@@ -1,0 +1,59 @@
+# ======================
+# Dependencies
+# ======================
+client/node_modules/
+server/node_modules/
+
+# ======================
+# React / Vite
+# ======================
+client/dist/
+client/.vite/
+
+# ======================
+# Python
+# ======================
+python-service/__pycache__/
+python-service/*.py[cod]
+python-service/.venv/
+python-service/venv/
+python-service/env/
+
+# ======================
+# Environment Variables
+# ======================
+.env
+client/.env
+server/.env
+python-service/.env
+
+# ======================
+# Uploads
+# ======================
+server/uploads/
+python-service/uploads/
+
+# ======================
+# Logs
+# ======================
+*.log
+logs/
+
+# ======================
+# IDE
+# ======================
+.vscode/
+.idea/
+
+# ======================
+# OS Files
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Build & Coverage
+# ======================
+build/
+dist/
+coverage/
