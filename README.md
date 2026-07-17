@@ -1,80 +1,88 @@
-AI-Powered Applicant Tracking System (ATS)
-Overview
+# 🤖 AI-Powered Applicant Tracking System (ATS)
 
-The AI-Powered Applicant Tracking System (ATS) is a full-stack web application designed to streamline and automate the recruitment process for both recruiters and job seekers. The system provides separate portals for Candidates and HR/Recruiters, allowing candidates to search and apply for jobs while enabling recruiters to efficiently manage job postings, screen applications, schedule interviews, and track the hiring process.
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-Express-green?logo=node.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-green?logo=mongodb)
+![Python](https://img.shields.io/badge/Python-AI-yellow?logo=python)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-The platform integrates Artificial Intelligence to analyze resumes, extract candidate information, compare resumes with job descriptions, calculate candidate-job matching scores, identify missing skills, and generate hiring recommendations. This helps recruiters reduce manual screening efforts and make faster, data-driven hiring decisions.
+An AI-powered recruitment platform that streamlines the hiring process through intelligent resume analysis and candidate management.
 
-Features
-Candidate Portal
-User Registration & Login
-Profile Management
-Resume Upload (PDF/DOCX)
-Job Search with Filters
-Apply for Jobs
-Track Application Status
-AI Match Score & Skill Analysis
-Notifications
-Dashboard
-HR / Recruiter Portal
-Recruiter Registration & Login
-Company Profile Management
-Create, Edit & Delete Job Posts
-View and Manage Applicants
-AI-Based Candidate Ranking
-Resume Viewer
-Schedule Interviews
-Send Email Notifications
-Reports & Analytics Dashboard
-AI Features
-Resume Parsing
-Skill Extraction
-Experience & Education Analysis
-Candidate-Job Matching
-AI Match Score Generation
-Missing Skills Detection
-Candidate Recommendations
-Tech Stack
-Layer	Technologies
-Frontend	React.js, React Router, Axios, CSS/Tailwind CSS
-Backend	Node.js, Express.js, JWT, bcrypt, Multer, Nodemailer
-Database	MongoDB Atlas, Mongoose
-AI Service	Python (FastAPI), spaCy, pdfplumber, PyMuPDF
-AI Integration	Google Gemini API / OpenAI API
-Cloud Storage	AWS S3
-Tools	Git, GitHub, Postman, VS Code
-Project Architecture
-React.js (Frontend)
-        │
-        ▼
-Node.js + Express.js
-        │
- ┌──────┼──────────┐
- │      │          │
- ▼      ▼          ▼
-MongoDB AWS S3  Python FastAPI
-                    │
-        Resume Parsing & AI Matching
-                    │
-          Gemini / OpenAI API
-Project Objectives
-Simplify the recruitment process.
-Automate resume screening using AI.
-Improve candidate-job matching.
-Reduce recruiter workload.
-Provide a modern and user-friendly hiring platform.
-Demonstrate a production-ready full-stack application using modern web technologies.
-Future Enhancements
-Real-time notifications with Socket.IO
-Video interview integration
-AI-generated interview questions
-Resume builder
-Advanced analytics dashboard
-Multi-company support
-Role-based Admin Panel
-Dark Mode
-Docker deployment
-CI/CD pipeline
+## 🚀 Features
+
+### 👤 Candidate
+- Register & Login
+- Create and Manage Profile
+- Upload Resume (PDF/DOCX)
+- Search & Apply for Jobs
+- Track Application Status
+- AI Resume Match Score
+- Notifications
+
+### 🏢 HR / Recruiter
+- Company Profile Management
+- Create & Manage Job Posts
+- View & Filter Applicants
+- AI Candidate Ranking
+- Schedule Interviews
+- Email Notifications
+- Hiring Analytics Dashboard
+
+### 🤖 AI Features
+- Resume Parsing
+- Skill Extraction
+- Candidate-Job Matching
+- AI Match Score
+- Missing Skill Detection
+- Hiring Recommendations
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Frontend | React.js, Vite, React Router, Axios |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| AI Service | Python (FastAPI), spaCy, pdfplumber |
+| AI | Google Gemini API / OpenAI API |
+| Storage | AWS S3 |
+| Authentication | JWT, bcrypt.js |
+| Email | Nodemailer |
+
+---
+
+## 📂 Project Structure
+
+```text
+ATS-System
+│
+├── client/          # React Frontend
+├── server/          # Node.js Backend
+├── python-service/  # AI Microservice
+└── README.md
+```
+
+---
+
+## 🎯 Project Objective
+
+To automate and enhance the recruitment process by enabling recruiters to efficiently manage job postings, analyze resumes using AI, rank candidates, and simplify hiring decisions while providing candidates with a seamless job application experience.
+
+---
+
+## 👨‍💻 Developed Using
+
+- React.js
+- Node.js
+- Express.js
+- MongoDB
+- Python
+- FastAPI
+- Google Gemini/OpenAI API
+- AWS S3
+  
 License
 
 This project is developed for educational and portfolio purposes. It demonstrates modern full-stack web development with AI integration and follows industry-standard architecture and best practices.
