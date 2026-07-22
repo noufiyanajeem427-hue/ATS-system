@@ -8,7 +8,7 @@ import { Page } from '../App';
 
 interface JobSearchProps {
   onMenuClick?: () => void;
-  onNavigate?: (p: Page) => void;
+  onNavigate?: (p: Page, job?: any) => void;
 }
 
 interface Job {
@@ -274,7 +274,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3
-                          onClick={() => onNavigate?.('jobdetails')}
+                          onClick={() => onNavigate?.('jobdetails', job)}
                           className="text-sm sm:text-[16px] font-bold text-[#1a1a2e] mb-1.5 truncate cursor-pointer hover:text-[#6c63ff] transition-colors"
                         >
                           {job.title}
@@ -312,7 +312,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                       </div>
                       <div className="flex gap-2.5 w-full sm:w-auto">
                         <button
-                          onClick={() => onNavigate?.('jobdetails')}
+                          onClick={() => onNavigate?.('jobdetails', job)}
                           className="flex-1 sm:flex-none px-5 py-2 border-[1.5px] border-[#e4e8f0] rounded-[9px] bg-white text-[13px] font-semibold text-[#4a5068] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all font-sans active:scale-95"
                         >
                           Details

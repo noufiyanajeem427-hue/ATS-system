@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LayoutDashboard, Search, FileText, FileEdit, Bot,
+  LayoutDashboard, Search, FileEdit, Bot,
   Folder, Mic2, User, MessageCircle, Bell, Settings, X
 } from 'lucide-react';
 import { Page } from '../App';
@@ -10,7 +10,6 @@ interface NavItem { icon: React.ReactNode; label: string; page: Page; }
 const navItems: NavItem[] = [
   { icon: <LayoutDashboard size={17} />, label: 'Dashboard',          page: 'dashboard' },
   { icon: <Search size={17} />,          label: 'Job Search',          page: 'jobsearch' },
-  { icon: <FileText size={17} />,        label: 'Job Details',         page: 'jobdetails' },
   { icon: <FileEdit size={17} />,        label: 'Resume',              page: 'resume' },
   { icon: <Bot size={17} />,             label: 'AI Resume Analyzer',  page: 'airesume' },
   { icon: <Folder size={17} />,          label: 'Applications',        page: 'applications' },

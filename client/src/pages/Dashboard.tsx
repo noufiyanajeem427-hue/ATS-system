@@ -6,10 +6,11 @@ import {
   Play, MessageSquare, Sparkles, Plus, X
 } from 'lucide-react';
 import { Page } from '../App';
+import { appStats } from '../data/applicationData';
 
 interface DashboardProps {
   onMenuClick?: () => void;
-  onNavigate?: (p: Page) => void;
+  onNavigate?: (p: Page, job?: any) => void;
 }
 
 const pipelineJobs = [
@@ -121,7 +122,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                     <Zap size={11}/> 96% Match
                   </span>
                   <button
-                    onClick={() => onNavigate?.('jobdetails')}
+                    onClick={() => onNavigate?.('jobdetails', {
+                      title: 'Senior Product Designer',
+                      company: 'Google',
+                      location: 'Remote',
+                      match: 96,
+                      salary: '$190k - $250k',
+                      type: 'Full-time',
+                      logo: 'G'
+                    })}
                     className="text-[12px] font-semibold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
                   >
                     Details
@@ -180,10 +189,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
           {[
-            { icon: <Play size={15}/>, label: 'Applied',    count: 24, sub: 'Total Applications', accent: '#6c63ff', bg: 'rgba(108,99,255,0.08)', target: 'applications' as Page },
-            { icon: <MessageSquare size={15}/>, label: 'Interviews', count: 8, sub: 'In Progress', accent: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', target: 'interview' as Page },
-            { icon: <Sparkles size={15}/>, label: 'Offers', count: 2, sub: 'Active Offers', accent: '#00c853', bg: 'rgba(0,200,83,0.08)', target: 'applications' as Page },
-            { icon: null, label: 'Archived', count: 5, sub: 'Rejected / Closed', accent: '#ff4d6d', bg: 'rgba(255,77,109,0.08)', isX: true, target: 'applications' as Page },
+            { icon: <Play size={15}/>, label: 'Applied',    count: appStats.applied,    sub: 'Total Applications', accent: '#6c63ff', bg: 'rgba(108,99,255,0.08)', target: 'applications' as Page },
+            { icon: <MessageSquare size={15}/>, label: 'Interviews', count: appStats.interviews, sub: 'In Progress', accent: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', target: 'interview' as Page },
+            { icon: <Sparkles size={15}/>, label: 'Offers', count: appStats.offers,    sub: 'Active Offers', accent: '#00c853', bg: 'rgba(0,200,83,0.08)', target: 'applications' as Page },
+            { icon: null, label: 'Withdrawn', count: appStats.withdrawn,  sub: 'Rejected / Closed', accent: '#ff4d6d', bg: 'rgba(255,77,109,0.08)', isX: true, target: 'applications' as Page },
           ].map((s) => (
             <div
               key={s.label}
@@ -257,7 +266,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
               {recommended.map((job, i) => (
                 <div
                   key={i}
-                  onClick={() => onNavigate?.('jobdetails')}
+                  onClick={() => onNavigate?.('jobdetails', {
+                    title: job.title,
+                    company: job.company,
+                    location: job.location,
+                    match: job.match,
+                    salary: job.tags[2] || '$180k - $240k',
+                    type: job.tags[1] || 'Full-time',
+                    logo: job.initials
+                  })}
                   className="flex gap-3 p-3.5 rounded-xl border-[1.5px] border-[#f0f2f8] cursor-pointer hover:border-[#dddaff] hover:shadow-sm transition-all"
                 >
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold text-white flex-shrink-0" style={{ background: job.bg }}>
