@@ -93,9 +93,39 @@ const getUserProfile = async (req, res) => {
     });
   }
 };
+const uploadResume = async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a PDF resume",
+      });
+    }
+
+    user.resume = req.file.path;
+    await user.save();
+
+    res.status(200).json({
+      message: "Resume uploaded successfully",
+      resume: user.resume,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
+  uploadResume,
 };
