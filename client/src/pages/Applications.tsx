@@ -3,7 +3,7 @@ import Topbar from '../components/Topbar';
 import {
   Send, Star, Calendar, Gift, SlidersHorizontal,
   ChevronLeft, ChevronRight, TrendingUp, Sparkles,
-  ArrowUpRight, Eye, Zap, Check
+  Eye, Zap, Check
 } from 'lucide-react';
 import { Page } from '../App';
 import { applicationData, appStats, StatusType } from '../data/applicationData';

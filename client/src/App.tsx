@@ -7,6 +7,13 @@ import JobDetails from './pages/JobDetails';
 import Resume from './pages/Resume';
 import AIResume from './pages/AIResume';
 import Applications from './pages/Applications';
+import Interview from './pages/Interview';
+import ProfilePage from './pages/ProfilePage';
+import Messages from './pages/Messages';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import AppLoader, { DashboardSkeleton, JobSearchSkeleton } from './components/Loading';
 
@@ -21,7 +28,9 @@ export type Page =
   | 'profile'
   | 'messages'
   | 'notifications'
-  | 'settings';
+  | 'settings'
+  | 'login'
+  | 'register';
 
 const pageNames: Partial<Record<Page, string>> = {
   jobdetails: 'Job Details',
@@ -33,6 +42,8 @@ const pageNames: Partial<Record<Page, string>> = {
   messages: 'Messages',
   notifications: 'Notifications',
   settings: 'Settings',
+  login: 'Sign In',
+  register: 'Create Account',
 };
 
 function App() {
@@ -132,6 +143,62 @@ function App() {
         />
       );
     }
+    if (activePage === 'interview') {
+      return (
+        <Interview
+          onMenuClick={() => setSidebarOpen(true)}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activePage === 'profile') {
+      return (
+        <ProfilePage
+          onMenuClick={() => setSidebarOpen(true)}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activePage === 'messages') {
+      return (
+        <Messages
+          onMenuClick={() => setSidebarOpen(true)}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activePage === 'notifications') {
+      return (
+        <Notifications
+          onMenuClick={() => setSidebarOpen(true)}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activePage === 'settings') {
+      return (
+        <Settings
+          onMenuClick={() => setSidebarOpen(true)}
+          onNavigate={handleNavigate}
+        />
+      );
+    }
+    if (activePage === 'login') {
+      return (
+        <Login
+          onNavigate={handleNavigate}
+          onLoginSuccess={() => handleNavigate('dashboard')}
+        />
+      );
+    }
+    if (activePage === 'register') {
+      return (
+        <Register
+          onNavigate={handleNavigate}
+          onRegisterSuccess={() => handleNavigate('dashboard')}
+        />
+      );
+    }
 
     return (
       <NotFound
@@ -145,14 +212,18 @@ function App() {
     return <AppLoader />;
   }
 
+  const isAuthPage = activePage === 'login' || activePage === 'register';
+
   return (
     <div className="flex min-h-screen bg-[#f4f6fb]">
-      <Sidebar
-        activePage={activePage}
-        onNavigate={handleNavigate}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      {!isAuthPage && (
+        <Sidebar
+          activePage={activePage}
+          onNavigate={handleNavigate}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      )}
       {renderPage()}
     </div>
   );

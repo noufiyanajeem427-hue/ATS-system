@@ -3,7 +3,7 @@ import Topbar from '../components/Topbar';
 import {
   Star, Upload, Eye, Download, Trash2, Plus,
   ChevronDown, Shield, CloudUpload, X, Sparkles,
-  FileText, Info, Check, AlertCircle, ZoomIn, ZoomOut, RotateCw
+  FileText, Info, Check, AlertCircle
 } from 'lucide-react';
 import { Page } from '../App';
 

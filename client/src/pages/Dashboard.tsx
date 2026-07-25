@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Topbar from '../components/Topbar';
+import jsPDF from 'jspdf';
 import {
-  Zap, TrendingUp, CheckCircle2, Video,
-  Calendar, Clock, ExternalLink, ChevronRight,
-  Play, MessageSquare, Sparkles, Plus, X
+  Zap, TrendingUp, CheckCircle2, ChevronRight,
+  Sparkles, X, BarChart2, Eye, Download, Award,
+  Users, Target, ShieldCheck
 } from 'lucide-react';
 import { Page } from '../App';
 import { appStats } from '../data/applicationData';
@@ -32,10 +33,64 @@ const badgeClass: Record<string, string> = {
 
 const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Export Analytics PDF
+  const downloadAnalyticsPDF = () => {
+    try {
+      const doc = new jsPDF();
+      doc.setFillColor(26, 26, 46);
+      doc.rect(0, 0, 210, 35, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Nexus ATS - Detailed Career Analytics Report', 15, 18);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(167, 139, 250);
+      doc.text('Candidate: Alex Rivera  |  Generated: Oct 2023', 15, 27);
+
+      let y = 45;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(108, 99, 255);
+      doc.text('KEY PERFORMANCE METRICS', 15, y);
+
+      y += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(50, 50, 70);
+      doc.text(`• Profile Impressions: 187 views (+12% growth)`, 15, y);
+      doc.text(`• Recruiter Search Appearances: 42 appearances`, 15, y + 6);
+      doc.text(`• AI Match Accuracy Index: 98%`, 15, y + 12);
+      doc.text(`• Interview Response Rate: 58.3%`, 15, y + 18);
+
+      y += 30;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(108, 99, 255);
+      doc.text('KEYWORD & SKILL ATS MATCH BREAKDOWN', 15, y);
+
+      y += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('• Figma & UI Prototyping: 98% Match', 15, y);
+      doc.text('• Design Systems Architecture: 95% Match', 15, y + 6);
+      doc.text('• User Research & Usability: 88% Match', 15, y + 12);
+      doc.text('• React & Component Systems: 75% Match', 15, y + 18);
+
+      doc.save('Nexus_Career_Analytics_Report.pdf');
+      showToast('Analytics PDF downloaded successfully!');
+    } catch (err) {
+      showToast('Downloading analytics PDF report...');
+    }
   };
 
   return (
@@ -47,9 +102,141 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
         <div className="fixed top-20 right-6 bg-[#1a1a2e] text-white px-4 py-3 rounded-xl shadow-2xl border border-[#6c63ff]/30 z-50 flex items-center gap-3 animate-bounce">
           <Sparkles className="text-[#6c63ff]" size={18} />
           <span className="text-xs font-medium">{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)} className="text-[#8890a4] hover:text-white ml-2">
+          <button onClick={() => setToastMessage(null)} className="text-[#8890a4] hover:text-white ml-2 bg-transparent border-none cursor-pointer">
             <X size={14} />
           </button>
+        </div>
+      )}
+
+      {/* ── DETAILED ANALYTICS REPORT MODAL ── */}
+      {showAnalyticsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between mb-6 pb-4 border-b border-[#f0f2f8]">
+              <div>
+                <div className="flex items-center gap-2 text-[11px] font-bold text-[#6c63ff] tracking-widest uppercase mb-1">
+                  <BarChart2 size={14} /> DETAILED ANALYTICS REPORT
+                </div>
+                <h2 className="text-[22px] sm:text-[26px] font-black text-[#1a1a2e]">Candidate Performance Insights</h2>
+                <p className="text-[13px] text-[#8890a4]">Real-time engagement, recruiter searches, and ATS match analytics.</p>
+              </div>
+              <button
+                onClick={() => setShowAnalyticsModal(false)}
+                className="w-9 h-9 rounded-xl bg-[#f4f6fb] flex items-center justify-center text-[#8890a4] hover:text-[#1a1a2e] hover:bg-[#e4e8f0] transition-colors border-none cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Metrics Cards Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {[
+                { label: 'Weekly Profile Views', val: '187', change: '+12%', color: '#6c63ff', icon: <Eye size={14} /> },
+                { label: 'Recruiter Searches', val: '42', change: '+8%', color: '#00c853', icon: <Users size={14} /> },
+                { label: 'AI Match Index', val: '98%', change: 'Top 2%', color: '#8b5cf6', icon: <Target size={14} /> },
+                { label: 'Response Rate', val: '58.3%', change: 'Passed 5/8', color: '#f59e0b', icon: <Award size={14} /> },
+              ].map(m => (
+                <div key={m.label} className="p-4 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
+                  <div className="flex items-center justify-between text-[#8890a4] mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">{m.label}</span>
+                    <span style={{ color: m.color }}>{m.icon}</span>
+                  </div>
+                  <p className="text-[22px] font-black text-[#1a1a2e] leading-none mb-1">{m.val}</p>
+                  <span className="text-[10px] font-bold text-[#00c853] bg-[#00c853]/10 px-2 py-0.5 rounded-full">{m.change}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Visual Charts & Skill Distribution */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+              
+              {/* Weekly Traffic Bar Chart */}
+              <div className="p-5 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
+                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] mb-3 flex items-center gap-2">
+                  <TrendingUp size={14} className="text-[#6c63ff]" /> Weekly Profile Views Trend
+                </h4>
+                <div className="flex items-end justify-between h-32 pt-4 px-2">
+                  {[
+                    { day: 'Mon', count: 18, h: '40%' },
+                    { day: 'Tue', count: 32, h: '70%' },
+                    { day: 'Wed', count: 45, h: '95%' },
+                    { day: 'Thu', count: 38, h: '80%' },
+                    { day: 'Fri', count: 28, h: '60%' },
+                    { day: 'Sat', count: 14, h: '30%' },
+                    { day: 'Sun', count: 12, h: '25%' },
+                  ].map(d => (
+                    <div key={d.day} className="flex flex-col items-center gap-1.5 flex-1">
+                      <div className="w-full max-w-[20px] bg-[#6c63ff]/15 rounded-t-lg relative group flex items-end justify-center h-full">
+                        <div
+                          className="w-full bg-[#6c63ff] rounded-t-lg transition-all group-hover:bg-[#8b5cf6]"
+                          style={{ height: d.h }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#8890a4] font-semibold">{d.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skill Match Breakdown */}
+              <div className="p-5 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
+                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] mb-3 flex items-center gap-2">
+                  <ShieldCheck size={14} className="text-[#00c853]" /> ATS Skill Match Accuracy
+                </h4>
+                <div className="flex flex-col gap-2.5">
+                  {[
+                    { skill: 'Figma & UI Design', pct: 98, color: '#00c853' },
+                    { skill: 'Design Systems', pct: 95, color: '#6c63ff' },
+                    { skill: 'User Research', pct: 88, color: '#8b5cf6' },
+                    { skill: 'React & Frontend', pct: 75, color: '#f59e0b' },
+                  ].map(s => (
+                    <div key={s.skill}>
+                      <div className="flex justify-between text-[11px] font-bold mb-1">
+                        <span className="text-[#1a1a2e]">{s.skill}</span>
+                        <span style={{ color: s.color }}>{s.pct}%</span>
+                      </div>
+                      <div className="h-1.5 bg-[#e4e8f0] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer Action Buttons */}
+            <div className="flex items-center justify-between pt-4 border-t border-[#f0f2f8] flex-wrap gap-3">
+              <button
+                onClick={downloadAnalyticsPDF}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border border-[#e4e8f0] hover:border-[#6c63ff] hover:text-[#6c63ff] cursor-pointer transition-all"
+              >
+                <Download size={14} className="text-[#6c63ff]" /> Export PDF Report
+              </button>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAnalyticsModal(false)}
+                  className="px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#8890a4] bg-transparent border border-[#e4e8f0] hover:text-[#1a1a2e] cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAnalyticsModal(false);
+                    onNavigate?.('airesume');
+                  }}
+                  className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}
+                >
+                  <Sparkles size={13} /> Optimize in AI Resume →
+                </button>
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 
@@ -91,17 +278,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
               <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <button
-                  onClick={() => onNavigate?.('resume')}
+                  onClick={() => onNavigate?.('profile')}
                   className="flex items-center gap-2 px-5 py-3 rounded-xl text-[14px] font-semibold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5 active:scale-95"
                   style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.4)' }}
                 >
                   Complete Profile <ChevronRight size={14}/>
                 </button>
                 <button
-                  onClick={() => showToast("Opening Detailed Analytics Report...")}
-                  className="bg-transparent border-none text-[14px] font-medium text-white/70 cursor-pointer hover:text-white transition-colors active:scale-95"
+                  onClick={() => setShowAnalyticsModal(true)}
+                  className="bg-transparent border-none text-[14px] font-semibold text-white/90 hover:text-white underline cursor-pointer transition-colors active:scale-95 flex items-center gap-1.5"
                 >
-                  View Analytics
+                  <BarChart2 size={15} className="text-[#a78bfa]" /> View Analytics
                 </button>
               </div>
             </div>
@@ -113,219 +300,178 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                 <div className="flex gap-2.5 items-start mb-3">
                   <div className="w-9 h-9 rounded-xl bg-[#4285f4] flex items-center justify-center text-white text-base font-bold flex-shrink-0">G</div>
                   <div>
-                    <div className="text-[13px] font-bold text-[#1a1a2e]">Senior Product Designer</div>
-                    <div className="text-[11px] text-[#8890a4]">Google • Remote</div>
+                    <span className="block text-sm font-bold text-[#1a1a2e]">Senior AI Product Designer</span>
+                    <span className="block text-xs text-[#8890a4]">Google · Mountain View, CA</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-2.5 border-t border-[#f0f2f8]">
-                  <span className="flex items-center gap-1 text-[12px] font-semibold text-[#00c853] bg-[#00c853]/10 px-2 py-0.5 rounded-full">
-                    <Zap size={11}/> 96% Match
-                  </span>
+                <div className="flex items-center justify-between pt-2 border-t border-[#f0f2f8]">
+                  <span className="text-xs font-bold text-[#00c853]">96% Match Rate</span>
                   <button
-                    onClick={() => onNavigate?.('jobdetails', {
-                      title: 'Senior Product Designer',
-                      company: 'Google',
-                      location: 'Remote',
-                      match: 96,
-                      salary: '$190k - $250k',
-                      type: 'Full-time',
-                      logo: 'G'
-                    })}
-                    className="text-[12px] font-semibold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                    onClick={() => onNavigate?.('jobdetails', { title: 'Senior AI Product Designer', company: 'Google', location: 'Mountain View, CA', match: 96, salary: '$190k - $250k', type: 'Full-time' })}
+                    className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
                   >
-                    Details
+                    View Job →
                   </button>
                 </div>
               </div>
 
-              <div
-                onClick={() => showToast("Goal Added: AI Recommendation Engine Updated!")}
-                className="flex items-center gap-2.5 bg-white/[0.06] border-2 border-dashed border-white/15 rounded-xl p-3.5 cursor-pointer hover:bg-white/10 transition-all active:scale-95"
-              >
-                <Plus size={22} className="text-[#b0b8cc] flex-shrink-0"/>
-                <span className="text-[12px] text-white/50 leading-tight">Add another goal to refine recommendations</span>
+              <div className="bg-white/10 rounded-2xl p-4 border border-white/10 text-white flex items-center justify-between">
+                <div>
+                  <span className="block text-[11px] text-[#a78bfa] font-bold">NEXT INTERVIEW</span>
+                  <span className="block text-sm font-bold mt-0.5">Netflix · Tomorrow 10:00 AM</span>
+                </div>
+                <button
+                  onClick={() => onNavigate?.('interview')}
+                  className="bg-white/15 text-white border border-white/20 text-xs px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/25 font-semibold"
+                >
+                  Prepare
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Interview Card */}
-          <div className="bg-white rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[16px] font-bold text-[#1a1a2e]">Next Interview</span>
-              <button
-                onClick={() => onNavigate?.('interview')}
-                className="w-8 h-8 flex items-center justify-center bg-[#f4f6fb] rounded-[9px] border-none cursor-pointer text-[#8890a4] hover:text-[#6c63ff] transition-colors"
-                title="View Calendar"
-              >
-                <Calendar size={16}/>
-              </button>
-            </div>
-
-            <div className="bg-[#f8f9fc] rounded-xl p-5 flex flex-col items-center gap-3 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#6c63ff]/10 flex items-center justify-center">
-                <Video size={28} className="text-[#6c63ff]"/>
+          {/* Right Column Quick Actions */}
+          <div className="flex flex-col gap-3">
+            <div className="bg-white rounded-2xl p-5 border border-[#e4e8f0] shadow-sm flex-1">
+              <span className="block text-[11px] font-bold text-[#8890a4] tracking-widest uppercase mb-4">Quick Navigation</span>
+              <div className="flex flex-col gap-2.5">
+                {[
+                  { label: 'Job Search & Matches', page: 'jobsearch', color: '#6c63ff', count: '12 new' },
+                  { label: 'AI Resume Optimizer', page: 'airesume', color: '#8b5cf6', count: 'Score 92%' },
+                  { label: 'Application Tracker', page: 'applications', color: '#00c853', count: `${appStats.applied} active` },
+                  { label: 'Scheduled Interviews', page: 'interview', color: '#f59e0b', count: `${appStats.interviews} upcoming` },
+                ].map((item) => (
+                  <button
+                    key={item.page}
+                    onClick={() => onNavigate?.(item.page as Page)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-[#f8f9fc] hover:bg-[#6c63ff]/8 border border-[#e4e8f0] hover:border-[#6c63ff]/30 text-left transition-all cursor-pointer group"
+                  >
+                    <span className="text-[13px] font-bold text-[#1a1a2e] group-hover:text-[#6c63ff] transition-colors">{item.label}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: item.color }}>{item.count}</span>
+                  </button>
+                ))}
               </div>
-              <div>
-                <div className="text-[15px] font-bold text-[#1a1a2e]">Technical Round</div>
-                <div className="text-[12px] text-[#8890a4] mt-0.5">Netflix • Engineering Team</div>
-              </div>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-[13px] text-[#4a5068]"><Calendar size={14} className="text-[#8890a4]"/> Wednesday, Oct 24</div>
-              <div className="flex items-center gap-2 text-[13px] text-[#4a5068]"><Clock size={14} className="text-[#8890a4]"/> 10:00 AM – 11:30 AM (PST)</div>
-            </div>
-
-            <button
-              onClick={() => showToast("Connecting to Netflix Technical Interview Room...")}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[14px] font-semibold text-white border-none cursor-pointer transition-all hover:bg-[#1a4a7a] active:scale-95"
-              style={{ background: '#0f3460', boxShadow: '0 4px 14px rgba(15,52,96,0.3)' }}
-            >
-              Join Interview <ExternalLink size={14}/>
-            </button>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        {/* Middle Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
-            { icon: <Play size={15}/>, label: 'Applied',    count: appStats.applied,    sub: 'Total Applications', accent: '#6c63ff', bg: 'rgba(108,99,255,0.08)', target: 'applications' as Page },
-            { icon: <MessageSquare size={15}/>, label: 'Interviews', count: appStats.interviews, sub: 'In Progress', accent: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', target: 'interview' as Page },
-            { icon: <Sparkles size={15}/>, label: 'Offers', count: appStats.offers,    sub: 'Active Offers', accent: '#00c853', bg: 'rgba(0,200,83,0.08)', target: 'applications' as Page },
-            { icon: null, label: 'Withdrawn', count: appStats.withdrawn,  sub: 'Rejected / Closed', accent: '#ff4d6d', bg: 'rgba(255,77,109,0.08)', isX: true, target: 'applications' as Page },
+            { label: 'Applications', value: appStats.applied, sub: 'Active tracking', page: 'applications' },
+            { label: 'Interviews', value: appStats.interviews, sub: 'Next: Netflix', page: 'interview' },
+            { label: 'Offers Received', value: appStats.offers, sub: 'Verdant Labs', page: 'applications' },
+            { label: 'Saved Jobs', value: 8, sub: 'In bookmarks', page: 'jobsearch' },
           ].map((s) => (
             <div
               key={s.label}
-              onClick={() => onNavigate?.(s.target)}
-              className="bg-white rounded-2xl p-5 shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer border-l-4"
-              style={{ borderColor: s.accent }}
+              onClick={() => onNavigate?.(s.page as Page)}
+              className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e4e8f0] shadow-sm hover:shadow-md hover:border-[#6c63ff]/40 cursor-pointer transition-all"
             >
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: s.bg, color: s.accent }}>
-                  {s.isX
-                    ? <svg viewBox="0 0 24 24" fill="none" stroke={s.accent} strokeWidth="2.5" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                    : s.icon}
-                </div>
-                <span className="text-[12px] font-semibold text-[#8890a4]">{s.label}</span>
-              </div>
-              <div className="text-[32px] font-extrabold leading-none mb-1" style={{ color: s.accent }}>{s.count}</div>
-              <div className="text-[12px] text-[#b0b8cc]">{s.sub}</div>
+              <span className="block text-[11px] font-bold text-[#8890a4] mb-1">{s.label}</span>
+              <span className="block text-3xl font-black text-[#1a1a2e] mb-1">{s.value}</span>
+              <span className="block text-[11px] text-[#6c63ff] font-semibold">{s.sub} →</span>
             </div>
           ))}
         </div>
 
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-          {/* Pipeline */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-[16px] font-bold text-[#1a1a2e]">Active Pipeline</span>
+        {/* Bottom Row: Active Applications Pipeline & Recommended Jobs */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
+          
+          {/* Left: Active Pipeline */}
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-extrabold text-[#1a1a2e]">Active Application Pipeline</h3>
               <button
                 onClick={() => onNavigate?.('applications')}
-                className="text-[13px] font-semibold text-[#8890a4] bg-transparent border-none cursor-pointer hover:text-[#6c63ff] transition-colors"
+                className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
               >
-                View All
+                View All ({appStats.applied}) →
               </button>
             </div>
-            <div className="flex flex-col">
-              {pipelineJobs.map((job, i) => (
-                <div
-                  key={i}
-                  onClick={() => onNavigate?.('applications')}
-                  className="flex gap-3.5 items-start pb-5 last:pb-0 cursor-pointer group"
-                >
-                  <div className="flex flex-col items-center w-2.5 flex-shrink-0 mt-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: job.dotColor }}/>
-                    {i < pipelineJobs.length - 1 && <div className="w-0.5 flex-1 bg-[#e4e8f0] min-h-[24px] mt-1"/>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                      <span className="text-[14px] font-semibold text-[#1a1a2e] group-hover:text-[#6c63ff] transition-colors">{job.company}</span>
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${badgeClass[job.badgeColor]}`}>{job.badge}</span>
+
+            <div className="flex flex-col gap-3">
+              {pipelineJobs.map((j, i) => (
+                <div key={i} className="flex items-center justify-between p-3.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-bold text-[13px] shadow-sm border border-[#e4e8f0] text-[#1a1a2e]">
+                      {j.company[0]}
                     </div>
-                    <div className="text-[12px] text-[#8890a4]">{job.role} • {job.location}</div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-extrabold text-[#1a1a2e]">{j.role}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeClass[j.badgeColor]}`}>
+                          {j.badge}
+                        </span>
+                      </div>
+                      <span className="text-xs text-[#8890a4]">{j.company} · {j.location}</span>
+                    </div>
                   </div>
-                  <div className="text-[12px] text-[#b0b8cc] whitespace-nowrap flex-shrink-0 mt-1">{job.status}</div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="hidden sm:inline text-xs text-[#8890a4]">{j.status}</span>
+                    <button
+                      onClick={() => onNavigate?.('applications')}
+                      className="p-1.5 text-[#8890a4] hover:text-[#6c63ff] bg-transparent border-none cursor-pointer"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Recommended */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-[16px] font-bold text-[#1a1a2e]">Recommended for You</span>
-              <button
-                onClick={() => onNavigate?.('jobsearch')}
-                className="text-[13px] font-semibold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
-              >
-                See Matches
-              </button>
-            </div>
-            <div className="flex flex-col gap-3.5">
-              {recommended.map((job, i) => (
-                <div
-                  key={i}
-                  onClick={() => onNavigate?.('jobdetails', {
-                    title: job.title,
-                    company: job.company,
-                    location: job.location,
-                    match: job.match,
-                    salary: job.tags[2] || '$180k - $240k',
-                    type: job.tags[1] || 'Full-time',
-                    logo: job.initials
-                  })}
-                  className="flex gap-3 p-3.5 rounded-xl border-[1.5px] border-[#f0f2f8] cursor-pointer hover:border-[#dddaff] hover:shadow-sm transition-all"
+          {/* Right: Top Recommended */}
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-extrabold text-[#1a1a2e]">Top Recommended Roles</h3>
+                <button
+                  onClick={() => onNavigate?.('jobsearch')}
+                  className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold text-white flex-shrink-0" style={{ background: job.bg }}>
-                    {job.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5 gap-2">
-                      <span className="text-[14px] font-bold text-[#1a1a2e] truncate hover:text-[#6c63ff]">{job.title}</span>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap" style={{ color: job.matchColor, background: `${job.matchColor}18` }}>
-                        ✦ {job.match}% Match
-                      </span>
+                  Explore →
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {recommended.map((r, i) => (
+                  <div key={i} className="p-3.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center" style={{ background: r.bg }}>
+                          {r.initials}
+                        </div>
+                        <div>
+                          <span className="block text-xs font-bold text-[#1a1a2e]">{r.title}</span>
+                          <span className="block text-[10px] text-[#8890a4]">{r.company} · {r.location}</span>
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold" style={{ color: r.matchColor }}>{r.match}% Match</span>
                     </div>
-                    <div className="text-[12px] text-[#8890a4] mb-2">{job.company} • {job.location}</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {job.tags.map((t) => (
-                        <span key={t} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f0f2f8] text-[#6a7090]">{t}</span>
-                      ))}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-[#e4e8f0]">
+                      <div className="flex gap-1.5">
+                        {r.tags.map((t, idx) => (
+                          <span key={idx} className="text-[9px] font-bold text-[#4a5068] bg-white px-2 py-0.5 rounded border border-[#e4e8f0]">{t}</span>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => onNavigate?.('jobdetails', { title: r.title, company: r.company, location: r.location, match: r.match, salary: '$180k - $240k', type: 'Full-time' })}
+                        className="text-[11px] font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                      >
+                        Apply →
+                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
+
         </div>
-
-        {/* Footer */}
-        <footer className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-[#e8edf5] text-[12px] text-[#b0b8cc]">
-          <span>© 2024 TalentStream AI. All rights reserved.</span>
-          <div className="flex gap-5">
-            {['Privacy Policy', 'Terms of Service', 'Support'].map((l) => (
-              <button
-                key={l}
-                onClick={() => showToast(`Opening ${l}...`)}
-                className="text-[#b0b8cc] bg-transparent border-none cursor-pointer hover:text-[#6c63ff] transition-colors"
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-        </footer>
       </div>
-
-      {/* Chat FAB */}
-      <button
-        onClick={() => onNavigate?.('messages')}
-        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer z-40 transition-all hover:scale-110 hover:-translate-y-0.5 active:scale-95"
-        style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 6px 20px rgba(108,99,255,0.4)' }}
-        title="Open AI Chat Assistant"
-      >
-        <MessageSquare size={20} className="text-white"/>
-      </button>
     </div>
   );
 };

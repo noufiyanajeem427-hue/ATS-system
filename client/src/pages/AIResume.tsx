@@ -3,8 +3,8 @@ import Topbar from '../components/Topbar';
 import jsPDF from 'jspdf';
 import {
   Sparkles, CheckCircle2, AlertTriangle, TrendingUp,
-  Download, Upload, X, Check, Zap,
-  FileText, Target, BookOpen, AlertCircle
+  Download, X, Check, Zap,
+  FileText, Target, BookOpen
 } from 'lucide-react';
 import { Page } from '../App';
 
@@ -15,7 +15,6 @@ interface AIResumeProps {
 
 const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [animating, setAnimating] = useState(false);
   const [applyingFixes, setApplyingFixes] = useState(false);
   const [fixesApplied, setFixesApplied] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
@@ -41,9 +40,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
     if (file) {
       setUploadedFile(file.name);
       setFixesApplied(false);
-      setAnimating(true);
       showToast(`Re-analyzing "${file.name}"...`);
-      setTimeout(() => setAnimating(false), 1500);
     }
     e.target.value = '';
   };
