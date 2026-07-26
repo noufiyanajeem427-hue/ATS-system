@@ -2,6 +2,8 @@ const Application = require("../models/Application");
 
 // Apply for a job
 const applyJob = async (req, res) => {
+  console.log("applyJob called");
+
   try {
     const { job } = req.body;
 
@@ -15,6 +17,7 @@ const applyJob = async (req, res) => {
       application,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: error.message,
     });
@@ -30,6 +33,61 @@ const getApplications = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Get application by ID
+const getApplicationById = async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate("user", "name email")
+      .populate("job", "title company");
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    res.status(200).json(application);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Update application status
+const updateApplicationStatus = async (req, res) => {
+  console.log("updateApplicationStatus called");
+
+  try {
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    if (req.body.status) {
+      application.status = req.body.status;
+    }
+
+    const updatedApplication = await application.save();
+
+    res.status(200).json({
+      message: "Application status updated successfully",
+      application: updatedApplication,
+    });
+  } catch (error) {
+    console.error("Update Application Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -39,4 +97,6 @@ const getApplications = async (req, res) => {
 module.exports = {
   applyJob,
   getApplications,
+  getApplicationById,
+  updateApplicationStatus,
 };
