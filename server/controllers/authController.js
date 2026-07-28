@@ -64,6 +64,7 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+<<<<<<< HEAD
     const newUser = {
       _id: "usr_" + Date.now(),
       name: name.trim(),
@@ -77,6 +78,20 @@ const registerUser = async (req, res) => {
     const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: "7d" });
 
     return res.status(201).json({
+=======
+
+    // Create new user
+    const user = await User.create({
+  name,
+  email,
+  password: hashedPassword,
+  role: "candidate",
+  isVerified: false,
+  googleId: "",
+  linkedinId: "",
+});
+    res.status(201).json({
+>>>>>>> AishwaryaJalgi
       message: "User registered successfully",
       token,
       user: { id: newUser._id, name: newUser.name, email: newUser.email },

@@ -3,14 +3,31 @@ const Job = require("../models/Job");
 // Create Job
 const createJob = async (req, res) => {
   try {
-    const { title, company, location, description } = req.body;
+    const {
+  title,
+  company,
+  location,
+  salary,
+  type,
+  description,
+  requirements,
+  responsibilities,
+  postedBy,
+  status,
+} = req.body;
 
     const job = await Job.create({
-      title,
-      company,
-      location,
-      description,
-    });
+  title,
+  company,
+  location,
+  salary,
+  type,
+  description,
+  requirements,
+  responsibilities,
+  postedBy,
+  status,
+});
 
     res.status(201).json({
       message: "Job created successfully",

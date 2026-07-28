@@ -5,13 +5,32 @@ const applyJob = async (req, res) => {
   console.log("applyJob called");
 
   try {
-    const { job } = req.body;
+    const {
+  job,
+  role,
+  company,
+  location,
+  resumeUrl,
+  coverLetter,
+  match,
+} = req.body;
 
     const application = await Application.create({
-      user: req.user,
-      job,
-    });
-
+  user: req.user,
+  job,
+  role,
+  company,
+  location,
+  resumeUrl,
+  coverLetter,
+  match,
+  timeline: [
+    {
+      status: "APPLIED",
+      note: "Application submitted",
+    },
+  ],
+});
     res.status(201).json({
       message: "Application submitted successfully",
       application,
@@ -76,8 +95,13 @@ const updateApplicationStatus = async (req, res) => {
     }
 
     if (req.body.status) {
-      application.status = req.body.status;
-    }
+  application.status = req.body.status;
+
+  application.timeline.push({
+    status: req.body.status,
+    note: "Status updated",
+  });
+}
 
     const updatedApplication = await application.save();
 
