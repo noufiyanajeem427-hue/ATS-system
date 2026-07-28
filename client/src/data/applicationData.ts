@@ -4,7 +4,7 @@
 export type StatusType = 'IN REVIEW' | 'INTERVIEWING' | 'OFFER RECEIVED' | 'WITHDRAWN' | 'APPLIED';
 
 export interface ApplicationRecord {
-  id: number;
+  id: number | string;
   role: string;
   company: string;
   location: string;

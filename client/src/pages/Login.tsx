@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      const response = await fetch('http://localhost:5005/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -289,7 +289,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
 
         {/* Footer */}
         <div className="text-center text-[11px] text-slate-500 py-2">
-          By signing in, you agree to Nexus ATS <a href="#" className="text-slate-400 underline">Terms of Service</a> and <a href="#" className="text-slate-400 underline">Privacy Policy</a>.
+          By signing in, you agree to Nexus ATS <span className="text-slate-400 underline cursor-pointer">Terms of Service</span> and <span className="text-slate-400 underline cursor-pointer">Privacy Policy</span>.
         </div>
       </div>
     </div>

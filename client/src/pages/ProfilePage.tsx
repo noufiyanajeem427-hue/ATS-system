@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import jsPDF from 'jspdf';
 import { ButtonSpinner } from '../components/Loading';
+import { fetchUserProfile } from '../services/api';
 import {
   MapPin, Mail, Phone, Globe,
   Edit3, Plus, Trash2, Check, X, Camera, Briefcase,
@@ -56,6 +57,25 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
     title: 'Staff Product Designer',
     experienceYears: '8 years experience',
   });
+
+  useEffect(() => {
+    // 1. Try local storage user
+    const localUser = localStorage.getItem('user');
+    if (localUser) {
+      try {
+        const u = JSON.parse(localUser);
+        if (u.name) setProfileHeader(p => ({ ...p, name: u.name }));
+        if (u.email) setContact(c => ({ ...c, email: u.email }));
+      } catch (e) {}
+    }
+    // 2. Fetch live user profile from MongoDB
+    fetchUserProfile().then(userData => {
+      if (userData) {
+        if (userData.name) setProfileHeader(p => ({ ...p, name: userData.name }));
+        if (userData.email) setContact(c => ({ ...c, email: userData.email }));
+      }
+    });
+  }, []);
 
   const [editHeaderTemp, setEditHeaderTemp] = useState(profileHeader);
 

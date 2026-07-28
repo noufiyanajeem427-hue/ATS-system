@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Search, MapPin, Heart, Building2,
   ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import { Page } from '../App';
+import { fetchJobs } from '../services/api';
 
 import { ButtonSpinner } from '../components/Loading';
 
@@ -14,7 +15,7 @@ interface JobSearchProps {
 }
 
 interface Job {
-  id: number; title: string; company: string; location: string;
+  id: number | string; title: string; company: string; location: string;
   match: number; salary: string; type: string; tag?: string;
   tagType?: 'urgent' | 'posted'; logo: string;
 }
@@ -34,18 +35,37 @@ const logoBg: Record<string, string> = {
 const matchColor = (m: number) => m >= 90 ? '#00c853' : m >= 80 ? '#6c63ff' : '#ff9800';
 
 const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
+  const [jobsList, setJobsList] = useState<Job[]>(initialJobs);
   const [loc, setLoc] = useState('remote');
   const [exp, setExp] = useState<string[]>(['Senior']);
   const [jt, setJt] = useState('fulltime');
   const [aim, setAim] = useState(80);
-  const [saved, setSaved] = useState<number[]>([]);
+  const [saved, setSaved] = useState<(number | string)[]>([]);
   const [page, setPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [loadingJobId, setLoadingJobId] = useState<number | null>(null);
+  const [loadingJobId, setLoadingJobId] = useState<number | string | null>(null);
+
+  useEffect(() => {
+    fetchJobs().then(data => {
+      if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+        const mappedJobs: Job[] = data.jobs.map((j: any, index: number) => ({
+          id: j._id || index + 1,
+          title: j.title || 'Software Engineer',
+          company: j.company || 'Tech Company',
+          location: j.location || 'Remote',
+          match: j.match || 95,
+          salary: j.salary || '$120k - $180k',
+          type: j.type || 'Full-time',
+          logo: (j.company || 'TC').substring(0, 2).toUpperCase(),
+        }));
+        setJobsList(mappedJobs);
+      }
+    });
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -53,7 +73,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   const toggleExp = (e: string) => setExp(p => p.includes(e) ? p.filter(x => x !== e) : [...p, e]);
-  const toggleSave = (id: number) => {
+  const toggleSave = (id: number | string) => {
     const isSaved = saved.includes(id);
     setSaved(p => isSaved ? p.filter(x => x !== id) : [...p, id]);
     showToast(isSaved ? 'Job removed from saved items' : 'Job saved to your bookmarks!');
@@ -83,7 +103,12 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
     showToast('All filters have been reset.');
   };
 
-  const filteredJobs = initialJobs.filter(j => j.match >= aim);
+  const filteredJobs = jobsList.filter(j => (j.match || 100) >= aim);
+  const pageSize = 10;
+  const totalPages = Math.ceil(filteredJobs.length / pageSize) || 1;
+  const displayedJobs = filteredJobs.length > 10 
+    ? filteredJobs.slice((page - 1) * pageSize, page * pageSize)
+    : filteredJobs;
 
   const FilterSidebar = () => (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
@@ -173,7 +198,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden relative">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden relative font-sans">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast Notification */}
@@ -255,7 +280,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
         {/* Job Listings */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 px-1">
-            <span className="text-[15px] text-[#4a5068]"><strong className="text-[#1a1a2e]">{filteredJobs.length * 47}</strong> Jobs matches for your profile</span>
+            <span className="text-[15px] text-[#4a5068]"><strong className="text-[#1a1a2e]">{filteredJobs.length}</strong> Jobs matches for your profile</span>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold text-[#b0b8cc] tracking-wider">SORT BY:</span>
               <div className="flex items-center gap-1">
@@ -272,14 +297,14 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
 
           {/* Cards */}
           <div className="flex flex-col gap-3">
-            {filteredJobs.length === 0 ? (
+            {displayedJobs.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 text-center text-[#8890a4]">
                 <p className="font-bold text-base mb-1">No jobs match your AI filter threshold</p>
                 <p className="text-xs mb-4">Try lowering the AI Match slider to see more opportunities.</p>
                 <button onClick={resetFilters} className="px-4 py-2 bg-[#6c63ff] text-white rounded-xl text-xs font-semibold">Reset Filters</button>
               </div>
             ) : (
-              filteredJobs.map((job) => {
+              displayedJobs.map((job: Job) => {
                 const mc = matchColor(job.match);
                 return (
                   <div key={job.id} className={`bg-white rounded-2xl p-4 sm:p-5 shadow-sm border-[1.5px] transition-all hover:-translate-y-0.5 hover:shadow-md relative overflow-hidden ${job.id === 1 ? 'border-[#dddaff]' : 'border-transparent hover:border-[#e0ddff]'}`}>
@@ -350,26 +375,34 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
             )}
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-center gap-1.5 mt-6">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95"
-            >
-              <ChevronLeft size={14}/>
-            </button>
-            {[1, 2, 3].map((p) => (
-              <button key={p} onClick={() => setPage(p)} className={`w-9 h-9 rounded-[9px] border-[1.5px] text-[13px] font-medium cursor-pointer transition-all font-sans active:scale-95 ${page === p ? 'bg-[#6c63ff] border-[#6c63ff] text-white font-bold' : 'bg-white border-[#e4e8f0] text-[#4a5068] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}>{p}</button>
-            ))}
-            <span className="text-[14px] text-[#b0b8cc] px-1">...</span>
-            <button onClick={() => setPage(14)} className={`w-9 h-9 rounded-[9px] border-[1.5px] text-[13px] font-medium cursor-pointer transition-all font-sans active:scale-95 ${page === 14 ? 'bg-[#6c63ff] border-[#6c63ff] text-white font-bold' : 'bg-white border-[#e4e8f0] text-[#4a5068] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}>14</button>
-            <button
-              onClick={() => setPage(p => Math.min(14, p + 1))}
-              className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95"
-            >
-              <ChevronRight size={14}/>
-            </button>
-          </div>
+          {/* Dynamic Pagination (Only shown when jobs count > 10) */}
+          {filteredJobs.length > 10 && (
+            <div className="flex items-center justify-center gap-1.5 mt-6">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-40"
+              >
+                <ChevronLeft size={14}/>
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-9 h-9 rounded-[9px] border-[1.5px] text-[13px] font-medium cursor-pointer transition-all font-sans active:scale-95 ${page === p ? 'bg-[#6c63ff] border-[#6c63ff] text-white font-bold' : 'bg-white border-[#e4e8f0] text-[#4a5068] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-40"
+              >
+                <ChevronRight size={14}/>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

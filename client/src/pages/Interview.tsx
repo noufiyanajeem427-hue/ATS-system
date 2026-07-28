@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Video, Calendar, Clock, MapPin, ExternalLink,
@@ -8,6 +8,7 @@ import {
   Bell, MoreHorizontal, Phone
 } from 'lucide-react';
 import { Page } from '../App';
+import { fetchInterviewsApi } from '../services/api';
 
 interface InterviewProps {
   onMenuClick?: () => void;
@@ -17,7 +18,7 @@ interface InterviewProps {
 type TabType = 'upcoming' | 'past';
 
 interface InterviewItem {
-  id: number;
+  id: number | string;
   role: string;
   company: string;
   companyLogo: string;
@@ -192,7 +193,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
   const [tab, setTab] = useState<TabType>('upcoming');
   const [checklist, setChecklist] = useState(prepChecklist);
   const [toast, setToast] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<number | null>(1);
+  const [expandedId, setExpandedId] = useState<number | string | null>(1);
   const today = 24;
 
   const showToast = (msg: string) => {

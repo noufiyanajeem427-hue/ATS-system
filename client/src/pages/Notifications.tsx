@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Bell, Check, CheckCheck, Trash2, Sparkles,
@@ -7,6 +7,7 @@ import {
   Mail, Smartphone, Monitor
 } from 'lucide-react';
 import { Page } from '../App';
+import { fetchNotificationsApi } from '../services/api';
 
 interface NotificationsProps {
   onMenuClick?: () => void;
@@ -16,7 +17,7 @@ interface NotificationsProps {
 export type NotificationCategory = 'all' | 'unread' | 'interview' | 'jobs' | 'messages' | 'system';
 
 export interface NotificationItem {
-  id: number;
+  id: number | string;
   title: string;
   message: string;
   time: string;
@@ -39,19 +40,19 @@ const initialNotifications: NotificationItem[] = [
     date: 'Today',
     category: 'interview',
     read: false,
-    actionText: 'Join Interview Room',
+    actionText: 'View Interview Details',
     targetPage: 'interview',
-    iconBg: '#6c63ff15',
+    iconBg: '#6c63ff',
   },
   {
     id: 2,
-    title: '98% AI Match Found!',
-    message: 'Nexus AI found a high match role: "Staff UI Designer" at Airbnb ($180k-$240k). Review matching criteria now.',
-    time: '1h ago',
+    title: 'New High AI Match Job Posted',
+    message: 'Cognitive Systems just posted "Senior Product Designer (AI/ML)" with a 98% Match to your profile.',
+    time: '2h ago',
     date: 'Today',
     category: 'jobs',
     read: false,
-    actionText: 'View Match Details',
+    actionText: 'View Job Details',
     targetPage: 'jobdetails',
     jobPayload: { title: 'Staff UI Designer', company: 'Airbnb', location: 'San Francisco (Hybrid)', match: 98, salary: '$180k - $240k', type: 'Full-time', logo: 'A' },
     iconBg: '#00c85315',
@@ -123,6 +124,24 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
   const [filter, setFilter] = useState<NotificationCategory>('all');
   const [toast, setToast] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetchNotificationsApi().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const mapped: NotificationItem[] = data.map((n: any, idx: number) => ({
+          id: n._id || idx + 1,
+          title: n.title || 'Notification',
+          message: n.message || n.description || 'You have a new update',
+          time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+          date: 'Today',
+          category: (n.category || 'system') as any,
+          read: Boolean(n.read),
+          iconBg: '#6c63ff15',
+        }));
+        setNotifications(mapped);
+      }
+    });
+  }, []);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
@@ -144,11 +163,11 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
     showToast('All notifications marked as read');
   };
 
-  const toggleRead = (id: number) => {
+  const toggleRead = (id: number | string) => {
     setNotifications(ns => ns.map(n => n.id === id ? { ...n, read: !n.read } : n));
   };
 
-  const deleteNotification = (id: number) => {
+  const deleteNotification = (id: number | string) => {
     setNotifications(ns => ns.filter(n => n.id !== id));
     showToast('Notification removed');
   };

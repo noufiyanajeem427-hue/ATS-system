@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Send, Star, Calendar, Gift, SlidersHorizontal,
@@ -6,7 +6,8 @@ import {
   Eye, Zap, Check
 } from 'lucide-react';
 import { Page } from '../App';
-import { applicationData, appStats, StatusType } from '../data/applicationData';
+import { applicationData, appStats, StatusType, ApplicationRecord } from '../data/applicationData';
+import { fetchApplications } from '../services/api';
 
 interface ApplicationsProps {
   onMenuClick?: () => void;
@@ -16,17 +17,38 @@ interface ApplicationsProps {
 type TabType = 'all' | 'active' | 'completed';
 
 const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) => {
+  const [appsList, setAppsList] = useState(applicationData);
   const [tab, setTab] = useState<TabType>('all');
   const [sortBy, setSortBy] = useState('Newest');
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchApplications().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const mapped: ApplicationRecord[] = data.map((a: any, idx: number) => ({
+          id: a._id || idx + 1,
+          role: a.role || a.jobTitle || a.job?.title || 'Software Engineer',
+          company: a.company || a.job?.company || 'Company',
+          location: a.location || 'Remote',
+          date: a.date || a.appliedDate || (a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Today'),
+          ago: a.ago || 'Recently',
+          status: (a.status ? a.status.toUpperCase() : 'APPLIED') as StatusType,
+          match: a.match || 90,
+          logo: (a.company || 'C').substring(0, 2).toUpperCase(),
+          logoBg: 'linear-gradient(135deg,#6c63ff,#3b82f6)',
+        }));
+        setAppsList(mapped);
+      }
+    });
+  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  const filtered = applicationData.filter(a => {
+  const filtered = appsList.filter(a => {
     if (tab === 'active')    return ['IN REVIEW','INTERVIEWING','APPLIED'].includes(a.status);
     if (tab === 'completed') return ['OFFER RECEIVED','WITHDRAWN'].includes(a.status);
     return true;
