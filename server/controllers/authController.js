@@ -20,8 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "nexhire_jwt_secret_2026";
 const isMongoConnected = () => {
   return (
     mongoose.connection &&
-    mongoose.connection.readyState === 1 &&
-    Boolean(mongoose.connection.db)
+    mongoose.connection.readyState === 1
   );
 };
 
@@ -35,34 +34,30 @@ const registerUser = async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Database registration if MongoDB is fully connected & db initialized
+    // 1. Database registration if MongoDB is connected
     if (isMongoConnected()) {
-      try {
-        const userExists = await User.findOne({ email: cleanEmail });
-        if (userExists) {
-          return res.status(400).json({ message: "User already exists with this email." });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({
-          name: name.trim(),
-          email: cleanEmail,
-          password: hashedPassword,
-        });
-
-        const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
-
-        return res.status(201).json({
-          message: "User registered successfully in database",
-          token,
-          user: { id: user._id, name: user.name, email: user.email },
-        });
-      } catch (dbErr) {
-        console.log("MongoDB Registration bypass:", dbErr.message);
+      const userExists = await User.findOne({ email: cleanEmail });
+      if (userExists) {
+        return res.status(400).json({ message: "User already exists with this email." });
       }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        name: name.trim(),
+        email: cleanEmail,
+        password: hashedPassword,
+      });
+
+      const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+
+      return res.status(201).json({
+        message: "User registered successfully",
+        token,
+        user: { id: user._id, name: user.name, email: user.email },
+      });
     }
 
-    // 2. Fast In-Memory Backend Registration Fallback
+    // 2. In-Memory Backend Registration Fallback
     const existingInMemory = inMemoryUsers.find(u => u.email.toLowerCase() === cleanEmail);
     if (existingInMemory) {
       return res.status(400).json({ message: "User already registered with this email." });
@@ -88,6 +83,9 @@ const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Register Error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "User already exists with this email." });
+    }
     return res.status(500).json({ message: error.message || "Registration error occurred." });
   }
 };
@@ -102,23 +100,20 @@ const loginUser = async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Database login if MongoDB is fully connected & db initialized
+    // 1. Database login if MongoDB is connected
     if (isMongoConnected()) {
-      try {
-        const user = await User.findOne({ email: cleanEmail });
-        if (user) {
-          const isMatch = await bcrypt.compare(password, user.password);
-          if (isMatch) {
-            const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
-            return res.status(200).json({
-              message: "Login successful",
-              token,
-              user: { id: user._id, name: user.name, email: user.email },
-            });
-          }
+      const user = await User.findOne({ email: cleanEmail });
+      if (user) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+          return res.status(200).json({
+            message: "Login successful",
+            token,
+            user: { id: user._id, name: user.name, email: user.email },
+          });
         }
-      } catch (dbErr) {
-        console.log("MongoDB Login bypass:", dbErr.message);
+        return res.status(400).json({ message: "Invalid email or password." });
       }
     }
 
@@ -145,19 +140,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 3. Fallback for new credentials
-    const fallbackUser = {
-      _id: "usr_" + Date.now(),
-      name: cleanEmail.split('@')[0] || "User",
-      email: cleanEmail
-    };
-    const token = jwt.sign({ id: fallbackUser._id, email: fallbackUser.email }, JWT_SECRET, { expiresIn: "7d" });
-
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: fallbackUser,
-    });
+    return res.status(400).json({ message: "Invalid email or password." });
   } catch (error) {
     console.error("Login Error:", error);
     return res.status(500).json({ message: error.message || "Login error occurred." });
@@ -205,10 +188,40 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    let dbUsers = [];
+    if (isMongoConnected()) {
+      try {
+        dbUsers = await User.find().select("-password");
+      } catch (err) {
+        console.log("Error fetching DB users:", err.message);
+      }
+    }
+    const formattedInMemoryUsers = inMemoryUsers.map(u => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      createdAt: u.createdAt
+    }));
+
+    return res.status(200).json({
+      success: true,
+      mongoConnected: isMongoConnected(),
+      totalUsers: dbUsers.length + formattedInMemoryUsers.length,
+      databaseUsers: dbUsers,
+      inMemoryUsers: formattedInMemoryUsers
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   uploadResume,
   updateProfile,
+  getAllUsers,
 };

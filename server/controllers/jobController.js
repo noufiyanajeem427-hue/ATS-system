@@ -61,7 +61,7 @@ const getAllJobs = async (req, res) => {
 
     // Pagination
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
+    const limit = Number(req.query.limit) || 100;
 
     const totalJobs = await Job.countDocuments(filter);
 

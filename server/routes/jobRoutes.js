@@ -14,8 +14,8 @@ const router = express.Router();
 // Create a job
 router.post("/", protect, createJob);
 
-// Get all jobs
-router.get("/", protect, getAllJobs);
+// Get all jobs (Public View)
+router.get("/", getAllJobs);
 
 // Get a job by ID
 router.get("/:id", protect, getJobById);
