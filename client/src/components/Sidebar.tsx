@@ -53,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, onClo
             </svg>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-white font-bold text-base tracking-widest">ATS</span>
+            <span className="text-white font-bold text-base tracking-wider">NexHire</span>
             <span className="text-[9px] text-[#4a5068] leading-tight mt-0.5">AI-powered Applicant Tracking System</span>
           </div>
         </div>

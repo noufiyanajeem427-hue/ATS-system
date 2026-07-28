@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { Page } from '../App';
 
+import { ButtonSpinner } from '../components/Loading';
+
 interface JobSearchProps {
   onMenuClick?: () => void;
   onNavigate?: (p: Page, job?: any) => void;
@@ -42,6 +44,8 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingJobId, setLoadingJobId] = useState<number | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -56,7 +60,19 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   const handleSearch = () => {
+    setIsSearching(true);
     showToast(`Searching for "${searchQuery || 'All Jobs'}" in "${locationQuery || 'Any Location'}"...`);
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 600);
+  };
+
+  const handleJobNavigate = (job: Job) => {
+    setLoadingJobId(job.id);
+    setTimeout(() => {
+      setLoadingJobId(null);
+      if (onNavigate) onNavigate('jobdetails', job);
+    }, 400);
   };
 
   const resetFilters = () => {
@@ -197,10 +213,11 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
           </div>
           <button
             onClick={handleSearch}
-            className="px-7 py-3 rounded-xl text-[14px] font-semibold text-white border-none cursor-pointer whitespace-nowrap transition-all hover:-translate-y-px active:scale-95 flex-shrink-0"
+            disabled={isSearching}
+            className="px-7 py-3 rounded-xl text-[14px] font-semibold text-white border-none cursor-pointer whitespace-nowrap transition-all hover:-translate-y-px active:scale-95 flex-shrink-0 flex items-center justify-center gap-2"
             style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.35)' }}
           >
-            Find Jobs
+            {isSearching ? <ButtonSpinner size={16} color="#ffffff" /> : 'Find Jobs'}
           </button>
         </div>
       </div>
@@ -312,10 +329,11 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                       </div>
                       <div className="flex gap-2.5 w-full sm:w-auto">
                         <button
-                          onClick={() => onNavigate?.('jobdetails', job)}
-                          className="flex-1 sm:flex-none px-5 py-2 border-[1.5px] border-[#e4e8f0] rounded-[9px] bg-white text-[13px] font-semibold text-[#4a5068] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all font-sans active:scale-95"
+                          onClick={() => handleJobNavigate(job)}
+                          disabled={loadingJobId === job.id}
+                          className="flex-1 sm:flex-none px-5 py-2 border-[1.5px] border-[#e4e8f0] rounded-[9px] bg-white text-[13px] font-semibold text-[#4a5068] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all font-sans active:scale-95 flex items-center justify-center gap-1.5"
                         >
-                          Details
+                          {loadingJobId === job.id ? <ButtonSpinner size={14} color="#6c63ff" /> : 'Details'}
                         </button>
                         <button
                           onClick={() => onNavigate?.('applications')}

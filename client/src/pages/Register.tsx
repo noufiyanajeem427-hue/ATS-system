@@ -91,7 +91,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
             <Zap size={22} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[20px] font-black tracking-tight text-white leading-none">Nexus ATS</h1>
+            <h1 className="text-[20px] font-black tracking-tight text-white leading-none">NexHire</h1>
             <p className="text-[10px] text-[#a78bfa] tracking-widest font-bold uppercase mt-1">AI Career Intelligence</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
             <div className="w-8 h-8 rounded-xl bg-[#6c63ff] flex items-center justify-center">
               <Zap size={16} className="text-white" />
             </div>
-            <span className="text-[16px] font-black text-white">Nexus ATS</span>
+            <span className="text-[16px] font-black text-white">NexHire</span>
           </div>
 
           <div className="ml-auto text-[13px] text-slate-400">

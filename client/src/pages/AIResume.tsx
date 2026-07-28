@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Topbar from '../components/Topbar';
 import jsPDF from 'jspdf';
+import { ButtonSpinner } from '../components/Loading';
 import {
   Sparkles, CheckCircle2, AlertTriangle, TrendingUp,
   Download, X, Check, Zap,
@@ -638,7 +639,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             >
               {applyingFixes ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <ButtonSpinner size={16} color="#ffffff" />
                   Applying Fixes...
                 </>
               ) : fixesApplied ? (
@@ -656,7 +657,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             >
               {generatingPDF ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-[#6c63ff]/30 border-t-[#6c63ff] rounded-full animate-spin" />
+                  <ButtonSpinner size={14} color="#6c63ff" />
                   Generating PDF...
                 </>
               ) : (

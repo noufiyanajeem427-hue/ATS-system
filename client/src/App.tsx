@@ -15,7 +15,7 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
-import AppLoader, { DashboardSkeleton, JobSearchSkeleton } from './components/Loading';
+import AppLoader, { DashboardSkeleton, JobSearchSkeleton, PageSpinner } from './components/Loading';
 
 export type Page =
   | 'dashboard'
@@ -92,6 +92,7 @@ function App() {
     if (pageLoading) {
       if (activePage === 'dashboard') return <DashboardSkeleton />;
       if (activePage === 'jobsearch') return <JobSearchSkeleton />;
+      return <PageSpinner label={`Loading ${pageNames[activePage] || activePage}...`} />;
     }
 
     if (activePage === 'dashboard') {

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Topbar from '../components/Topbar';
 import jsPDF from 'jspdf';
+import { ButtonSpinner } from '../components/Loading';
 import {
   MapPin, Mail, Phone, Globe,
   Edit3, Plus, Trash2, Check, X, Camera, Briefcase,
@@ -142,11 +143,15 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
     }
   };
 
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
   // Download Resume PDF
   const downloadResumePDF = () => {
-    try {
-      const doc = new jsPDF();
-      doc.setFillColor(26, 26, 46);
+    setDownloadingPDF(true);
+    setTimeout(() => {
+      try {
+        const doc = new jsPDF();
+        doc.setFillColor(26, 26, 46);
       doc.rect(0, 0, 210, 40, 'F');
       
       doc.setTextColor(255, 255, 255);
@@ -216,11 +221,14 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
       const splitSkills = doc.splitTextToSize(skillList, 180);
       doc.text(splitSkills, 15, y);
 
-      doc.save(`${profileHeader.name.replace(/\s+/g, '_')}_Resume.pdf`);
-      showToast('Resume PDF generated and downloaded!');
-    } catch (err) {
-      showToast('Downloading resume PDF...', 'info');
-    }
+        doc.save(`${profileHeader.name.replace(/\s+/g, '_')}_Resume.pdf`);
+        showToast('Resume PDF generated and downloaded!');
+      } catch (err) {
+        showToast('Downloading resume PDF...');
+      } finally {
+        setDownloadingPDF(false);
+      }
+    }, 600);
   };
 
   // Copy share link
@@ -492,10 +500,11 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={downloadResumePDF}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all shadow-xs active:scale-95"
+                  disabled={downloadingPDF}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all shadow-xs active:scale-95 disabled:opacity-60"
                   title="Download PDF Resume"
                 >
-                  <Download size={14} className="text-[#6c63ff]" /> Resume PDF
+                  {downloadingPDF ? <ButtonSpinner size={14} color="#6c63ff" /> : <Download size={14} className="text-[#6c63ff]" />} Resume PDF
                 </button>
                 <button
                   onClick={() => setShowShareModal(true)}

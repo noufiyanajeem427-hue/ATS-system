@@ -5,6 +5,7 @@ import {
   Phone, Video, Check, CheckCheck, Star,
   X, Sparkles, Plus, Building2, Image, Zap
 } from 'lucide-react';
+import { ButtonSpinner } from '../components/Loading';
 import { Page } from '../App';
 
 interface MessagesProps {
@@ -155,6 +156,7 @@ const Messages: React.FC<MessagesProps> = ({ onMenuClick, onNavigate }) => {
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAI, setShowAI] = useState(false);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -182,18 +184,30 @@ const Messages: React.FC<MessagesProps> = ({ onMenuClick, onNavigate }) => {
 
   const sendMessage = () => {
     const text = inputText.trim();
-    if (!text) return;
-    const newMsg: Message = {
-      id: Date.now(), text, time: 'Just now', type: 'sent', read: false,
-    };
-    setConversations(cs => cs.map(c =>
-      c.id === activeId
-        ? { ...c, messages: [...c.messages, newMsg], lastMsg: text, time: 'Just now' }
-        : c
-    ));
-    setInputText('');
-    setShowAI(false);
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    if (!text || sending) return;
+
+    setSending(true);
+    setTimeout(() => {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const newMsg: Message = {
+        id: Date.now(),
+        text,
+        time: timeStr,
+        type: 'sent',
+        read: true,
+      };
+
+      setConversations(cs => cs.map(c =>
+        c.id === activeId
+          ? { ...c, messages: [...c.messages, newMsg], lastMsg: text, time: 'Just now' }
+          : c
+      ));
+
+      setInputText('');
+      setShowAI(false);
+      setSending(false);
+    }, 300);
   };
 
   const applySuggestion = (s: string) => {
@@ -446,10 +460,11 @@ const Messages: React.FC<MessagesProps> = ({ onMenuClick, onNavigate }) => {
               {/* Send */}
               <button
                 onClick={sendMessage}
+                disabled={sending}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center border-none cursor-pointer transition-all flex-shrink-0 ${inputText.trim() ? 'text-white hover:-translate-y-0.5 shadow-md hover:shadow-lg' : 'text-[#b0b8cc] bg-[#f4f6fb]'}`}
                 style={inputText.trim() ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 12px rgba(108,99,255,0.35)' } : {}}
               >
-                <Send size={16} />
+                {sending ? <ButtonSpinner size={16} color="#ffffff" /> : <Send size={16} />}
               </button>
             </div>
           </div>
