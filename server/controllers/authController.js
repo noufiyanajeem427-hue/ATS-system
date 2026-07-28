@@ -19,11 +19,14 @@ const registerUser = async (req, res) => {
 
     // Create new user
     const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-
+  name,
+  email,
+  password: hashedPassword,
+  role: "candidate",
+  isVerified: false,
+  googleId: "",
+  linkedinId: "",
+});
     res.status(201).json({
       message: "User registered successfully",
       user,

@@ -7,10 +7,33 @@ const notificationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    title: {
+      type: String,
+      required: true,
+    },
+
     message: {
       type: String,
       required: true,
     },
+
+    category: {
+      type: String,
+      enum: [
+        "Application",
+        "Interview",
+        "Job",
+        "System",
+      ],
+      default: "System",
+    },
+
+    targetPage: {
+      type: String,
+      default: "",
+    },
+
     isRead: {
       type: Boolean,
       default: false,

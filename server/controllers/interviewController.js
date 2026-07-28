@@ -3,16 +3,37 @@ const Interview = require("../models/Interview");
 // Schedule Interview
 const scheduleInterview = async (req, res) => {
   try {
-    const { application, interviewDate, interviewTime, meetingLink } = req.body;
-
+    const {
+  application,
+  user,
+  job,
+  role,
+  company,
+  interviewer,
+  interviewerTitle,
+  type,
+  round,
+  mode,
+  interviewDate,
+  interviewTime,
+  meetingLink,
+} = req.body;
     const interview = await Interview.create({
-      application,
-      recruiter: req.user,
-      interviewDate,
-      interviewTime,
-      meetingLink,
-    });
-
+  application,
+  user,
+  recruiter: req.user,
+  job,
+  role,
+  company,
+  interviewer,
+  interviewerTitle,
+  type,
+  round,
+  mode,
+  interviewDate,
+  interviewTime,
+  meetingLink,
+});
     res.status(201).json({
       message: "Interview scheduled successfully",
       interview,
