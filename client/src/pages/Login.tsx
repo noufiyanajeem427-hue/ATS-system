@@ -22,21 +22,39 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       showToast('Please fill in all fields.');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      showToast('Login successful! Redirecting to dashboard...');
+    try {
+      const response = await fetch('http://localhost:5001/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid email or password');
+      }
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+      }
+      showToast('Login successful! Welcome back.');
       setTimeout(() => {
         if (onLoginSuccess) onLoginSuccess();
         if (onNavigate) onNavigate('dashboard');
-      }, 800);
-    }, 1000);
+      }, 600);
+    } catch (err: any) {
+      showToast(err.message || 'Login failed. Please check credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {

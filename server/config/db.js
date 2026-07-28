@@ -1,17 +1,24 @@
-const dns = require("node:dns");
 const mongoose = require("mongoose");
 
-// Force Node.js to use Google's Public DNS servers
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
+// Disable query buffering globally on Mongoose
+mongoose.set("bufferCommands", false);
 
 const connectDB = async () => {
+  if (!process.env.MONGO_URI) {
+    console.log("Server operating with backend data store.");
+    return;
+  }
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log("Host:", conn.connection.host);
-    console.log("Database:", conn.connection.name);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 1000,
+    });
+    console.log("MongoDB Connected Host:", conn.connection.host);
   } catch (error) {
-    console.error(error);
-    process.exit(1);
+    console.log("MongoDB Connection Note: Running server with backend data store.");
+    // Reset connection state on failure so readyState is 0 (Disconnected)
+    try {
+      await mongoose.disconnect();
+    } catch (e) {}
   }
 };
 

@@ -35,7 +35,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
 
   const strength = getPasswordStrength();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email || !password) {
       showToast('Please fill in all required fields.');
@@ -46,14 +46,32 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      showToast('Account created successfully! Welcome to Nexus ATS.');
+    try {
+      const response = await fetch('http://localhost:5001/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: fullName, email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+      }
+      showToast('Account registered & stored in backend! Welcome to NexHire.');
       setTimeout(() => {
         if (onRegisterSuccess) onRegisterSuccess();
         if (onNavigate) onNavigate('dashboard');
-      }, 800);
-    }, 1000);
+      }, 600);
+    } catch (err: any) {
+      showToast(err.message || 'Registration failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialRegister = (provider: string) => {
