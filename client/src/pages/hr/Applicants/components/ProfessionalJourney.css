@@ -1,0 +1,142 @@
+.journey-card{
+
+    margin-top:30px;
+    background:#fff;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+
+}
+
+.journey-item{
+
+    display:flex;
+    gap:25px;
+    padding:25px 0;
+
+    border-bottom:1px solid #edf0f5;
+
+}
+
+.journey-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.company-logo{
+
+    width:70px;
+    height:70px;
+
+    border-radius:16px;
+
+    background:#eef2ff;
+
+    color:#5B5FEF;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:28px;
+
+    flex-shrink:0;
+
+}
+
+.journey-content{
+
+    flex:1;
+
+}
+
+.journey-top{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:15px;
+
+}
+
+.journey-top h3{
+
+    color:#1f2937;
+    margin-bottom:6px;
+    font-size:20px;
+
+}
+
+.journey-top h4{
+
+    color:#5B5FEF;
+    font-weight:600;
+
+}
+
+.journey-date{
+
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+    color:#6b7280;
+    font-size:14px;
+
+}
+
+.journey-date span{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+}
+
+.journey-content p{
+
+    color:#555;
+    line-height:1.7;
+    margin-bottom:18px;
+
+}
+
+.skill-tags{
+
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+
+}
+
+.skill-tags span{
+
+    background:#eef2ff;
+    color:#5B5FEF;
+
+    padding:8px 14px;
+
+    border-radius:25px;
+
+    font-size:13px;
+    font-weight:600;
+
+}
+
+@media(max-width:768px){
+
+.journey-item{
+
+flex-direction:column;
+
+}
+
+.journey-top{
+
+flex-direction:column;
+gap:15px;
+
+}
+
+}

@@ -1,0 +1,178 @@
+.ai-card{
+
+    background:#fff;
+    height:100%;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+
+}
+.ai-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:25px;
+
+}
+
+.ai-icon{
+
+    width:60px;
+
+    height:60px;
+
+    border-radius:15px;
+
+    background:#EEF2FF;
+
+    color:#5B5FEF;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:24px;
+
+}
+
+.ai-header h2{
+
+    color:#1f2937;
+
+}
+
+.ai-header p{
+
+    color:#6b7280;
+
+    font-size:14px;
+
+}
+
+.score-circle{
+
+    width:150px;
+
+    height:150px;
+
+    margin:25px auto;
+
+    border-radius:50%;
+
+    border:10px solid #5B5FEF;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.score-circle span{
+
+    font-size:40px;
+
+    font-weight:700;
+
+    color:#5B5FEF;
+
+}
+
+.score-circle small{
+
+    color:#777;
+
+}
+
+.analysis{
+
+    margin-top:25px;
+
+}
+
+.analysis-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+.progress{
+
+    height:8px;
+
+    background:#edf2f7;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin-bottom:18px;
+
+}
+
+.progress div{
+
+    height:100%;
+
+    background:#5B5FEF;
+
+    border-radius:20px;
+
+}
+
+.recommendation{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:15px;
+
+    margin-top:25px;
+
+    padding:18px;
+
+    border-radius:14px;
+
+    background:#EEF9F1;
+
+}
+
+.recommendation svg{
+
+    color:#16A34A;
+
+    font-size:22px;
+
+}
+
+.recommendation h4{
+
+    color:#15803D;
+
+    margin-bottom:5px;
+
+}
+
+.recommendation p{
+
+    color:#4b5563;
+
+    font-size:14px;
+
+}

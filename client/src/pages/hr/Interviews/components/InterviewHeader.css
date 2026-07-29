@@ -1,0 +1,239 @@
+.interview-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:24px;
+
+    background:#fff;
+
+    padding:28px 32px;
+
+    border-radius:22px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+
+    border:1px solid #eef2ff;
+
+}
+
+/* Left */
+
+.header-left h1{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    color:#1f2937;
+
+    margin-bottom:12px;
+
+}
+
+.header-meta{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    color:#6b7280;
+
+    font-size:15px;
+
+}
+
+.header-meta span{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.header-meta svg{
+
+    color:#5B5FEF;
+
+}
+
+.dot{
+
+    color:#cbd5e1 !important;
+
+}
+
+.scheduled-count{
+
+    color:#5B5FEF !important;
+
+    font-weight:600;
+
+}
+
+/* Right */
+
+.header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    flex-wrap:wrap;
+
+}
+
+/* Toggle */
+
+.view-toggle{
+
+    display:flex;
+
+    background:#f8fafc;
+
+    border-radius:12px;
+
+    padding:4px;
+
+    border:1px solid #e2e8f0;
+
+}
+
+.view-toggle button{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:10px 16px;
+
+    border:none;
+
+    background:transparent;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    color:#64748b;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.view-toggle button.active{
+
+    background:#5B5FEF;
+
+    color:white;
+
+    box-shadow:0 4px 12px rgba(91,95,239,.25);
+
+}
+
+/* Schedule Button */
+
+.schedule-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    background:#5B5FEF;
+
+    color:white;
+
+    padding:12px 20px;
+
+    border-radius:12px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    box-shadow:0 8px 20px rgba(91,95,239,.25);
+
+}
+
+.schedule-btn:hover{
+
+    background:#464bdd;
+
+    transform:translateY(-2px);
+
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+.interview-header{
+
+flex-direction:column;
+
+}
+
+.header-right{
+
+width:100%;
+
+justify-content:space-between;
+
+}
+
+}
+
+@media(max-width:600px){
+
+.header-right{
+
+flex-direction:column;
+
+align-items:stretch;
+
+}
+
+.view-toggle{
+
+width:100%;
+
+}
+
+.view-toggle button{
+
+flex:1;
+
+justify-content:center;
+
+}
+
+.schedule-btn{
+
+width:100%;
+
+justify-content:center;
+
+}
+
+}

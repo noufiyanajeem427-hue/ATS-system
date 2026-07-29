@@ -1,0 +1,169 @@
+/* ===========================
+   TRUSTED COMPANIES
+=========================== */
+
+.companies{
+    padding:100px 8%;
+    text-align:center;
+
+    background:linear-gradient(
+        180deg,
+        #FFFFFF,
+        #F8FAFF
+    );
+}
+
+/* ===========================
+   TITLE
+=========================== */
+
+.companies h2{
+
+    font-size:44px;
+
+    color:#111827;
+
+    font-weight:700;
+
+    margin-bottom:18px;
+
+}
+
+.companies h2 span{
+
+    background:linear-gradient(
+        90deg,
+        #6C63FF,
+        #8B5CF6
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+}
+
+.companies p{
+
+    max-width:700px;
+
+    margin:0 auto 60px;
+
+    color:#6B7280;
+
+    font-size:17px;
+
+    line-height:1.8;
+
+}
+
+/* ===========================
+   GRID
+=========================== */
+
+.company-container{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+    gap:28px;
+
+}
+
+/* ===========================
+   CARD
+=========================== */
+
+.company-card{
+
+    position:relative;
+
+    background:white;
+
+    border-radius:22px;
+
+    padding:35px 20px;
+
+    border:1px solid #ECEBFF;
+
+    box-shadow:
+        0 10px 30px rgba(108,99,255,.08);
+
+    transition:.35s;
+
+    cursor:pointer;
+
+    overflow:hidden;
+
+}
+
+/* Top gradient line */
+
+.company-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:4px;
+
+    background:linear-gradient(
+        90deg,
+        #6C63FF,
+        #A855F7
+    );
+
+}
+
+/* Company Name */
+
+.company-card h3{
+
+    font-size:22px;
+
+    color:#5B21B6;
+
+    font-weight:700;
+
+    margin-bottom:10px;
+
+}
+
+.company-card p{
+
+    color:#6B7280;
+
+    font-size:14px;
+
+    margin:0;
+
+}
+
+/* Hover */
+
+.company-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#D8D3FF;
+
+    box-shadow:
+        0 25px 45px rgba(108,99,255,.18);
+
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+.companies h2{
+
+    font-size:34px;
+
+}
+
+}

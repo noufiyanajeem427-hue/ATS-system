@@ -1,0 +1,3 @@
+aiAnalysis: {
+    type: Object
+}

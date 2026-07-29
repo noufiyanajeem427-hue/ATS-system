@@ -1,0 +1,25 @@
+.hero-temp{
+
+    height:90vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:linear-gradient(
+        135deg,
+        #EEF2FF,
+        #F8FAFC
+    );
+
+}
+
+.hero-temp h1{
+
+    font-size:58px;
+
+    color:#111827;
+
+}

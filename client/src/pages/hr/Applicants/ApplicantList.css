@@ -1,0 +1,47 @@
+.applicant-page{
+    min-height:100vh;
+    background:#F5F7FB;
+    padding:35px;
+}
+
+.page-title{
+    margin-bottom:25px;
+}
+
+.page-title h1{
+    font-size:34px;
+    color:#111827;
+    margin-bottom:8px;
+}
+
+.page-title p{
+    color:#6B7280;
+    font-size:15px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:30px;
+}
+
+@media(max-width:1000px){
+
+.cards{
+    grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:600px){
+
+.cards{
+    grid-template-columns:1fr;
+}
+
+.applicant-page{
+    padding:20px;
+}
+
+}

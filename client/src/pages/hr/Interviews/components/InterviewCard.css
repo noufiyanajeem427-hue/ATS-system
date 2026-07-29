@@ -1,0 +1,120 @@
+.interview-card{
+    background:#fff;
+    border-radius:18px;
+    padding:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+    box-shadow:0 10px 25px rgba(91,95,239,.08);
+    border:1px solid #eef1ff;
+    transition:.3s;
+}
+
+.interview-card:hover{
+    transform:translateY(-4px);
+}
+
+.card-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.candidate-image{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#eef2ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#5B5FEF;
+    font-size:32px;
+}
+
+.candidate-details h3{
+    color:#1f2937;
+    font-size:18px;
+}
+
+.candidate-details p{
+    color:#5B5FEF;
+    font-weight:600;
+    margin:5px 0;
+}
+
+.candidate-details span{
+    color:#6b7280;
+    font-size:14px;
+}
+
+.card-center{
+    text-align:center;
+}
+
+.card-center small{
+    color:#9ca3af;
+}
+
+.card-center h4{
+    color:#1f2937;
+    margin:6px 0;
+}
+
+.card-center span{
+    background:#eef2ff;
+    color:#5B5FEF;
+    padding:5px 14px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+.card-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.ai-match{
+    text-align:center;
+}
+
+.ai-match span{
+    color:#9ca3af;
+    font-size:13px;
+}
+
+.ai-match h3{
+    color:#5B5FEF;
+    margin-top:5px;
+}
+
+.card-right button{
+    width:46px;
+    height:46px;
+    border:none;
+    border-radius:50%;
+    background:#5B5FEF;
+    color:#fff;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.card-right button:hover{
+    background:#4649db;
+}
+
+@media(max-width:992px){
+
+.interview-card{
+    flex-direction:column;
+    gap:20px;
+    text-align:center;
+}
+
+.card-left{
+    flex-direction:column;
+}
+
+}
