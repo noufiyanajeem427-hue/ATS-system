@@ -132,6 +132,47 @@ export const fetchNotificationsApi = async () => {
   }
 };
 
+// --- SAVED JOBS API ---
+export const fetchSavedJobs = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/saved-jobs`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch saved jobs');
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend fetchSavedJobs error:', err);
+    return null;
+  }
+};
+
+export const saveJobApi = async (jobId: string | number) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/saved-jobs`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ job: jobId }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('saveJob error:', err);
+    return null;
+  }
+};
+
+export const deleteSavedJobApi = async (jobId: string | number) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/saved-jobs/${jobId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('deleteSavedJob error:', err);
+    return null;
+  }
+};
+
 // --- INTERVIEWS API ---
 export const fetchInterviewsApi = async () => {
   try {
@@ -145,3 +186,4 @@ export const fetchInterviewsApi = async () => {
     return null;
   }
 };
+

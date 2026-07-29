@@ -16,12 +16,30 @@ const jobSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: false,
     },
+    salary: {
+      type: String,
+      default: "$150k - $220k",
+    },
+    type: {
+      type: String,
+      default: "Full-time",
+    },
+    match: {
+      type: Number,
+      default: 95,
+    },
+    about: {
+      type: String,
+    },
+    responsibilities: [{ type: String }],
+    requirements: [{ type: String }],
+    skills: [{ type: String }],
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("Job", jobSchema);
+module.exports = mongoose.model("Job", jobSchema);

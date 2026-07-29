@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import { Page } from '../App';
-import { fetchJobs } from '../services/api';
+import { fetchJobs, fetchSavedJobs, saveJobApi, deleteSavedJobApi } from '../services/api';
 
 import { ButtonSpinner } from '../components/Loading';
 
@@ -40,7 +40,15 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   const [exp, setExp] = useState<string[]>(['Senior']);
   const [jt, setJt] = useState('fulltime');
   const [aim, setAim] = useState(80);
-  const [saved, setSaved] = useState<(number | string)[]>([]);
+  const [saved, setSaved] = useState<(number | string)[]>(() => {
+    try {
+      const stored = localStorage.getItem('nexus_saved_jobs');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,6 +73,13 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
         setJobsList(mappedJobs);
       }
     });
+
+    fetchSavedJobs().then(savedData => {
+      if (Array.isArray(savedData) && savedData.length > 0) {
+        const savedIds = savedData.map((s: any) => s.job?._id || s.job || s._id);
+        setSaved(savedIds);
+      }
+    });
   }, []);
 
   const showToast = (msg: string) => {
@@ -73,10 +88,26 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   const toggleExp = (e: string) => setExp(p => p.includes(e) ? p.filter(x => x !== e) : [...p, e]);
-  const toggleSave = (id: number | string) => {
+  
+  const toggleSave = async (id: number | string) => {
     const isSaved = saved.includes(id);
-    setSaved(p => isSaved ? p.filter(x => x !== id) : [...p, id]);
+    const updated = isSaved ? saved.filter(x => x !== id) : [...saved, id];
+    setSaved(updated);
+    try {
+      localStorage.setItem('nexus_saved_jobs', JSON.stringify(updated));
+    } catch (e) {}
+
     showToast(isSaved ? 'Job removed from saved items' : 'Job saved to your bookmarks!');
+
+    try {
+      if (!isSaved) {
+        await saveJobApi(id);
+      } else {
+        await deleteSavedJobApi(id);
+      }
+    } catch (err) {
+      console.warn('Syncing saved job error:', err);
+    }
   };
 
   const handleSearch = () => {
@@ -100,10 +131,14 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
     setExp(['Senior']);
     setJt('fulltime');
     setAim(80);
+    setShowSavedOnly(false);
     showToast('All filters have been reset.');
   };
 
-  const filteredJobs = jobsList.filter(j => (j.match || 100) >= aim);
+  const filteredJobs = jobsList.filter(j => {
+    if (showSavedOnly && !saved.includes(j.id)) return false;
+    return (j.match || 100) >= aim;
+  });
   const pageSize = 10;
   const totalPages = Math.ceil(filteredJobs.length / pageSize) || 1;
   const displayedJobs = filteredJobs.length > 10 
@@ -279,8 +314,30 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
 
         {/* Job Listings */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 px-1">
-            <span className="text-[15px] text-[#4a5068]"><strong className="text-[#1a1a2e]">{filteredJobs.length}</strong> Jobs matches for your profile</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 px-1">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowSavedOnly(false); setPage(1); }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none ${
+                  !showSavedOnly
+                    ? 'bg-[#6c63ff] text-white shadow-sm'
+                    : 'bg-white text-[#8890a4] border border-[#e4e8f0] hover:text-[#1a1a2e]'
+                }`}
+              >
+                All Jobs ({jobsList.length})
+              </button>
+              <button
+                onClick={() => { setShowSavedOnly(true); setPage(1); }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border-none ${
+                  showSavedOnly
+                    ? 'bg-[#6c63ff] text-white shadow-sm'
+                    : 'bg-white text-[#8890a4] border border-[#e4e8f0] hover:text-[#1a1a2e]'
+                }`}
+              >
+                <Heart size={12} fill={showSavedOnly ? 'white' : 'none'} stroke={showSavedOnly ? 'white' : 'currentColor'} /> Saved Jobs ({saved.length})
+              </button>
+            </div>
+
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold text-[#b0b8cc] tracking-wider">SORT BY:</span>
               <div className="flex items-center gap-1">

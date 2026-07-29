@@ -3,13 +3,20 @@ const Job = require("../models/Job");
 // Create Job
 const createJob = async (req, res) => {
   try {
-    const { title, company, location, description } = req.body;
+    const { title, company, location, description, salary, type, match, about, responsibilities, requirements, skills } = req.body;
 
     const job = await Job.create({
       title,
       company,
       location,
-      description,
+      description: description || about || "Detailed job description and responsibilities.",
+      salary: salary || "$150k - $220k",
+      type: type || "Full-time",
+      match: match || 95,
+      about,
+      responsibilities: responsibilities || [],
+      requirements: requirements || [],
+      skills: skills || [],
     });
 
     res.status(201).json({

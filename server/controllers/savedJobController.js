@@ -5,6 +5,15 @@ const saveJob = async (req, res) => {
   try {
     const { job } = req.body;
 
+    if (!job) {
+      return res.status(400).json({ message: "Job ID is required" });
+    }
+
+    const existing = await SavedJob.findOne({ user: req.user, job });
+    if (existing) {
+      return res.status(200).json({ message: "Job already saved", savedJob: existing });
+    }
+
     const savedJob = await SavedJob.create({
       user: req.user,
       job,
@@ -38,15 +47,13 @@ const getSavedJobs = async (req, res) => {
 // Delete a saved job
 const deleteSavedJob = async (req, res) => {
   try {
-    const savedJob = await SavedJob.findById(req.params.id);
+    let savedJob = await SavedJob.findById(req.params.id);
 
     if (!savedJob) {
-      return res.status(404).json({
-        message: "Saved job not found",
-      });
+      savedJob = await SavedJob.findOneAndDelete({ user: req.user, job: req.params.id });
+    } else {
+      await SavedJob.findByIdAndDelete(req.params.id);
     }
-
-    await SavedJob.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       message: "Saved job deleted successfully",
@@ -62,4 +69,4 @@ module.exports = {
   saveJob,
   getSavedJobs,
   deleteSavedJob,
-};
+};

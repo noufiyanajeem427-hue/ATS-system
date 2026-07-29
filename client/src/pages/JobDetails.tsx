@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Briefcase, MapPin, DollarSign, ArrowRight,
@@ -6,10 +6,12 @@ import {
   Sparkles, Check, Bookmark, Target, X
 } from 'lucide-react';
 import { Page } from '../App';
+import { fetchJobById, saveJobApi, deleteSavedJobApi } from '../services/api';
 
 interface JobDetailsProps {
   job?: {
-    id?: number;
+    id?: number | string;
+    _id?: number | string;
     title: string;
     company: string;
     location: string;
@@ -17,77 +19,17 @@ interface JobDetailsProps {
     salary: string;
     type: string;
     logo: string;
+    description?: string;
+    about?: string;
+    responsibilities?: string[];
+    requirements?: string[];
+    skills?: string[];
+    growth?: string[];
+    industry?: string;
   };
   onMenuClick?: () => void;
   onNavigate?: (p: Page) => void;
 }
-
-// Custom data mapping for different job titles to make the page dynamic
-const getJobExtendedData = (title: string) => {
-  const t = title.toLowerCase();
-  
-  if (t.includes('ux') || t.includes('ui') || t.includes('designer')) {
-    return {
-      about: "As a designer in this role, you will be at the forefront of defining how users interact with next-generation applications. You aren't just designing screens; you are designing behaviors, trust-loops, and multi-modal experiences that bridge the gap between complex backend architectures and intuitive workflows.",
-      responsibilities: [
-        'Lead the end-to-end design lifecycle, focusing on high-fidelity prototyping of user interfaces.',
-        'Partner with Product and Engineering to ensure UI outputs are both technically feasible and human-centric.',
-        'Develop and maintain reusable design tokens, component libraries, and visual guidelines.',
-        'Conduct qualitative user research and translate insights into high-impact user experiences.'
-      ],
-      requirements: [
-        '5+ years of experience in Product/UX/UI Design, with a strong focus on complex web applications.',
-        'Deep visual craft and systems thinking demonstrated in your portfolio.',
-        'Proficiency in Figma, ProtoPie, and familiarity with front-end technologies like React & Tailwind.',
-        'Excellent communication skills to articulate design decisions to stakeholders.'
-      ],
-      skills: ['Product Design', 'Figma', 'Systems Thinking', 'Prototyping', 'Data Viz'],
-      growth: ['Agentic Workflows', 'LLM Integration'],
-      industry: 'Design & User Experience'
-    };
-  }
-  
-  if (t.includes('infrastructure') || t.includes('engineer') || t.includes('developer')) {
-    return {
-      about: "In this engineering role, you will be architecting and managing highly scalable cloud systems. You will optimize pipeline throughput, establish resilient deployment infrastructure, and design distributed orchestration protocols to ensure high availability and robust security standards.",
-      responsibilities: [
-        'Design, build, and maintain our scalable cloud deployment infrastructure.',
-        'Build telemetry dashboards, configure alert handlers, and automate failover procedures.',
-        'Collaborate with developers to optimize container runtimes and secure network pathways.',
-        'Manage continuous integration pipelines and automated container deployments.'
-      ],
-      requirements: [
-        '6+ years of experience in Software Engineering, Infrastructure, or DevOps environments.',
-        'Strong knowledge of cloud providers (AWS/GCP/Azure) and container orchestration.',
-        'Proficiency in writing automation scripts using Shell, Python, Go, or Node.js.',
-        'Familiarity with CI/CD tools, Infrastructure as Code (Terraform), and microservice architectures.'
-      ],
-      skills: ['AWS / GCP', 'Kubernetes', 'CI/CD Pipelines', 'Terraform', 'Docker'],
-      growth: ['Rust / Go Lang', 'eBPF Monitoring'],
-      industry: 'Cloud Infrastructure & DevOps'
-    };
-  }
-
-  // Fallback default
-  return {
-    about: "In this position, you will collaborate with cross-functional partners to execute and scale our core business initiatives. You will bring your deep expertise to solve ambiguous problems, identify process bottlenecks, and optimize workflows.",
-    responsibilities: [
-      'Coordinate project milestones and align deliverables across different departments.',
-      'Analyze performance metrics to iterate and improve business operations.',
-      'Document systems processes and establish best practice standards.',
-      'Define product/service requirements based on stakeholder needs.'
-    ],
-    requirements: [
-      '4+ years of professional experience in a fast-paced technology environment.',
-      'Strong analytical, problem-solving, and project management skills.',
-      'Proven record of delivering successful projects from concept to launch.',
-      'Familiarity with collaborative workflow suites and data analytics systems.'
-    ],
-    skills: ['Project Management', 'Data Analysis', 'Strategic Planning', 'Figma', 'System Design'],
-    growth: ['AI Automation', 'Data Science'],
-    industry: 'Technology Solutions & AI'
-  };
-};
 
 const logoBgs: Record<string, string> = {
   CS: 'linear-gradient(135deg,#667eea,#764ba2)',
@@ -100,35 +42,85 @@ const logoBgs: Record<string, string> = {
 
 const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const [dbJob, setDbJob] = useState<any>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const targetJobId = job?._id || job?.id;
+
+  useEffect(() => {
+    if (targetJobId) {
+      fetchJobById(targetJobId).then(data => {
+        if (data && (data._id || data.title)) {
+          setDbJob(data);
+        }
+      });
+    }
+  }, [targetJobId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleSaveToggle = () => {
-    setIsSaved(!isSaved);
-    showToast(!isSaved ? 'Job saved to your bookmarks!' : 'Job removed from saved items');
+  const activeJob = {
+    id: dbJob?._id || job?.id || job?._id || 1,
+    title: dbJob?.title || job?.title || 'Software Engineer',
+    company: dbJob?.company || job?.company || 'Tech Company',
+    location: dbJob?.location || job?.location || 'Remote',
+    match: dbJob?.match || job?.match || 90,
+    salary: dbJob?.salary || job?.salary || '$120k - $180k',
+    type: dbJob?.type || job?.type || 'Full-time',
+    logo: (dbJob?.company || job?.company || 'TC').substring(0, 2).toUpperCase(),
+    description: dbJob?.description,
+  };
+
+  const jobId = activeJob.id || activeJob.title;
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('nexus_saved_jobs');
+      const list = stored ? JSON.parse(stored) : [];
+      setIsSaved(list.includes(jobId));
+    } catch (e) {}
+  }, [jobId]);
+
+  const handleSaveToggle = async () => {
+    const nextSaved = !isSaved;
+    setIsSaved(nextSaved);
+    showToast(nextSaved ? 'Job saved to your bookmarks!' : 'Job removed from saved items');
+
+    try {
+      const stored = localStorage.getItem('nexus_saved_jobs');
+      let list: any[] = stored ? JSON.parse(stored) : [];
+      if (nextSaved) {
+        if (!list.includes(jobId)) list.push(jobId);
+        await saveJobApi(jobId);
+      } else {
+        list = list.filter((x: any) => x !== jobId);
+        await deleteSavedJobApi(jobId);
+      }
+      localStorage.setItem('nexus_saved_jobs', JSON.stringify(list));
+    } catch (e) {}
   };
 
   const handleApply = () => {
     showToast('Redirecting to application portal...');
   };
 
-  // Fallback defaults if job payload isn't passed
-  const activeJob = job || {
-    id: 1,
-    title: 'Senior AI Product Designer',
-    company: 'Nexus AI',
-    location: 'San Francisco, CA • Remote',
-    match: 98,
-    salary: '$180k - $240k',
-    type: 'Full-time',
-    logo: 'NX'
+  const jobResp = job?.responsibilities;
+  const jobReq = job?.requirements;
+  const jobSkills = job?.skills;
+  const jobGrowth = job?.growth;
+
+  const extendedData = {
+    about: dbJob?.about || dbJob?.description || job?.about || job?.description || '',
+    responsibilities: Array.isArray(dbJob?.responsibilities) && dbJob.responsibilities.length > 0 ? dbJob.responsibilities : (Array.isArray(jobResp) ? jobResp : []),
+    requirements: Array.isArray(dbJob?.requirements) && dbJob.requirements.length > 0 ? dbJob.requirements : (Array.isArray(jobReq) ? jobReq : []),
+    skills: Array.isArray(dbJob?.skills) && dbJob.skills.length > 0 ? dbJob.skills : (Array.isArray(jobSkills) ? jobSkills : []),
+    growth: Array.isArray(dbJob?.growth) ? dbJob.growth : (Array.isArray(jobGrowth) ? jobGrowth : []),
+    industry: dbJob?.industry || job?.industry || 'Technology & Innovation',
   };
 
-  const extendedData = getJobExtendedData(activeJob.title);
   const logoBg = logoBgs[activeJob.logo] || 'linear-gradient(135deg,#6c63ff,#8b5cf6)';
 
   return (
@@ -183,7 +175,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-[13px] text-[#5a6080]">
                       <span className="flex items-center gap-1"><Briefcase size={14} className="text-[#8890a4]" /> {activeJob.company}</span>
                       <span className="flex items-center gap-1"><MapPin size={14} className="text-[#8890a4]" /> {activeJob.location}</span>
-                      <span className="flex items-center gap-1"><DollarSign size={14} className="text-[#8890a4]" /> {activeJob.salary}</span>
+                      {activeJob.salary && <span className="flex items-center gap-1"><DollarSign size={14} className="text-[#8890a4]" /> {activeJob.salary}</span>}
                     </div>
                   </div>
                 </div>
@@ -209,13 +201,20 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
               </div>
 
               {/* Tag Badges */}
-              <div className="flex flex-wrap gap-2 mt-6 pt-5 border-t border-[#f0f2f8]">
-                {[(activeJob.type || 'Full-time').toUpperCase(), 'AI INTEGRATION', 'SENIOR LEVEL', 'POSTED 2 DAYS AGO'].map((tag) => (
-                  <span key={tag} className="text-[10px] font-bold tracking-wider px-3 py-1.5 rounded-lg bg-[#f4f6fb] text-[#5a6080]">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {(activeJob.type || activeJob.location) && (
+                <div className="flex flex-wrap gap-2 mt-6 pt-5 border-t border-[#f0f2f8]">
+                  {activeJob.type && (
+                    <span className="text-[10px] font-bold tracking-wider px-3 py-1.5 rounded-lg bg-[#f4f6fb] text-[#5a6080] uppercase">
+                      {activeJob.type}
+                    </span>
+                  )}
+                  {activeJob.location && (
+                    <span className="text-[10px] font-bold tracking-wider px-3 py-1.5 rounded-lg bg-[#f4f6fb] text-[#5a6080] uppercase">
+                      {activeJob.location}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* AI Reasoning Match Card */}
@@ -247,97 +246,104 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
                   <span>AI Reasoning</span>
                 </div>
                 <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4">
-                  This role is an exceptional match based on your recent profile analysis. Your matching profile metrics and experience aligned perfectly with <strong className="text-[#1a1a2e]">{activeJob.company}</strong>'s upcoming core business objectives.
+                  This role match is based on your active profile analysis and skills matching <strong className="text-[#1a1a2e]">{activeJob.company}</strong>'s requirements.
                 </p>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-[#00c853] font-semibold">
                   <span className="flex items-center gap-1 bg-[#00c853]/8 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 size={13} /> {activeJob.match >= 85 ? '12/12 Key Skills' : '10/12 Key Skills'}
-                  </span>
-                  <span className="flex items-center gap-1 bg-[#00c853]/8 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 size={13} /> {activeJob.match >= 80 ? '5+ Yrs Experience' : '3+ Yrs Experience'}
+                    <CheckCircle2 size={13} /> {activeJob.match}% Profile Match
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* About the Role & Responsibilities */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#e4e8f0]/60 flex flex-col gap-6">
-              
-              {/* About */}
-              <div>
-                <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-3">About the Role</h3>
-                <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4">
-                  {extendedData.about}
-                </p>
-              </div>
+            {/* About the Role & Responsibilities (Rendered ONLY if present) */}
+            {(extendedData.about || extendedData.responsibilities.length > 0 || extendedData.requirements.length > 0) && (
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#e4e8f0]/60 flex flex-col gap-6">
+                
+                {/* About */}
+                {extendedData.about && (
+                  <div>
+                    <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-3">About the Role</h3>
+                    <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4">
+                      {extendedData.about}
+                    </p>
+                  </div>
+                )}
 
-              {/* Responsibilities */}
-              <div>
-                <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-4">Responsibilities</h3>
-                <div className="flex flex-col gap-3">
-                  {extendedData.responsibilities.map((res, i) => (
-                    <div key={i} className="flex gap-3 items-start">
-                      <div className="w-5 h-5 rounded-full bg-[#6c63ff]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Target size={11} className="text-[#6c63ff]" />
-                      </div>
-                      <span className="text-[13px] text-[#4a5068] leading-relaxed">{res}</span>
+                {/* Responsibilities */}
+                {extendedData.responsibilities.length > 0 && (
+                  <div>
+                    <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-4">Responsibilities</h3>
+                    <div className="flex flex-col gap-3">
+                      {extendedData.responsibilities.map((res: string, i: number) => (
+                        <div key={i} className="flex gap-3 items-start">
+                          <div className="w-5 h-5 rounded-full bg-[#6c63ff]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Target size={11} className="text-[#6c63ff]" />
+                          </div>
+                          <span className="text-[13px] text-[#4a5068] leading-relaxed">{res}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
 
-              {/* Requirements */}
-              <div>
-                <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-4">Requirements</h3>
-                <div className="flex flex-col gap-3">
-                  {extendedData.requirements.map((req, i) => (
-                    <div key={i} className="flex gap-3 items-start">
-                      <Check size={14} className="text-[#6c63ff] flex-shrink-0 mt-1" />
-                      <span className="text-[13px] text-[#4a5068] leading-relaxed">{req}</span>
+                {/* Requirements */}
+                {extendedData.requirements.length > 0 && (
+                  <div>
+                    <h3 className="text-[16px] font-extrabold text-[#1a1a2e] mb-4">Requirements</h3>
+                    <div className="flex flex-col gap-3">
+                      {extendedData.requirements.map((req: string, i: number) => (
+                        <div key={i} className="flex gap-3 items-start">
+                          <Check size={14} className="text-[#6c63ff] flex-shrink-0 mt-1" />
+                          <span className="text-[13px] text-[#4a5068] leading-relaxed">{req}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Sidebar Column */}
           <div className="flex flex-col gap-6">
             
-            {/* Skill Analysis Card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
-              <h3 className="text-[15px] font-extrabold text-[#1a1a2e] mb-4">Skill Analysis</h3>
-              
-              {/* Matching Skills */}
-              <div className="mb-5">
-                <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-2.5 uppercase">Matching Skills</span>
-                <div className="flex flex-col gap-1.5">
-                  {extendedData.skills.map((skill) => (
-                    <div key={skill} className="flex items-center justify-between px-3 py-2 bg-[#00c853]/6 rounded-lg text-xs font-semibold text-[#00a843]">
-                      <span>{skill}</span>
-                      <Check size={12} strokeWidth={3} />
+            {/* Skill Analysis Card (Rendered ONLY if skills exist) */}
+            {(extendedData.skills.length > 0 || extendedData.growth.length > 0) && (
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+                <h3 className="text-[15px] font-extrabold text-[#1a1a2e] mb-4">Skill Analysis</h3>
+                
+                {/* Matching Skills */}
+                {extendedData.skills.length > 0 && (
+                  <div className="mb-5">
+                    <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-2.5 uppercase">Matching Skills</span>
+                    <div className="flex flex-col gap-1.5">
+                      {extendedData.skills.map((skill: string) => (
+                        <div key={skill} className="flex items-center justify-between px-3 py-2 bg-[#00c853]/6 rounded-lg text-xs font-semibold text-[#00a843]">
+                          <span>{skill}</span>
+                          <Check size={12} strokeWidth={3} />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
 
-              {/* Growth Areas */}
-              <div className="mb-4">
-                <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-2.5 uppercase">Growth Areas</span>
-                <div className="flex flex-col gap-1.5">
-                  {extendedData.growth.map((skill) => (
-                    <div key={skill} className="flex items-center gap-2 px-3 py-2 bg-[#8b5cf6]/8 rounded-lg text-xs font-semibold text-[#6c63ff]">
-                      <Info size={12} />
-                      <span>{skill}</span>
+                {/* Growth Areas */}
+                {extendedData.growth.length > 0 && (
+                  <div className="mb-4">
+                    <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-2.5 uppercase">Growth Areas</span>
+                    <div className="flex flex-col gap-1.5">
+                      {extendedData.growth.map((skill: string) => (
+                        <div key={skill} className="flex items-center gap-2 px-3 py-2 bg-[#8b5cf6]/8 rounded-lg text-xs font-semibold text-[#6c63ff]">
+                          <Info size={12} />
+                          <span>{skill}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
-
-              <p className="text-[11px] text-[#8890a4] leading-relaxed italic border-t border-[#f0f2f8] pt-3">
-                {activeJob.company} offers internal training programs for these specific areas.
-              </p>
-            </div>
+            )}
 
             {/* Company Overview Card */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 flex flex-col gap-4">
