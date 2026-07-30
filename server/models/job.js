@@ -2,12 +2,34 @@ const mongoose = require("mongoose");
 
 const jobSchema = new mongoose.Schema(
   {
+    company_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+    },
+
     title: {
       type: String,
       required: true,
     },
 
-    company: {
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    job_type: {
+      type: String,
+      required: true,
+    },
+
+    work_mode: {
       type: String,
       required: true,
     },
@@ -17,38 +39,40 @@ const jobSchema = new mongoose.Schema(
       required: true,
     },
 
-    salary: {
-      type: String,
-      required: true,
-    },
-
-    type: {
-      type: String,
-      enum: [
-        "Full-time",
-        "Part-time",
-        "Contract",
-        "Hybrid",
-        "Remote",
-      ],
-      required: true,
-    },
-
-    matchScore: {
+    experience_min: {
       type: Number,
-      default: 98,
+      default: 0,
     },
 
-    description: {
+    experience_max: {
+      type: Number,
+      default: 0,
+    },
+
+    salary_min: {
+      type: Number,
+      default: 0,
+    },
+
+    salary_max: {
+      type: Number,
+      default: 0,
+    },
+
+    salary_period: {
       type: String,
-      required: true,
+      default: "Monthly",
     },
 
-    requirements: [
-      {
-        type: String,
-      },
-    ],
+    vacancies: {
+      type: Number,
+      default: 1,
+    },
+
+    qualification: {
+      type: String,
+      default: "",
+    },
 
     responsibilities: [
       {
@@ -56,15 +80,30 @@ const jobSchema = new mongoose.Schema(
       },
     ],
 
-    postedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    benefits: [
+      {
+        type: String,
+      },
+    ],
+
+    application_email: {
+      type: String,
+      default: "",
+    },
+
+    contact_number: {
+      type: String,
+      default: "",
+    },
+
+    application_deadline: {
+      type: Date,
     },
 
     status: {
       type: String,
-      enum: ["active", "closed", "draft"],
-      default: "active",
+      enum: ["Open", "Closed"],
+      default: "Open",
     },
   },
   {
