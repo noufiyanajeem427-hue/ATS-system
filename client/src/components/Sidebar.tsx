@@ -27,7 +27,18 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, onClose }) => (
+const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, onClose }) => {
+  const storedUser = (() => {
+    try {
+      const st = localStorage.getItem('user');
+      return st ? JSON.parse(st) : null;
+    } catch { return null; }
+  })();
+
+  const userName = storedUser?.name || 'Candidate User';
+  const userInitials = userName.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+
+  return (
   <>
     {/* Mobile Overlay */}
     {isOpen && (
@@ -97,17 +108,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, onClo
       <div className="mx-2.5 mb-4 p-3 bg-white/[0.04] border border-white/[0.06] rounded-xl flex items-center gap-2.5 cursor-pointer">
         <div className="relative flex-shrink-0">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center text-[11px] font-bold text-white">
-            AC
+            {userInitials}
           </div>
           <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0f0f1a]" />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[13px] font-semibold text-[#e0e4f0] truncate">Alex Chen</span>
-          <span className="text-[9px] font-bold text-[#6c63ff] tracking-wider">PREMIUM MEMBER</span>
+          <span className="text-[13px] font-semibold text-[#e0e4f0] truncate">{userName}</span>
+          <span className="text-[9px] font-bold text-[#6c63ff] tracking-wider">MEMBER</span>
         </div>
       </div>
     </aside>
   </>
-);
+  );
+};
 
 export default Sidebar;

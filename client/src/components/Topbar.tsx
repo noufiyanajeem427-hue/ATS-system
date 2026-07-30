@@ -26,6 +26,17 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const storedUser = (() => {
+    try {
+      const st = localStorage.getItem('user');
+      return st ? JSON.parse(st) : null;
+    } catch { return null; }
+  })();
+
+  const userName = storedUser?.name || 'Candidate User';
+  const userEmail = storedUser?.email || 'user@nexhire.ai';
+  const userInitials = userName.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+
   const handleMenuSelect = (page: Page) => {
     setShowDropdown(false);
     if (onNavigate) onNavigate(page);
@@ -33,6 +44,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
 
   const handleLogout = () => {
     setShowDropdown(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToast('Logged out successfully!');
     setTimeout(() => {
       if (onNavigate) onNavigate('login');
@@ -98,7 +111,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
         {/* Notification */}
         <button
           onClick={() => onNavigate?.('notifications')}
-          className="relative w-9 h-9 flex items-center justify-center bg-[#f4f6fb] border-none rounded-[9px] cursor-pointer text-[#8890a4] hover:bg-[#e8edf5] hover:text-[#6c63ff] transition-all"
+          className="relative flex w-9 h-9 items-center justify-center bg-[#f4f6fb] border-none rounded-[9px] cursor-pointer text-[#8890a4] hover:bg-[#e8edf5] hover:text-[#6c63ff] transition-all"
           title="Notifications"
         >
           <Bell size={18}/>
@@ -116,9 +129,9 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
             }`}
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 shadow-sm">
-              AR
+              {userInitials}
             </div>
-            <span className="hidden md:inline text-[13px] font-semibold text-[#1a1a2e] whitespace-nowrap">Alex Rivera</span>
+            <span className="hidden md:inline text-[13px] font-semibold text-[#1a1a2e] whitespace-nowrap">{userName}</span>
             <ChevronDown
               size={13}
               className={`text-[#8890a4] transition-transform duration-200 ${showDropdown ? 'rotate-180 text-[#6c63ff]' : ''}`}
@@ -132,15 +145,15 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
               <div className="px-4 py-3 border-b border-[#f0f2f8]">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center text-[13px] font-black text-white shadow-md">
-                    AR
+                    {userInitials}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[13px] font-extrabold text-[#1a1a2e] truncate">Alex Rivera</p>
-                    <p className="text-[11px] text-[#8890a4] truncate">alex.rivera@email.com</p>
+                    <p className="text-[13px] font-extrabold text-[#1a1a2e] truncate">{userName}</p>
+                    <p className="text-[11px] text-[#8890a4] truncate">{userEmail}</p>
                   </div>
                 </div>
                 <span className="inline-block text-[9.5px] font-bold text-[#6c63ff] bg-[#6c63ff]/10 px-2.5 py-0.5 rounded-full">
-                  Staff Product Designer
+                  Candidate Account
                 </span>
               </div>
 

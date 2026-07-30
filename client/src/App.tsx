@@ -46,12 +46,27 @@ const pageNames: Partial<Record<Page, string>> = {
   register: 'Create Account',
 };
 
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
+
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
-  const [activePage, setActivePage] = useState<Page>('dashboard');
+
+  // Helper to check if user is logged in
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    return Boolean(token || user);
+  };
+
+  // Require Login First: Default to login page if user is not authenticated
+  const [activePage, setActivePage] = useState<Page>(() => {
+    return isAuthenticated() ? 'dashboard' : 'login';
+  });
+
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [pageLoading, setPageLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [timeoutNotice, setTimeoutNotice] = useState<string | null>(null);
 
   // Initial App Load effect
   useEffect(() => {
@@ -61,8 +76,51 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auth Guard: Redirect unauthenticated user to Login page
+  useEffect(() => {
+    if (!isAuthenticated() && activePage !== 'login' && activePage !== 'register') {
+      setActivePage('login');
+    }
+  }, [activePage]);
+
+  // 15-Minute Portal Inactivity Timeout
+  useEffect(() => {
+    const isAuthPage = activePage === 'login' || activePage === 'register';
+    if (isAuthPage || !isAuthenticated()) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        // Clear session data after 15 minutes of inactivity
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setActivePage('login');
+        setTimeoutNotice('Portal session expired after 15 minutes of inactivity. Please log in again.');
+      }, INACTIVITY_TIMEOUT_MS);
+    };
+
+    // User activity listeners
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    activityEvents.forEach(evt => window.addEventListener(evt, resetTimer));
+
+    resetTimer();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      activityEvents.forEach(evt => window.removeEventListener(evt, resetTimer));
+    };
+  }, [activePage]);
+
   // Handle Page Navigation with Loading transition
   const handleNavigate = (page: Page, jobPayload?: any) => {
+    // Prevent unauthenticated navigation to portal pages
+    if (!isAuthenticated() && page !== 'login' && page !== 'register') {
+      setActivePage('login');
+      return;
+    }
+
     if (jobPayload) {
       setSelectedJob(jobPayload);
     } else if (page === 'jobdetails' && !selectedJob) {
@@ -217,6 +275,15 @@ function App() {
 
   return (
     <div className="flex min-h-screen bg-[#f4f6fb]">
+      {/* 15 Minute Timeout Notice Toast */}
+      {timeoutNotice && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-[#1a1a2e] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-amber-500/50">
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+          <span className="text-xs font-semibold">{timeoutNotice}</span>
+          <button onClick={() => setTimeoutNotice(null)} className="ml-2 text-white/60 hover:text-white bg-transparent border-none cursor-pointer">✕</button>
+        </div>
+      )}
+
       {!isAuthPage && (
         <Sidebar
           activePage={activePage}

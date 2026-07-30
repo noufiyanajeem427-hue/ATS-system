@@ -24,12 +24,13 @@ const applyJob = async (req, res) => {
   }
 };
 
-// Get all applications
+// Get all applications for the logged in user
 const getApplications = async (req, res) => {
   try {
-    const applications = await Application.find()
+    const query = req.user ? { user: req.user } : {};
+    const applications = await Application.find(query)
       .populate("user", "name email")
-      .populate("job", "title company");
+      .populate("job");
 
     res.status(200).json(applications);
   } catch (error) {

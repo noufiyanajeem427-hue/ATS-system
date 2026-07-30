@@ -27,10 +27,22 @@ const scheduleInterview = async (req, res) => {
   }
 };
 
-// Get All Interviews
+// Get All Interviews for the logged in user
 const getAllInterviews = async (req, res) => {
   try {
-    const interviews = await Interview.find()
+    let query = {};
+    if (req.user) {
+      const userApps = await Application.find({ user: req.user }).select("_id");
+      const userAppIds = userApps.map((a) => a._id);
+      query = {
+        $or: [
+          { recruiter: req.user },
+          { application: { $in: userAppIds } }
+        ]
+      };
+    }
+
+    const interviews = await Interview.find(query)
       .populate({
         path: "application",
         populate: [
