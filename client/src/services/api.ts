@@ -187,3 +187,30 @@ export const fetchInterviewsApi = async () => {
   }
 };
 
+export const scheduleInterviewApi = async (interviewData: any) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/interviews`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(interviewData),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('scheduleInterview error:', err);
+    throw err;
+  }
+};
+
+export const deleteInterviewApi = async (id: string | number) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/interviews/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('deleteInterview error:', err);
+    return null;
+  }
+};
+

@@ -3,14 +3,17 @@ const Interview = require("../models/Interview");
 // Schedule Interview
 const scheduleInterview = async (req, res) => {
   try {
-    const { application, interviewDate, interviewTime, meetingLink } = req.body;
+    const { application, role, company, type, interviewDate, interviewTime, meetingLink } = req.body;
 
     const interview = await Interview.create({
-      application,
+      application: application || null,
       recruiter: req.user,
-      interviewDate,
-      interviewTime,
-      meetingLink,
+      role: role || undefined,
+      company: company || undefined,
+      type: type || undefined,
+      interviewDate: interviewDate || new Date(),
+      interviewTime: interviewTime || "10:00 AM",
+      meetingLink: meetingLink || "https://meet.google.com",
     });
 
     res.status(201).json({
@@ -28,8 +31,15 @@ const scheduleInterview = async (req, res) => {
 const getAllInterviews = async (req, res) => {
   try {
     const interviews = await Interview.find()
-      .populate("application")
-      .populate("recruiter", "name email");
+      .populate({
+        path: "application",
+        populate: [
+          { path: "job" },
+          { path: "user", select: "name email" }
+        ]
+      })
+      .populate("recruiter", "name email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json(interviews);
   } catch (error) {

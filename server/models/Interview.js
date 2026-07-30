@@ -5,12 +5,24 @@ const interviewSchema = new mongoose.Schema(
     application: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Application",
-      required: true,
+      required: false,
     },
     recruiter: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    role: {
+      type: String,
+      default: "Software Engineer",
+    },
+    company: {
+      type: String,
+      default: "Tech Corp",
+    },
+    type: {
+      type: String,
+      default: "Technical Round",
     },
     interviewDate: {
       type: Date,

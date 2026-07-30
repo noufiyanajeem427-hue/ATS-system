@@ -3,12 +3,12 @@ import Topbar from '../components/Topbar';
 import {
   Video, Calendar, Clock, MapPin, ExternalLink,
   CheckCircle2, ChevronRight, ChevronLeft,
-  Sparkles, Star, AlertCircle, Mic, BookOpen,
+  Sparkles, Star, AlertCircle, Mic, MicOff, VideoOff, PhoneOff, BookOpen,
   Play, X, Check, User, Building2, Zap, TrendingUp,
-  Bell, MoreHorizontal, Phone
+  Bell, Phone
 } from 'lucide-react';
 import { Page } from '../App';
-import { fetchInterviewsApi } from '../services/api';
+import { fetchInterviewsApi, scheduleInterviewApi, deleteInterviewApi } from '../services/api';
 
 interface InterviewProps {
   onMenuClick?: () => void;
@@ -189,12 +189,200 @@ const calendarDays = [
   { date: 27, day: 'Fri', hasInterview: true, company: 'Nova' },
 ];
 
+const formatBackendInterview = (item: any): InterviewItem => {
+  const d = item.interviewDate ? new Date(item.interviewDate) : new Date();
+  const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const dayStr = d.toLocaleDateString('en-US', { weekday: 'long' });
+  const companyName = item.application?.job?.company || item.company || 'Tech Corp';
+  const roleName = item.application?.job?.title || item.role || 'Software Engineer';
+  const logoText = companyName.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'TC';
+
+  const rawStatus = (item.status || 'scheduled').toLowerCase();
+  const status: 'scheduled' | 'completed' | 'cancelled' = 
+    rawStatus === 'completed' ? 'completed' : rawStatus === 'cancelled' ? 'cancelled' : 'scheduled';
+
+  return {
+    id: item._id,
+    role: roleName,
+    company: companyName,
+    companyLogo: logoText,
+    logoBg: 'linear-gradient(135deg,#6c63ff,#8b5cf6)',
+    type: item.type || 'Technical Round',
+    typeColor: '#6c63ff',
+    typeBg: '#6c63ff18',
+    date: dateStr,
+    day: dayStr,
+    time: item.interviewTime || '10:00 AM – 11:00 AM',
+    duration: '60 min',
+    interviewer: item.recruiter?.name || 'Hiring Manager',
+    interviewerTitle: 'Recruiter',
+    round: 'Round 1',
+    roundNum: 1,
+    totalRounds: 3,
+    mode: 'video',
+    link: item.meetingLink || 'https://meet.google.com',
+    status: status,
+  };
+};
+
 const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
   const [tab, setTab] = useState<TabType>('upcoming');
   const [checklist, setChecklist] = useState(prepChecklist);
   const [toast, setToast] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | string | null>(1);
+  const [liveInterviews, setLiveInterviews] = useState<InterviewItem[]>([]);
+  const [showScheduleModal, setShowScheduleModal] = useState<boolean>(false);
+  const [formData, setFormData] = useState({
+    role: '',
+    company: '',
+    type: 'Technical Round',
+    interviewDate: new Date().toISOString().split('T')[0],
+    interviewTime: '10:00 AM – 11:30 AM',
+    meetingLink: 'https://meet.google.com/abc-defg-hij',
+  });
+
+  // Live Camera & Mic Video Room State
+  const [activeInterviewRoom, setActiveInterviewRoom] = useState<InterviewItem | null>(null);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [isMicOn, setIsMicOn] = useState<boolean>(true);
+  const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [callSeconds, setCallSeconds] = useState<number>(0);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+  const startVideoCall = async (interview: InterviewItem) => {
+    setActiveInterviewRoom(interview);
+    setMediaError(null);
+    setIsMicOn(true);
+    setIsVideoOn(true);
+    setCallSeconds(0);
+
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        setMediaStream(stream);
+      } else {
+        setMediaError('Camera / Microphone API is not supported in this browser.');
+      }
+    } catch (err: any) {
+      console.error('Camera/Mic permission error:', err);
+      setMediaError('Could not access camera or microphone. Please allow camera & microphone permissions in your browser.');
+    }
+  };
+
+  const stopVideoCall = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    setActiveInterviewRoom(null);
+    setMediaError(null);
+  };
+
+  useEffect(() => {
+    if (activeInterviewRoom && videoRef.current && mediaStream) {
+      videoRef.current.srcObject = mediaStream;
+    }
+  }, [activeInterviewRoom, mediaStream]);
+
+  useEffect(() => {
+    let timer: any;
+    if (activeInterviewRoom) {
+      timer = setInterval(() => {
+        setCallSeconds(s => s + 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [activeInterviewRoom]);
+
+  const toggleMic = () => {
+    if (mediaStream) {
+      const audioTrack = mediaStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !isMicOn;
+        setIsMicOn(!isMicOn);
+      }
+    } else {
+      setIsMicOn(!isMicOn);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (mediaStream) {
+      const videoTrack = mediaStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !isVideoOn;
+        setIsVideoOn(!isVideoOn);
+      }
+    } else {
+      setIsVideoOn(!isVideoOn);
+    }
+  };
+
+  const formatTimer = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = (sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   const today = 24;
+
+  const loadInterviews = async () => {
+    try {
+      const data = await fetchInterviewsApi();
+      if (Array.isArray(data)) {
+        const formatted = data.map(formatBackendInterview);
+        setLiveInterviews(formatted);
+      }
+    } catch (err) {
+      console.error('Error fetching interviews:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadInterviews();
+  }, []);
+
+  const handleScheduleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await scheduleInterviewApi({
+        role: formData.role || 'Software Engineer',
+        company: formData.company || 'Tech Corp',
+        type: formData.type,
+        interviewDate: formData.interviewDate,
+        interviewTime: formData.interviewTime,
+        meetingLink: formData.meetingLink,
+      });
+      showToast('Interview scheduled successfully!');
+      setShowScheduleModal(false);
+      setFormData({
+        role: '',
+        company: '',
+        type: 'Technical Round',
+        interviewDate: new Date().toISOString().split('T')[0],
+        interviewTime: '10:00 AM – 11:30 AM',
+        meetingLink: 'https://meet.google.com/abc-defg-hij',
+      });
+      loadInterviews();
+    } catch (err) {
+      showToast('Failed to schedule interview');
+    }
+  };
+
+  const handleDeleteInterview = async (id: string | number) => {
+    if (typeof id === 'string') {
+      try {
+        await deleteInterviewApi(id);
+        showToast('Interview cancelled');
+        loadInterviews();
+      } catch (err) {
+        showToast('Error deleting interview');
+      }
+    } else {
+      showToast('Interview cancelled');
+    }
+  };
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -214,7 +402,14 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
     return <MapPin size={13} className="text-[#00c853]" />;
   };
 
-  const interviews = tab === 'upcoming' ? upcomingInterviews : pastInterviews;
+  const liveUpcoming = liveInterviews.filter(i => i.status === 'scheduled');
+  const livePast = liveInterviews.filter(i => i.status === 'completed' || i.status === 'cancelled');
+
+  const allUpcoming = [...liveUpcoming, ...upcomingInterviews];
+  const allPast = [...livePast, ...pastInterviews];
+
+  const interviews = tab === 'upcoming' ? allUpcoming : allPast;
+  const nextInterview = allUpcoming[0];
 
   return (
     <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
@@ -229,20 +424,294 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
         </div>
       )}
 
+      {/* Schedule Interview Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-[#e4e8f0]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-[#1a1a2e]">Schedule New Interview</h3>
+              <button onClick={() => setShowScheduleModal(false)} className="text-[#8890a4] hover:text-[#1a1a2e] bg-transparent border-none cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleScheduleSubmit} className="flex flex-col gap-3">
+              <div>
+                <label className="text-xs font-bold text-[#4a5068] mb-1 block">Job Role</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Senior Frontend Engineer"
+                  value={formData.role}
+                  onChange={e => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-[#4a5068] mb-1 block">Company Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Google"
+                  value={formData.company}
+                  onChange={e => setFormData({ ...formData, company: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-[#4a5068] mb-1 block">Round / Type</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Technical Round 1"
+                  value={formData.type}
+                  onChange={e => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-[#4a5068] mb-1 block">Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.interviewDate}
+                    onChange={e => setFormData({ ...formData, interviewDate: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#4a5068] mb-1 block">Time</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 10:00 AM - 11:30 AM"
+                    value={formData.interviewTime}
+                    onChange={e => setFormData({ ...formData, interviewTime: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-[#4a5068] mb-1 block">Meeting Link</label>
+                <input
+                  type="url"
+                  placeholder="https://meet.google.com/..."
+                  value={formData.meetingLink}
+                  onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#e4e8f0] focus:outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-[#4a5068] bg-[#f4f6fb] rounded-xl border-none cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-bold text-white rounded-xl border-none cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}
+                >
+                  Schedule Interview
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── LIVE CAMERA & MIC INTERVIEW ROOM OVERLAY ── */}
+      {activeInterviewRoom && (
+        <div className="fixed inset-0 z-50 bg-[#0f0f1a] text-white flex flex-col overflow-hidden animate-in fade-in duration-300">
+          {/* Top Bar */}
+          <div className="h-16 bg-[#16162a]/90 backdrop-blur-md border-b border-[#2a2a4a] px-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs text-white" style={{ background: activeInterviewRoom.logoBg }}>
+                {activeInterviewRoom.companyLogo}
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  {activeInterviewRoom.role}
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6c63ff]/20 text-[#a78bfa] border border-[#6c63ff]/30 font-medium">
+                    {activeInterviewRoom.type}
+                  </span>
+                </h2>
+                <p className="text-[11px] text-[#8890a4]">{activeInterviewRoom.company} · Live Interview Session</p>
+              </div>
+            </div>
+
+            {/* Live Indicator & Timer */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-[#ff4d6d]/15 border border-[#ff4d6d]/30 px-3 py-1 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-[#ff4d6d] animate-ping" />
+                <span className="text-xs font-bold text-[#ff4d6d]">LIVE</span>
+                <span className="text-xs font-mono text-white/90 ml-1">{formatTimer(callSeconds)}</span>
+              </div>
+
+              <button
+                onClick={stopVideoCall}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-all border-none cursor-pointer"
+              >
+                <PhoneOff size={14} /> End Interview
+              </button>
+            </div>
+          </div>
+
+          {/* Main Call View */}
+          <div className="flex-1 relative p-4 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 bg-[#0a0a14]">
+            {/* Main Stage */}
+            <div className="relative rounded-2xl bg-[#141424] border border-[#2a2a4a] overflow-hidden flex flex-col items-center justify-center">
+              
+              {/* Interviewer View (Simulated Live Recruiter Stream) */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a36] to-[#0f0f24]">
+                <div className="relative">
+                  <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#6c63ff] to-[#8b5cf6] flex items-center justify-center text-3xl font-black text-white shadow-2xl border-4 border-[#6c63ff]/40 animate-pulse">
+                    {activeInterviewRoom.interviewer ? activeInterviewRoom.interviewer.charAt(0) : 'S'}
+                  </div>
+                  <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-[#00c853] border-2 border-[#141424]" />
+                </div>
+                <h3 className="text-base font-bold text-white mt-4">{activeInterviewRoom.interviewer || 'Sarah Chen'}</h3>
+                <p className="text-xs text-[#8890a4] mt-0.5">{activeInterviewRoom.interviewerTitle || 'Senior Hiring Manager'} · {activeInterviewRoom.company}</p>
+                <div className="mt-3 flex items-center gap-2 px-3 py-1 rounded-full bg-[#6c63ff]/10 border border-[#6c63ff]/20 text-xs text-[#a78bfa]">
+                  <Sparkles size={13} /> AI Assistant Active · Camera & Microphone Live
+                </div>
+              </div>
+
+              {/* Candidate Camera Feed Box (Picture-in-Picture / Floating Self View) */}
+              <div className="absolute bottom-6 right-6 w-56 sm:w-72 aspect-video bg-[#0a0a14] rounded-2xl border-2 border-[#6c63ff]/50 shadow-2xl overflow-hidden transition-all hover:scale-105">
+                {isVideoOn && !mediaError ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform -scale-x-100"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#1a1a2e] text-[#8890a4]">
+                    <VideoOff size={28} className="text-[#ff4d6d] mb-1" />
+                    <span className="text-[11px] font-medium text-white/70">Camera Off</span>
+                  </div>
+                )}
+
+                {/* Candidate Name Tag */}
+                <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[10px] font-semibold text-white flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isMicOn ? 'bg-[#00c853]' : 'bg-[#ff4d6d]'}`} />
+                  You (Candidate)
+                </div>
+              </div>
+
+              {/* Media Error Alert Banner */}
+              {mediaError && (
+                <div className="absolute top-6 left-6 right-6 z-20 bg-red-950/90 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-xs flex items-center gap-2 shadow-xl backdrop-blur-md">
+                  <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
+                  <span>{mediaError}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Notes & Prep */}
+            <div className="hidden lg:flex flex-col gap-3 bg-[#141424] border border-[#2a2a4a] rounded-2xl p-4 overflow-y-auto">
+              <div className="flex items-center gap-2 pb-3 border-b border-[#2a2a4a]">
+                <Sparkles size={15} className="text-[#6c63ff]" />
+                <h3 className="text-xs font-bold text-white tracking-wide uppercase">AI Interview Copilot</h3>
+              </div>
+
+              <div className="flex flex-col gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-[#1d1d36] border border-[#2a2a4a]">
+                  <p className="font-bold text-[#a78bfa] mb-1">Key Tip for Round</p>
+                  <p className="text-[#b0b8cc] leading-relaxed text-[11px]">
+                    Use the STAR framework (Situation, Task, Action, Result) to structure your responses effectively.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#1d1d36] border border-[#2a2a4a]">
+                  <p className="font-bold text-white mb-2">Live Mic Level</p>
+                  <div className="flex items-center gap-1 h-6">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`flex-1 rounded-full transition-all ${
+                          isMicOn ? 'bg-[#00c853]' : 'bg-[#2a2a4a]'
+                        }`}
+                        style={{
+                          height: isMicOn ? `${Math.floor(Math.random() * 80) + 20}%` : '20%',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#1d1d36] border border-[#2a2a4a]">
+                  <p className="font-bold text-[#00c853] mb-1">Meeting Link</p>
+                  <a
+                    href={activeInterviewRoom.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#6c63ff] hover:underline break-all text-[11px]"
+                  >
+                    {activeInterviewRoom.link}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Controls Bar */}
+          <div className="h-20 bg-[#16162a] border-t border-[#2a2a4a] px-6 flex items-center justify-center gap-4">
+            {/* Mic Toggle */}
+            <button
+              onClick={toggleMic}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border-none cursor-pointer ${
+                isMicOn
+                  ? 'bg-[#2a2a4a] text-white hover:bg-[#383860]'
+                  : 'bg-red-500/20 text-red-400 border border-red-500/40'
+              }`}
+              title={isMicOn ? 'Mute Microphone' : 'Unmute Microphone'}
+            >
+              {isMicOn ? <Mic size={20} /> : <MicOff size={20} />}
+            </button>
+
+            {/* Video Toggle */}
+            <button
+              onClick={toggleVideo}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border-none cursor-pointer ${
+                isVideoOn
+                  ? 'bg-[#2a2a4a] text-white hover:bg-[#383860]'
+                  : 'bg-red-500/20 text-red-400 border border-red-500/40'
+              }`}
+              title={isVideoOn ? 'Turn Off Camera' : 'Turn On Camera'}
+            >
+              {isVideoOn ? <Video size={20} /> : <VideoOff size={20} />}
+            </button>
+
+            {/* End Call Button */}
+            <button
+              onClick={stopVideoCall}
+              className="w-14 h-12 rounded-2xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-all border-none cursor-pointer shadow-lg shadow-red-600/30"
+              title="Leave Room"
+            >
+              <PhoneOff size={22} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
         {/* Page Header */}
         <div className="flex items-start justify-between mb-7 flex-wrap gap-3">
           <div>
             <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] tracking-tight">Interviews</h1>
-            <p className="text-sm text-[#8890a4] mt-1">You have <span className="font-bold text-[#6c63ff]">{upcomingInterviews.length} upcoming</span> interviews this week.</p>
+            <p className="text-sm text-[#8890a4] mt-1">You have <span className="font-bold text-[#6c63ff]">{allUpcoming.length} upcoming</span> interviews scheduled.</p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => showToast('Interview reminder set!')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-white border border-[#e4e8f0] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all cursor-pointer">
               <Bell size={14} /> Set Reminder
             </button>
-            <button onClick={() => showToast('Opening calendar sync...')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.35)' }}>
-              <Calendar size={14} /> Sync Calendar
+            <button onClick={() => setShowScheduleModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.35)' }}>
+              <Calendar size={14} /> + Schedule Interview
             </button>
           </div>
         </div>
@@ -321,7 +790,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                     }`}
                     style={{ borderBottom: tab === t ? '2px solid #6c63ff' : '2px solid transparent' }}
                   >
-                    {t === 'upcoming' ? `Upcoming (${upcomingInterviews.length})` : `Past (${pastInterviews.length})`}
+                    {t === 'upcoming' ? `Upcoming (${allUpcoming.length})` : `Past (${allPast.length})`}
                   </button>
                 ))}
               </div>
@@ -409,7 +878,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                         <div className="flex items-center gap-2 mt-4 flex-wrap">
                           {tab === 'upcoming' && iv.link && (
                             <button
-                              onClick={() => showToast(`Joining ${iv.company} interview...`)}
+                              onClick={() => startVideoCall(iv)}
                               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5 active:scale-95"
                               style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 3px 10px rgba(108,99,255,0.3)' }}
                             >
@@ -432,8 +901,8 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                               <BookOpen size={12} /> View Debrief
                             </button>
                           )}
-                          <button onClick={() => showToast('Rescheduling...')} className="w-8 h-8 rounded-xl bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 hover:text-[#6c63ff] transition-colors text-[#8890a4]">
-                            <MoreHorizontal size={15} />
+                          <button onClick={() => handleDeleteInterview(iv.id)} title="Cancel Interview" className="w-8 h-8 rounded-xl bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-red-50 hover:text-red-500 transition-colors text-[#8890a4]">
+                            <X size={15} />
                           </button>
                         </div>
                       </div>
@@ -473,18 +942,20 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                   <Zap size={11} /> NEXT INTERVIEW
                 </div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black text-white" style={{ background: 'linear-gradient(135deg,#e50914,#831010)' }}>NF</div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black text-white" style={{ background: nextInterview?.logoBg || 'linear-gradient(135deg,#e50914,#831010)' }}>
+                    {nextInterview?.companyLogo || 'TC'}
+                  </div>
                   <div>
-                    <p className="text-[13px] font-bold text-white">Senior Product Designer</p>
-                    <p className="text-[11px] text-[#b0b8cc]">Netflix · Technical Round</p>
+                    <p className="text-[13px] font-bold text-white">{nextInterview?.role || 'Senior Product Designer'}</p>
+                    <p className="text-[11px] text-[#b0b8cc]">{nextInterview?.company || 'Company'} · {nextInterview?.type || 'Technical Round'}</p>
                   </div>
                 </div>
                 <div className="bg-white/8 rounded-xl p-3 mb-4">
                   <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[11px] text-[#b0b8cc] flex items-center gap-1"><Calendar size={10} /> Oct 24, Wednesday</span>
-                    <span className="text-[10px] font-bold text-[#6c63ff] bg-[#6c63ff]/20 px-2 py-0.5 rounded-full">Today</span>
+                    <span className="text-[11px] text-[#b0b8cc] flex items-center gap-1"><Calendar size={10} /> {nextInterview?.date || 'Oct 24'}, {nextInterview?.day || 'Wednesday'}</span>
+                    <span className="text-[10px] font-bold text-[#6c63ff] bg-[#6c63ff]/20 px-2 py-0.5 rounded-full">Upcoming</span>
                   </div>
-                  <div className="text-[13px] text-white flex items-center gap-1.5"><Clock size={12} className="text-[#b0b8cc]" /> 10:00 AM – 11:30 AM PST</div>
+                  <div className="text-[13px] text-white flex items-center gap-1.5"><Clock size={12} className="text-[#b0b8cc]" /> {nextInterview?.time || '10:00 AM – 11:30 AM'}</div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {[['02', 'Hrs'], ['45', 'Min'], ['30', 'Sec']].map(([v, l]) => (
@@ -495,7 +966,13 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                   ))}
                 </div>
                 <button
-                  onClick={() => showToast('Connecting to Netflix interview room...')}
+                  onClick={() => {
+                    if (nextInterview) {
+                      startVideoCall(nextInterview);
+                    } else {
+                      showToast('No upcoming interview scheduled');
+                    }
+                  }}
                   className="w-full py-3 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 border-none cursor-pointer transition-all hover:-translate-y-0.5 active:scale-95"
                   style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.4)' }}
                 >
