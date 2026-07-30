@@ -10,12 +10,14 @@ const applicationSchema = new mongoose.Schema(
     job: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Job",
-      required: true,
+      required: false,
     },
+    role: { type: String },
+    company: { type: String },
+    location: { type: String },
     status: {
       type: String,
-      enum: ["Pending", "Shortlisted", "Rejected"],
-      default: "Pending",
+      default: "Applied",
     },
   },
   {

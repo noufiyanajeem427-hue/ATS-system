@@ -12,38 +12,50 @@ const getDashboardStats = async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalJobs = await Job.countDocuments();
     const totalApplications = await Application.countDocuments(userFilter);
+
     const pendingApplications = await Application.countDocuments({
       ...userFilter,
-      status: { $in: ["Pending", "IN REVIEW", "In Review"] },
+      status: { $in: ["Pending", "IN REVIEW", "In Review", "PENDING", "Applied", "APPLIED"] },
     });
+
     const interviewingApplications = await Application.countDocuments({
       ...userFilter,
       status: { $in: ["INTERVIEWING", "Interviewing", "Shortlisted", "SHORTLISTED"] },
     });
+
     const activeApplications = await Application.countDocuments({
       ...userFilter,
-      status: { $in: ["Pending", "IN REVIEW", "In Review", "INTERVIEWING", "Interviewing", "Shortlisted", "SHORTLISTED", "APPLIED", "Applied"] },
+      status: { $in: ["Pending", "IN REVIEW", "In Review", "PENDING", "INTERVIEWING", "Interviewing", "Shortlisted", "SHORTLISTED", "APPLIED", "Applied"] },
     });
+
     const offersCount = await Application.countDocuments({
       ...userFilter,
-      status: { $in: ["Offer Received", "OFFER RECEIVED", "Offer", "OFFER"] },
+      status: { $in: ["Offer Received", "OFFER RECEIVED", "Offer", "OFFER", "Accepted", "ACCEPTED"] },
     });
+
     const savedJobsCount = await SavedJob.countDocuments(userFilter);
 
-    // Total interviews count
+    // Total interviews count for logged in user
     let interviewFilter = {};
     if (userId) {
       const userApps = await Application.find({ user: userId }).select("_id");
       const userAppIds = userApps.map((a) => a._id);
-      interviewFilter = { application: { $in: userAppIds } };
+      interviewFilter = {
+        $or: [
+          { recruiter: userId },
+          { application: { $in: userAppIds } }
+        ]
+      };
     }
+
     const scheduledInterviewsCount = await Interview.countDocuments({
       ...interviewFilter,
-      status: "Scheduled",
+      status: { $in: ["Scheduled", "scheduled", "Pending", "pending"] },
     });
+
     const totalInterviewsCount = await Interview.countDocuments(interviewFilter);
 
-    // Fetch recent applications
+    // Fetch recent applications for logged in user
     const recentApplications = await Application.find(userFilter)
       .populate("job")
       .sort({ createdAt: -1 })
@@ -63,8 +75,8 @@ const getDashboardStats = async (req, res) => {
       interviewingApplications,
       offersCount,
       savedJobsCount,
-      scheduledInterviewsCount: scheduledInterviewsCount || interviewingApplications,
-      totalInterviewsCount: totalInterviewsCount || interviewingApplications,
+      scheduledInterviewsCount,
+      totalInterviewsCount,
       recentApplications,
       recommendedJobs,
     });

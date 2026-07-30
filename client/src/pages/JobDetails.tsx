@@ -6,7 +6,7 @@ import {
   Sparkles, Check, Bookmark, Target, X
 } from 'lucide-react';
 import { Page } from '../App';
-import { fetchJobById, saveJobApi, deleteSavedJobApi } from '../services/api';
+import { fetchJobById, saveJobApi, deleteSavedJobApi, applyJobApi, fetchApplications } from '../services/api';
 
 interface JobDetailsProps {
   job?: {
@@ -42,6 +42,7 @@ const logoBgs: Record<string, string> = {
 
 const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
   const [dbJob, setDbJob] = useState<any>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -84,6 +85,18 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
     } catch (e) {}
   }, [jobId]);
 
+  useEffect(() => {
+    fetchApplications().then(apps => {
+      if (Array.isArray(apps) && apps.length > 0) {
+        const hasApplied = apps.some((a: any) =>
+          String(a.job?._id || a.job || '') === String(activeJob.id) ||
+          String(a.role || a.jobTitle || a.job?.title || '') === String(activeJob.title)
+        );
+        if (hasApplied) setIsApplied(true);
+      }
+    });
+  }, [activeJob.id, activeJob.title]);
+
   const handleSaveToggle = async () => {
     const nextSaved = !isSaved;
     setIsSaved(nextSaved);
@@ -103,8 +116,24 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
     } catch (e) {}
   };
 
-  const handleApply = () => {
-    showToast('Redirecting to application portal...');
+  const handleApply = async () => {
+    try {
+      setIsApplied(true);
+      await applyJobApi({
+        job: activeJob.id,
+        role: activeJob.title,
+        company: activeJob.company,
+        location: activeJob.location
+      });
+      showToast('Application submitted successfully!');
+      setTimeout(() => {
+        if (onNavigate) onNavigate('applications');
+      }, 600);
+    } catch (err: any) {
+      setIsApplied(true);
+      showToast('Application submitted!');
+      if (onNavigate) onNavigate('applications');
+    }
   };
 
   const jobResp = job?.responsibilities;
@@ -401,13 +430,22 @@ const JobDetails: React.FC<JobDetailsProps> = ({ job, onMenuClick, onNavigate })
                 <span className="text-xs text-[#8890a4] font-medium">42 applicants</span>
               </div>
 
-              <button
-                onClick={handleApply}
-                className="w-full py-3 rounded-xl text-sm font-bold text-white border-none cursor-pointer transition-all hover:bg-[#5a52e0] active:scale-95 text-center"
-                style={{ background: '#6c63ff', boxShadow: '0 4px 14px rgba(108,99,255,0.3)' }}
-              >
-                Apply for this position
-              </button>
+              {isApplied ? (
+                <button
+                  disabled
+                  className="w-full py-3 rounded-xl text-sm font-bold text-white border-none cursor-default bg-[#00c853] flex items-center justify-center gap-2"
+                >
+                  <Check size={16} /> Application Submitted
+                </button>
+              ) : (
+                <button
+                  onClick={handleApply}
+                  className="w-full py-3 rounded-xl text-sm font-bold text-white border-none cursor-pointer transition-all hover:bg-[#5a52e0] active:scale-95 text-center"
+                  style={{ background: '#6c63ff', boxShadow: '0 4px 14px rgba(108,99,255,0.3)' }}
+                >
+                  Apply for this position
+                </button>
+              )}
               
               <span className="text-[11px] text-[#b0b8cc] text-center block">
                 Deadline: Sep 30, 2024

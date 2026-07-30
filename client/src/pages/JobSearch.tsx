@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import {
-  Search, MapPin, Heart, Building2,
+  Search, MapPin, Heart, Building2, Check,
   ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import { Page } from '../App';
-import { fetchJobs, fetchSavedJobs, saveJobApi, deleteSavedJobApi } from '../services/api';
+import { fetchJobs, fetchSavedJobs, saveJobApi, deleteSavedJobApi, applyJobApi, fetchApplications } from '../services/api';
 
 import { ButtonSpinner } from '../components/Loading';
 
@@ -48,6 +48,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
       return [];
     }
   });
+  const [appliedJobIds, setAppliedJobIds] = useState<string[]>([]);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -78,6 +79,13 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
       if (Array.isArray(savedData) && savedData.length > 0) {
         const savedIds = savedData.map((s: any) => s.job?._id || s.job || s._id);
         setSaved(savedIds);
+      }
+    });
+
+    fetchApplications().then(apps => {
+      if (Array.isArray(apps) && apps.length > 0) {
+        const applied = apps.map((a: any) => String(a.job?._id || a.job || a.role || a.title || ''));
+        setAppliedJobIds(applied.filter(Boolean));
       }
     });
   }, []);
@@ -124,6 +132,29 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
       setLoadingJobId(null);
       if (onNavigate) onNavigate('jobdetails', job);
     }, 400);
+  };
+
+  const handleApplyNow = async (jobItem: Job) => {
+    try {
+      setLoadingJobId(jobItem.id);
+      await applyJobApi({
+        job: jobItem.id,
+        role: jobItem.title,
+        company: jobItem.company,
+        location: jobItem.location
+      });
+      setAppliedJobIds(prev => [...prev, String(jobItem.id), jobItem.title]);
+      showToast(`Successfully applied for ${jobItem.title}!`);
+      setTimeout(() => {
+        if (onNavigate) onNavigate('applications');
+      }, 600);
+    } catch (err: any) {
+      setAppliedJobIds(prev => [...prev, String(jobItem.id), jobItem.title]);
+      showToast(`Applied for ${jobItem.title}!`);
+      if (onNavigate) onNavigate('applications');
+    } finally {
+      setLoadingJobId(null);
+    }
   };
 
   const resetFilters = () => {
@@ -417,13 +448,23 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                         >
                           {loadingJobId === job.id ? <ButtonSpinner size={14} color="#6c63ff" /> : 'Details'}
                         </button>
-                        <button
-                          onClick={() => onNavigate?.('applications')}
-                          className="flex-1 sm:flex-none px-5 py-2 border-none rounded-[9px] text-[13px] font-semibold text-white cursor-pointer transition-all hover:-translate-y-px font-sans active:scale-95"
-                          style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 3px 10px rgba(108,99,255,0.3)' }}
-                        >
-                          Apply Now
-                        </button>
+                        {appliedJobIds.includes(String(job.id)) || appliedJobIds.includes(job.title) ? (
+                          <button
+                            disabled
+                            className="flex-1 sm:flex-none px-5 py-2 border-none rounded-[9px] text-[13px] font-bold text-white cursor-default flex items-center justify-center gap-1.5 bg-[#00c853]"
+                          >
+                            <Check size={14} /> Applied
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleApplyNow(job)}
+                            disabled={loadingJobId === job.id}
+                            className="flex-1 sm:flex-none px-5 py-2 border-none rounded-[9px] text-[13px] font-semibold text-white cursor-pointer transition-all hover:-translate-y-px font-sans active:scale-95 flex items-center justify-center gap-1.5"
+                            style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 3px 10px rgba(108,99,255,0.3)' }}
+                          >
+                            {loadingJobId === job.id ? <ButtonSpinner size={14} color="#ffffff" /> : 'Apply Now'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

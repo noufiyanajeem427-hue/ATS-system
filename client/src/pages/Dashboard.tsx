@@ -7,7 +7,6 @@ import {
   Users, ShieldCheck, Briefcase, Bookmark
 } from 'lucide-react';
 import { Page } from '../App';
-import { applicationData } from '../data/applicationData';
 import {
   fetchDashboardStats,
   fetchApplications,
@@ -35,7 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
   // Real Data States
   const [userProfile, setUserProfile] = useState<any>(null);
   const [backendStats, setBackendStats] = useState<any>(null);
-  const [applicationsList, setApplicationsList] = useState<any[]>(applicationData);
+  const [applicationsList, setApplicationsList] = useState<any[]>([]);
   const [savedJobsList, setSavedJobsList] = useState<any[]>([]);
   const [interviewsList, setInterviewsList] = useState<any[]>([]);
   const [jobsList, setJobsList] = useState<any[]>([]);
@@ -62,7 +61,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
     // 3. Fetch Applications
     fetchApplications().then(apps => {
-      if (Array.isArray(apps) && apps.length > 0) {
+      if (Array.isArray(apps)) {
         setApplicationsList(apps);
       }
     });
@@ -96,32 +95,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Dynamic Real Counts Calculation
-  const userName = userProfile?.name || (localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}')?.name : null) || 'Alex';
-  
-  // Real Applications Count
-  const realAppliedCount = backendStats?.totalApplications ?? applicationsList.length;
-  
-  // Real Active Applications Count
-  const realActiveAppsCount = backendStats?.activeApplications ?? applicationsList.filter(a => {
-    const st = (a.status || '').toUpperCase();
-    return ['IN REVIEW', 'INTERVIEWING', 'APPLIED', 'PENDING', 'SHORTLISTED'].includes(st);
-  }).length;
+  // Pure Real Counts Calculation for Logged-in User (Direct from Database / API)
+  const userName = userProfile?.name || (localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}')?.name : null) || 'User';
 
-  // Real Interviews Count
-  const realInterviewsCount = backendStats?.scheduledInterviewsCount ?? (
-    interviewsList.length > 0
-      ? interviewsList.filter(i => (i.status || '').toLowerCase() === 'scheduled').length
-      : applicationsList.filter(a => ['INTERVIEWING', 'Interviewing'].includes(a.status)).length
+  // 100% Real Applications Count from DB
+  const realAppliedCount = backendStats?.totalApplications ?? (Array.isArray(applicationsList) ? applicationsList.length : 0);
+
+  // 100% Real Active Applications Count from DB
+  const realActiveAppsCount = backendStats?.activeApplications ?? (
+    Array.isArray(applicationsList) ? applicationsList.filter(a => {
+      const st = (a.status || '').toUpperCase();
+      return ['IN REVIEW', 'INTERVIEWING', 'APPLIED', 'PENDING', 'SHORTLISTED'].includes(st);
+    }).length : 0
   );
 
-  // Real Offers Count
-  const realOffersCount = backendStats?.offersCount ?? applicationsList.filter(a => {
-    const st = (a.status || '').toUpperCase();
-    return st.includes('OFFER');
-  }).length;
+  // 100% Real Interviews Count from DB
+  const realInterviewsCount = backendStats?.scheduledInterviewsCount ?? (Array.isArray(interviewsList) ? interviewsList.length : 0);
 
-  // Real Saved Jobs Count
+  // 100% Real Offers Count from DB
+  const realOffersCount = backendStats?.offersCount ?? (
+    Array.isArray(applicationsList) ? applicationsList.filter(a => {
+      const st = (a.status || '').toUpperCase();
+      return st.includes('OFFER');
+    }).length : 0
+  );
+
+  // 100% Real Saved Jobs Count from DB
   const localSavedCount = (() => {
     try {
       const st = localStorage.getItem('nexus_saved_jobs');
@@ -130,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
   })();
   const realSavedJobsCount = backendStats?.savedJobsCount ?? (savedJobsList.length > 0 ? savedJobsList.length : localSavedCount);
 
-  // Real Jobs Count
+  // 100% Real Total Available Jobs Count from DB
   const realJobsCount = backendStats?.totalJobs ?? jobsList.length;
 
   // Profile readiness score

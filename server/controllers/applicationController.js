@@ -1,23 +1,33 @@
+const mongoose = require("mongoose");
 const Application = require("../models/Application");
 
 // Apply for a job
 const applyJob = async (req, res) => {
-  console.log("applyJob called");
-
   try {
-    const { job } = req.body;
+    const { job, role, company, location, title } = req.body;
 
-    const application = await Application.create({
+    const isValidObjectId = job && mongoose.Types.ObjectId.isValid(job);
+
+    const applicationData = {
       user: req.user,
-      job,
-    });
+      job: isValidObjectId ? job : undefined,
+      role: role || title || (req.body.jobTitle) || undefined,
+      company: company || undefined,
+      location: location || undefined,
+      status: "Applied",
+    };
+
+    const application = await Application.create(applicationData);
+    const populated = await Application.findById(application._id)
+      .populate("job")
+      .populate("user", "name email");
 
     res.status(201).json({
       message: "Application submitted successfully",
-      application,
+      application: populated || application,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Apply Job Error:", error);
     res.status(500).json({
       message: error.message,
     });

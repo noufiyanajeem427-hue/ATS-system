@@ -6,7 +6,7 @@ import {
   Eye, Zap, Check
 } from 'lucide-react';
 import { Page } from '../App';
-import { applicationData, appStats, StatusType, ApplicationRecord } from '../data/applicationData';
+import { StatusType, ApplicationRecord } from '../data/applicationData';
 import { fetchApplications } from '../services/api';
 
 interface ApplicationsProps {
@@ -17,7 +17,7 @@ interface ApplicationsProps {
 type TabType = 'all' | 'active' | 'completed';
 
 const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) => {
-  const [appsList, setAppsList] = useState(applicationData);
+  const [appsList, setAppsList] = useState<ApplicationRecord[]>([]);
   const [tab, setTab] = useState<TabType>('all');
   const [sortBy, setSortBy] = useState('Newest');
   const [page, setPage] = useState(1);
@@ -25,19 +25,29 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
 
   useEffect(() => {
     fetchApplications().then(data => {
-      if (Array.isArray(data) && data.length > 0) {
-        const mapped: ApplicationRecord[] = data.map((a: any, idx: number) => ({
-          id: a._id || idx + 1,
-          role: a.role || a.jobTitle || a.job?.title || 'Software Engineer',
-          company: a.company || a.job?.company || 'Company',
-          location: a.location || 'Remote',
-          date: a.date || a.appliedDate || (a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Today'),
-          ago: a.ago || 'Recently',
-          status: (a.status ? a.status.toUpperCase() : 'APPLIED') as StatusType,
-          match: a.match || 90,
-          logo: (a.company || 'C').substring(0, 2).toUpperCase(),
-          logoBg: 'linear-gradient(135deg,#6c63ff,#3b82f6)',
-        }));
+      if (Array.isArray(data)) {
+        const mapped: ApplicationRecord[] = data.map((a: any, idx: number) => {
+          let st = (a.status ? a.status.toUpperCase() : 'APPLIED');
+          if (st === 'PENDING') st = 'APPLIED';
+          if (!['IN REVIEW', 'INTERVIEWING', 'OFFER RECEIVED', 'WITHDRAWN', 'APPLIED'].includes(st)) {
+            st = 'APPLIED';
+          }
+          const comp = a.company || a.job?.company || 'Company';
+          const r = a.role || a.jobTitle || a.job?.title || 'Software Engineer';
+          const loc = a.location || a.job?.location || 'Remote';
+          return {
+            id: a._id || idx + 1,
+            role: r,
+            company: comp,
+            location: loc,
+            date: a.date || a.appliedDate || (a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Today'),
+            ago: a.ago || 'Recently',
+            status: st as StatusType,
+            match: a.match || a.job?.match || 92,
+            logo: comp.substring(0, 2).toUpperCase(),
+            logoBg: 'linear-gradient(135deg,#6c63ff,#3b82f6)',
+          };
+        });
         setAppsList(mapped);
       }
     });
@@ -54,14 +64,19 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
     return true;
   });
   const pageSize = 4;
-  const totalPages = Math.ceil(filtered.length / pageSize);
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  const appliedCount = appsList.length;
+  const shortlistedCount = appsList.filter(a => a.status === 'IN REVIEW').length;
+  const interviewsCount = appsList.filter(a => a.status === 'INTERVIEWING').length;
+  const offersCount = appsList.filter(a => a.status === 'OFFER RECEIVED').length;
+
   const stats = [
-    { icon: <Send size={18} className="text-[#6c63ff]" />, label: 'APPLIED',     value: appStats.applied,     badge: '+12%',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Send size={48} className="text-[#6c63ff]" opacity={0.07} /> },
-    { icon: <Star size={18} className="text-[#f59e0b]" />, label: 'SHORTLISTED', value: appStats.shortlisted,  badge: '+5%',     badgeColor: '#00c853', bg: 'linear-gradient(135deg,#f59e0b22,#f59e0b08)', ghost: <Star size={48} className="text-[#f59e0b]" opacity={0.07} /> },
-    { icon: <Calendar size={18} className="text-[#6c63ff]" />, label: 'INTERVIEWS', value: appStats.interviews, badge: '• Today', badgeColor: '#ff4d6d', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Calendar size={48} className="text-[#6c63ff]" opacity={0.07} />, highlight: true },
-    { icon: <Gift size={18} className="text-[#00c853]" />,  label: 'OFFERS',      value: appStats.offers,       badge: 'New!',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#00c85322,#00c85308)', ghost: <Gift size={48} className="text-[#00c853]" opacity={0.07} /> },
+    { icon: <Send size={18} className="text-[#6c63ff]" />, label: 'APPLIED',     value: appliedCount,     badge: 'Real-time',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Send size={48} className="text-[#6c63ff]" opacity={0.07} /> },
+    { icon: <Star size={18} className="text-[#f59e0b]" />, label: 'SHORTLISTED', value: shortlistedCount,  badge: 'Active',     badgeColor: '#00c853', bg: 'linear-gradient(135deg,#f59e0b22,#f59e0b08)', ghost: <Star size={48} className="text-[#f59e0b]" opacity={0.07} /> },
+    { icon: <Calendar size={18} className="text-[#6c63ff]" />, label: 'INTERVIEWS', value: interviewsCount, badge: 'Scheduled', badgeColor: '#ff4d6d', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Calendar size={48} className="text-[#6c63ff]" opacity={0.07} />, highlight: true },
+    { icon: <Gift size={18} className="text-[#00c853]" />,  label: 'OFFERS',      value: offersCount,       badge: 'Received',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#00c85322,#00c85308)', ghost: <Gift size={48} className="text-[#00c853]" opacity={0.07} /> },
   ];
 
   const getStatusStyle = (s: StatusType) => {
