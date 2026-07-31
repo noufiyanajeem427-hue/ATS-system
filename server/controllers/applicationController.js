@@ -1,46 +1,54 @@
-const mongoose = require("mongoose");
 const Application = require("../models/Application");
 
 // Apply for a job
 const applyJob = async (req, res) => {
+  console.log("applyJob called");
+
   try {
-    const { job, role, company, location, title } = req.body;
+    const {
+  job,
+  role,
+  company,
+  location,
+  resumeUrl,
+  coverLetter,
+  match,
+} = req.body;
 
-    const isValidObjectId = job && mongoose.Types.ObjectId.isValid(job);
-
-    const applicationData = {
-      user: req.user,
-      job: isValidObjectId ? job : undefined,
-      role: role || title || (req.body.jobTitle) || undefined,
-      company: company || undefined,
-      location: location || undefined,
-      status: "Applied",
-    };
-
-    const application = await Application.create(applicationData);
-    const populated = await Application.findById(application._id)
-      .populate("job")
-      .populate("user", "name email");
-
+    const application = await Application.create({
+  user: req.user,
+  job,
+  role,
+  company,
+  location,
+  resumeUrl,
+  coverLetter,
+  match,
+  timeline: [
+    {
+      status: "APPLIED",
+      note: "Application submitted",
+    },
+  ],
+});
     res.status(201).json({
       message: "Application submitted successfully",
-      application: populated || application,
+      application,
     });
   } catch (error) {
-    console.error("Apply Job Error:", error);
+    console.error(error);
     res.status(500).json({
       message: error.message,
     });
   }
 };
 
-// Get all applications for the logged in user
+// Get all applications
 const getApplications = async (req, res) => {
   try {
-    const query = req.user ? { user: req.user } : {};
-    const applications = await Application.find(query)
+    const applications = await Application.find()
       .populate("user", "name email")
-      .populate("job");
+      .populate("job", "title company");
 
     res.status(200).json(applications);
   } catch (error) {
@@ -87,8 +95,13 @@ const updateApplicationStatus = async (req, res) => {
     }
 
     if (req.body.status) {
-      application.status = req.body.status;
-    }
+  application.status = req.body.status;
+
+  application.timeline.push({
+    status: req.body.status,
+    note: "Status updated",
+  });
+}
 
     const updatedApplication = await application.save();
 

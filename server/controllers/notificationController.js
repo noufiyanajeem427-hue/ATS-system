@@ -2,12 +2,20 @@ const Notification = require("../models/Notification");
 
 const createNotification = async (req, res) => {
   try {
-    const { user, message } = req.body;
-
+    const {
+  user,
+  title,
+  message,
+  category,
+  targetPage,
+} = req.body;
     const notification = await Notification.create({
-      user,
-      message,
-    });
+  user,
+  title,
+  message,
+  category,
+  targetPage,
+});
 
     res.status(201).json({
       message: "Notification created successfully",

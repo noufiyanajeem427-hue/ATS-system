@@ -3,19 +3,37 @@ const Interview = require("../models/Interview");
 // Schedule Interview
 const scheduleInterview = async (req, res) => {
   try {
-    const { application, role, company, type, interviewDate, interviewTime, meetingLink } = req.body;
-
+    const {
+  application,
+  user,
+  job,
+  role,
+  company,
+  interviewer,
+  interviewerTitle,
+  type,
+  round,
+  mode,
+  interviewDate,
+  interviewTime,
+  meetingLink,
+} = req.body;
     const interview = await Interview.create({
-      application: application || null,
-      recruiter: req.user,
-      role: role || undefined,
-      company: company || undefined,
-      type: type || undefined,
-      interviewDate: interviewDate || new Date(),
-      interviewTime: interviewTime || "10:00 AM",
-      meetingLink: meetingLink || "https://meet.google.com",
-    });
-
+  application,
+  user,
+  recruiter: req.user,
+  job,
+  role,
+  company,
+  interviewer,
+  interviewerTitle,
+  type,
+  round,
+  mode,
+  interviewDate,
+  interviewTime,
+  meetingLink,
+});
     res.status(201).json({
       message: "Interview scheduled successfully",
       interview,
@@ -27,31 +45,12 @@ const scheduleInterview = async (req, res) => {
   }
 };
 
-// Get All Interviews for the logged in user
+// Get All Interviews
 const getAllInterviews = async (req, res) => {
   try {
-    let query = {};
-    if (req.user) {
-      const userApps = await Application.find({ user: req.user }).select("_id");
-      const userAppIds = userApps.map((a) => a._id);
-      query = {
-        $or: [
-          { recruiter: req.user },
-          { application: { $in: userAppIds } }
-        ]
-      };
-    }
-
-    const interviews = await Interview.find(query)
-      .populate({
-        path: "application",
-        populate: [
-          { path: "job" },
-          { path: "user", select: "name email" }
-        ]
-      })
-      .populate("recruiter", "name email")
-      .sort({ createdAt: -1 });
+    const interviews = await Interview.find()
+      .populate("application")
+      .populate("recruiter", "name email");
 
     res.status(200).json(interviews);
   } catch (error) {
