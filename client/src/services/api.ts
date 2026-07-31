@@ -107,6 +107,21 @@ export const fetchUserProfile = async () => {
   }
 };
 
+export const updateUserProfile = async (profileData: any) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(profileData),
+    });
+    if (!res.ok) throw new Error('Failed to update user profile');
+    return await res.json();
+  } catch (err) {
+    console.error('Backend updateUserProfile error:', err);
+    return null;
+  }
+};
+
 export const fetchAllUsersApi = async () => {
   try {
     const res = await fetch(`${API_BASE_URL}/auth/users`);

@@ -170,6 +170,19 @@ const updateProfile = async (req, res) => {
 
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
+    user.title = req.body.title !== undefined ? req.body.title : user.title;
+    user.bio = req.body.bio !== undefined ? req.body.bio : user.bio;
+    user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
+    user.location = req.body.location !== undefined ? req.body.location : user.location;
+    user.website = req.body.website !== undefined ? req.body.website : user.website;
+    user.linkedin = req.body.linkedin !== undefined ? req.body.linkedin : user.linkedin;
+    user.github = req.body.github !== undefined ? req.body.github : user.github;
+    user.avatarUrl = req.body.avatarUrl !== undefined ? req.body.avatarUrl : user.avatarUrl;
+    user.coverUrl = req.body.coverUrl !== undefined ? req.body.coverUrl : user.coverUrl;
+    if (req.body.skills) user.skills = req.body.skills;
+    if (req.body.experiences) user.experiences = req.body.experiences;
+    if (req.body.education) user.education = req.body.education;
+    if (req.body.preferences) user.preferences = req.body.preferences;
 
     await user.save();
 

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 import jsPDF from 'jspdf';
-import { ButtonSpinner } from '../components/Loading';
-import { fetchUserProfile } from '../services/api';
+import { ButtonSpinner, PageSpinner } from '../components/Loading';
+import { fetchUserProfile, updateUserProfile } from '../services/api';
 import {
   MapPin, Mail, Phone, Globe,
   Edit3, Plus, Trash2, Check, X, Camera, Briefcase,
@@ -34,12 +34,34 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
   const [toast, setToast] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const [activeTab, setActiveTab] = useState<'about' | 'experience' | 'education' | 'skills'>('about');
-  
+
   // Edit & Modal States
   const [editingBio, setEditingBio] = useState(false);
   const [editingContact, setEditingContact] = useState(false);
   const [editingPrefs, setEditingPrefs] = useState(false);
   const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showExperienceModal, setShowExperienceModal] = useState(false);
+  const [showEducationModal, setShowEducationModal] = useState(false);
+  const [newExp, setNewExp] = useState({
+    role: '',
+    company: '',
+    period: '',
+    location: '',
+    description: '',
+    current: false,
+  });
+  const [newEdu, setNewEdu] = useState({
+    degree: '',
+    field: '',
+    school: '',
+    year: '',
+    gpa: '',
+  });
+  const [newSkill, setNewSkill] = useState({
+    name: '',
+    level: 85,
+    category: 'Technical',
+  });
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -52,82 +74,148 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
   const coverRef = useRef<HTMLInputElement>(null);
 
   // ── Profile Main Info ───────────────────────────────────────────
+  const [loading, setLoading] = useState(true);
+
+  // ── Profile Main Info ───────────────────────────────────────────
   const [profileHeader, setProfileHeader] = useState({
-    name: 'Alex Rivera',
-    title: 'Staff Product Designer',
-    experienceYears: '8 years experience',
+    name: '',
+    title: '',
+    experienceYears: '',
   });
 
-  useEffect(() => {
-    // 1. Try local storage user
-    const localUser = localStorage.getItem('user');
-    if (localUser) {
-      try {
-        const u = JSON.parse(localUser);
-        if (u.name) setProfileHeader(p => ({ ...p, name: u.name }));
-        if (u.email) setContact(c => ({ ...c, email: u.email }));
-      } catch (e) {}
-    }
-    // 2. Fetch live user profile from MongoDB
-    fetchUserProfile().then(userData => {
-      if (userData) {
-        if (userData.name) setProfileHeader(p => ({ ...p, name: userData.name }));
-        if (userData.email) setContact(c => ({ ...c, email: userData.email }));
-      }
-    });
-  }, []);
-
-  const [editHeaderTemp, setEditHeaderTemp] = useState(profileHeader);
-
-  const [bio, setBio] = useState(
-    "Senior Product Designer with 8+ years crafting digital experiences at scale. Passionate about systems thinking, data-driven design, and building products that users love. Previously led design at Meta and Stripe."
-  );
-  const [bioTemp, setBioTemp] = useState(bio);
+  const [bio, setBio] = useState('');
+  const [bioTemp, setBioTemp] = useState('');
 
   const [contact, setContact] = useState({
-    email: 'alex.rivera@email.com', phone: '+1 (415) 555-0192',
-    location: 'San Francisco, CA', website: 'alexrivera.design',
-    linkedin: 'linkedin.com/in/alexrivera', github: 'github.com/alexrivera',
+    email: '',
+    phone: '',
+    location: '',
+    website: '',
+    linkedin: '',
+    github: '',
   });
   const [contactTemp, setContactTemp] = useState(contact);
 
   const [prefs, setPrefs] = useState({
-    role: 'Senior Product Designer', type: 'Full-time',
-    workMode: 'Remote / Hybrid', salary: '$180k – $250k', availability: 'Immediately',
+    role: '',
+    type: '',
+    workMode: '',
+    salary: '',
+    availability: '',
   });
   const [prefsTemp, setPrefsTemp] = useState(prefs);
 
-  const [experiences, setExperiences] = useState<Experience[]>([
-    { id: 1, company: 'Meta', role: 'Staff Product Designer', period: 'Jan 2021 – Present', location: 'Menlo Park, CA', description: 'Led design for Facebook Marketplace, serving 1B+ users. Built and managed a team of 8 designers. Drove 40% increase in seller conversion through system redesign.', logo: 'M', logoBg: 'linear-gradient(135deg,#1877f2,#0a4dbf)', current: true },
-    { id: 2, company: 'Stripe', role: 'Senior Product Designer', period: 'Mar 2018 – Dec 2020', location: 'San Francisco, CA', description: 'Owned end-to-end design for Stripe Dashboard. Created the Stripe Design System adopted by 200+ engineers. Reduced developer onboarding time by 60%.', logo: 'S', logoBg: 'linear-gradient(135deg,#6772e5,#4b50d4)', current: false },
-    { id: 3, company: 'Airbnb', role: 'Product Designer', period: 'Jun 2016 – Feb 2018', location: 'San Francisco, CA', description: 'Designed core booking flow and host dashboard. Contributed to the DLS (Design Language System). Improved booking completion rate by 22%.', logo: 'A', logoBg: 'linear-gradient(135deg,#ff5a5f,#c2185b)', current: false },
-  ]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [educations, setEducations] = useState<Education[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [skills, setSkills] = useState<{ id: number; name: string; level: number; category: string }[]>([]);
 
-  const [educations] = useState<Education[]>([
-    { id: 1, school: 'Carnegie Mellon University', degree: 'Master of Design', field: 'Human-Computer Interaction', year: '2016', gpa: '3.9/4.0', logo: 'CM', logoBg: 'linear-gradient(135deg,#c41230,#8b0c22)' },
-    { id: 2, school: 'University of Michigan', degree: 'Bachelor of Science', field: 'Computer Science', year: '2014', gpa: '3.7/4.0', logo: 'UM', logoBg: 'linear-gradient(135deg,#00274c,#003f8a)' },
-  ]);
+  const [editHeaderTemp, setEditHeaderTemp] = useState(profileHeader);
 
-  const [certifications] = useState<Certification[]>([
-    { id: 1, name: 'Google UX Design Certificate', issuer: 'Google', year: '2023', color: '#4285f4' },
-    { id: 2, name: 'AWS Solutions Architect', issuer: 'Amazon', year: '2022', color: '#f59e0b' },
-    { id: 3, name: 'Figma Advanced',            issuer: 'Figma',  year: '2023', color: '#6c63ff' },
-    { id: 4, name: 'Nielsen Norman UX Cert',    issuer: 'NN/g',   year: '2021', color: '#00c853' },
-  ]);
+  useEffect(() => {
+    setLoading(true);
+    // 1. Try local storage user
+    const localUser = localStorage.getItem('user');
+    let defaultName = '';
+    let defaultEmail = '';
+    if (localUser) {
+      try {
+        const u = JSON.parse(localUser);
+        if (u.name) defaultName = u.name;
+        if (u.email) defaultEmail = u.email;
+      } catch (e) { }
+    }
 
-  const [skills, setSkills] = useState([
-    { id: 1,  name: 'Figma',           level: 95, category: 'Design' },
-    { id: 2,  name: 'UI/UX Design',    level: 97, category: 'Design' },
-    { id: 3,  name: 'Design Systems',  level: 93, category: 'Design' },
-    { id: 4,  name: 'Prototyping',     level: 90, category: 'Design' },
-    { id: 5,  name: 'User Research',   level: 85, category: 'Research' },
-    { id: 6,  name: 'A/B Testing',     level: 80, category: 'Research' },
-    { id: 7,  name: 'Product Strategy',level: 88, category: 'Strategy' },
-    { id: 8,  name: 'Stakeholder Mgmt',level: 82, category: 'Leadership' },
-    { id: 9,  name: 'React',           level: 70, category: 'Technical' },
-    { id: 10, name: 'Data Analytics',  level: 75, category: 'Technical' },
-  ]);
-  const [newSkill, setNewSkill] = useState('');
+    // 2. Fetch live user profile from MongoDB
+    fetchUserProfile()
+      .then(userData => {
+        if (userData) {
+          const userName = userData.name || defaultName || 'User Profile';
+          const userTitle = userData.title || 'Candidate';
+          const expLabel = userData.experiences?.length ? `${userData.experiences.length} Position(s)` : 'Candidate Profile';
+
+          setProfileHeader({
+            name: userName,
+            title: userTitle,
+            experienceYears: expLabel,
+          });
+          setEditHeaderTemp({
+            name: userName,
+            title: userTitle,
+            experienceYears: expLabel,
+          });
+
+          const userContact = {
+            email: userData.email || defaultEmail || '',
+            phone: userData.phone || '',
+            location: userData.location || '',
+            website: userData.website || '',
+            linkedin: userData.linkedin || '',
+            github: userData.github || '',
+          };
+          setContact(userContact);
+          setContactTemp(userContact);
+
+          const userBio = userData.bio || '';
+          setBio(userBio);
+          setBioTemp(userBio);
+
+          if (userData.skills && Array.isArray(userData.skills)) {
+            setSkills(userData.skills.map((sk: string, idx: number) => ({
+              id: idx + 1,
+              name: sk,
+              level: 85,
+              category: 'Skills'
+            })));
+          }
+
+          if (userData.experiences && Array.isArray(userData.experiences)) {
+            setExperiences(userData.experiences.map((exp: any, idx: number) => ({
+              id: idx + 1,
+              company: exp.company || '',
+              role: exp.role || '',
+              period: exp.period || '',
+              location: exp.location || '',
+              description: exp.description || '',
+              logo: (exp.company || 'C')[0].toUpperCase(),
+              logoBg: 'linear-gradient(135deg,#6c63ff,#4b50d4)',
+              current: exp.current || false,
+            })));
+          }
+
+          if (userData.education && Array.isArray(userData.education)) {
+            setEducations(userData.education.map((edu: any, idx: number) => ({
+              id: idx + 1,
+              school: edu.school || '',
+              degree: edu.degree || '',
+              field: edu.field || '',
+              year: edu.year || '',
+              gpa: edu.gpa || '',
+              logo: (edu.school || 'E')[0].toUpperCase(),
+              logoBg: 'linear-gradient(135deg,#c41230,#8b0c22)'
+            })));
+          }
+
+          if (userData.avatarUrl) setAvatarUrl(userData.avatarUrl);
+          if (userData.coverUrl) setCoverUrl(userData.coverUrl);
+
+          if (userData.preferences) {
+            const userPrefs = {
+              role: userData.preferences.role || '',
+              type: userData.preferences.type || '',
+              workMode: userData.preferences.workMode || '',
+              salary: userData.preferences.salary || '',
+              availability: userData.preferences.availability || '',
+            };
+            setPrefs(userPrefs);
+            setPrefsTemp(userPrefs);
+          }
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const completeness = 87;
 
@@ -142,9 +230,11 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatarUrl(event.target?.result as string);
-        showToast('Profile photo updated successfully!');
+      reader.onload = async (event) => {
+        const base64Str = event.target?.result as string;
+        setAvatarUrl(base64Str);
+        showToast('Profile photo updated & saved!');
+        await updateUserProfile({ avatarUrl: base64Str });
       };
       reader.readAsDataURL(file);
     }
@@ -155,9 +245,11 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setCoverUrl(event.target?.result as string);
-        showToast('Cover banner updated successfully!');
+      reader.onload = async (event) => {
+        const base64Str = event.target?.result as string;
+        setCoverUrl(base64Str);
+        showToast('Cover banner updated & saved!');
+        await updateUserProfile({ coverUrl: base64Str });
       };
       reader.readAsDataURL(file);
     }
@@ -172,74 +264,74 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
       try {
         const doc = new jsPDF();
         doc.setFillColor(26, 26, 46);
-      doc.rect(0, 0, 210, 40, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      doc.text(profileHeader.name, 15, 20);
+        doc.rect(0, 0, 210, 40, 'F');
 
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(167, 139, 250);
-      doc.text(`${profileHeader.title} · ${profileHeader.experienceYears}`, 15, 29);
-
-      doc.setFontSize(9);
-      doc.setTextColor(200, 200, 220);
-      doc.text(`${contact.email}  |  ${contact.phone}  |  ${contact.location}`, 15, 36);
-
-      let y = 50;
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(108, 99, 255);
-      doc.text('SUMMARY', 15, y);
-
-      y += 6;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(60, 60, 80);
-      const splitBio = doc.splitTextToSize(bio, 180);
-      doc.text(splitBio, 15, y);
-
-      y += (splitBio.length * 5) + 8;
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(108, 99, 255);
-      doc.text('WORK EXPERIENCE', 15, y);
-
-      y += 8;
-      experiences.forEach((exp) => {
-        doc.setFontSize(11);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(26, 26, 46);
-        doc.text(`${exp.role} - ${exp.company}`, 15, y);
+        doc.text(profileHeader.name, 15, 20);
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(167, 139, 250);
+        doc.text(`${profileHeader.title} · ${profileHeader.experienceYears}`, 15, 29);
 
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(130, 130, 150);
-        doc.text(`${exp.period}  |  ${exp.location}`, 15, y + 4.5);
+        doc.setTextColor(200, 200, 220);
+        doc.text(`${contact.email}  |  ${contact.phone}  |  ${contact.location}`, 15, 36);
 
+        let y = 50;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(108, 99, 255);
+        doc.text('SUMMARY', 15, y);
+
+        y += 6;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 80);
+        const splitBio = doc.splitTextToSize(bio, 180);
+        doc.text(splitBio, 15, y);
+
+        y += (splitBio.length * 5) + 8;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(108, 99, 255);
+        doc.text('WORK EXPERIENCE', 15, y);
+
+        y += 8;
+        experiences.forEach((exp) => {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(26, 26, 46);
+          doc.text(`${exp.role} - ${exp.company}`, 15, y);
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(130, 130, 150);
+          doc.text(`${exp.period}  |  ${exp.location}`, 15, y + 4.5);
+
+          doc.setFontSize(9.5);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(70, 70, 90);
+          const splitDesc = doc.splitTextToSize(exp.description, 180);
+          doc.text(splitDesc, 15, y + 10);
+
+          y += (splitDesc.length * 4.5) + 16;
+        });
+
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(108, 99, 255);
+        doc.text('SKILLS', 15, y);
+
+        y += 7;
         doc.setFontSize(9.5);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(70, 70, 90);
-        const splitDesc = doc.splitTextToSize(exp.description, 180);
-        doc.text(splitDesc, 15, y + 10);
-
-        y += (splitDesc.length * 4.5) + 16;
-      });
-
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(108, 99, 255);
-      doc.text('SKILLS', 15, y);
-
-      y += 7;
-      doc.setFontSize(9.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(50, 50, 70);
-      const skillList = skills.map(s => `${s.name} (${s.level}%)`).join('  ·  ');
-      const splitSkills = doc.splitTextToSize(skillList, 180);
-      doc.text(splitSkills, 15, y);
+        doc.setTextColor(50, 50, 70);
+        const skillList = skills.map(s => `${s.name} (${s.level}%)`).join('  ·  ');
+        const splitSkills = doc.splitTextToSize(skillList, 180);
+        doc.text(splitSkills, 15, y);
 
         doc.save(`${profileHeader.name.replace(/\s+/g, '_')}_Resume.pdf`);
         showToast('Resume PDF generated and downloaded!');
@@ -261,30 +353,163 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   // Save Full Profile Modal
-  const saveFullProfileModal = () => {
+  const saveFullProfileModal = async () => {
     setProfileHeader(editHeaderTemp);
     setBio(bioTemp);
     setContact(contactTemp);
     setShowEditProfileModal(false);
     showToast('Profile updated successfully!');
+    const res = await updateUserProfile({
+      name: editHeaderTemp.name,
+      title: editHeaderTemp.title,
+      bio: bioTemp,
+      email: contactTemp.email,
+      phone: contactTemp.phone,
+      location: contactTemp.location,
+      website: contactTemp.website,
+      linkedin: contactTemp.linkedin,
+      github: contactTemp.github,
+    });
+    if (res && res.user) {
+      if (res.user.bio !== undefined) {
+        setBio(res.user.bio);
+        setBioTemp(res.user.bio);
+      }
+      if (res.user.name || res.user.title) {
+        setProfileHeader(p => ({
+          ...p,
+          name: res.user.name || p.name,
+          title: res.user.title || p.title,
+        }));
+      }
+    }
   };
 
-  const saveContact = () => { setContact(contactTemp); setEditingContact(false); showToast('Contact info saved!'); };
-  const saveBio     = () => { setBio(bioTemp); setEditingBio(false); showToast('Bio updated!'); };
-  const savePrefs   = () => { setPrefs(prefsTemp); setEditingPrefs(false); showToast('Preferences saved!'); };
+  const saveContact = () => {
+    setContact(contactTemp);
+    setEditingContact(false);
+    showToast('Contact info saved!');
+    updateUserProfile({
+      email: contactTemp.email,
+      phone: contactTemp.phone,
+      location: contactTemp.location,
+      website: contactTemp.website,
+      linkedin: contactTemp.linkedin,
+      github: contactTemp.github,
+    });
+  };
 
-  const removeExperience = (id: number) => { setExperiences(e => e.filter(x => x.id !== id)); showToast('Experience removed.', 'info'); };
-  const removeSkill      = (id: number) => { setSkills(s => s.filter(x => x.id !== id)); };
-  const addSkill = () => {
-    if (!newSkill.trim()) return;
-    setSkills(s => [...s, { id: Date.now(), name: newSkill.trim(), level: 70, category: 'Other' }]);
-    setNewSkill(''); setShowSkillModal(false);
-    showToast(`Skill "${newSkill.trim()}" added!`);
+  const saveBio = async () => {
+    const newBioText = bioTemp;
+    setBio(newBioText);
+    setEditingBio(false);
+    showToast('Bio updated!');
+    const res = await updateUserProfile({ bio: newBioText });
+    if (res && res.user && res.user.bio !== undefined) {
+      setBio(res.user.bio);
+      setBioTemp(res.user.bio);
+    }
+  };
+
+  const savePrefs = () => {
+    setPrefs(prefsTemp);
+    setEditingPrefs(false);
+    showToast('Preferences saved!');
+    updateUserProfile({ preferences: prefsTemp });
+  };
+
+  const removeExperience = (id: number) => {
+    const updated = experiences.filter(x => x.id !== id);
+    setExperiences(updated);
+    showToast('Experience removed.', 'info');
+    updateUserProfile({ experiences: updated });
+  };
+
+  const removeSkill = (id: number) => {
+    const updated = skills.filter(x => x.id !== id);
+    setSkills(updated);
+    updateUserProfile({ skills: updated.map(s => s.name) });
+  };
+
+  const addSkill = async () => {
+    if (!newSkill.name.trim()) {
+      showToast('Please enter a skill name.', 'info');
+      return;
+    }
+    const skillLevel = Number(newSkill.level) || 85;
+    const newSkillObj = {
+      id: Date.now(),
+      name: newSkill.name.trim(),
+      level: skillLevel,
+      category: newSkill.category.trim() || 'Technical',
+    };
+    const updated = [...skills, newSkillObj];
+    setSkills(updated);
+    setNewSkill({ name: '', level: 85, category: 'Technical' });
+    setShowSkillModal(false);
+    showToast(`Skill "${newSkillObj.name}" (${skillLevel}%) added!`);
+    await updateUserProfile({ skills: updated.map(s => s.name) });
+  };
+
+  const addExperience = async () => {
+    if (!newExp.role.trim() || !newExp.company.trim()) {
+      showToast('Please enter both Job Title and Company name.', 'info');
+      return;
+    }
+    const expObj: Experience = {
+      id: Date.now(),
+      role: newExp.role.trim(),
+      company: newExp.company.trim(),
+      period: newExp.period.trim() || 'Present',
+      location: newExp.location.trim() || 'Remote',
+      description: newExp.description.trim() || '',
+      logo: (newExp.company.trim() || 'C')[0].toUpperCase(),
+      logoBg: 'linear-gradient(135deg,#6c63ff,#4b50d4)',
+      current: newExp.current,
+    };
+    const updated = [...experiences, expObj];
+    setExperiences(updated);
+    setShowExperienceModal(false);
+    setNewExp({ role: '', company: '', period: '', location: '', description: '', current: false });
+    showToast(`Experience at ${expObj.company} added!`);
+    await updateUserProfile({ experiences: updated });
+  };
+
+  const addEducation = async () => {
+    if (!newEdu.school.trim() || !newEdu.degree.trim()) {
+      showToast('Please enter both Degree and School/University name.', 'info');
+      return;
+    }
+    const eduObj: Education = {
+      id: Date.now(),
+      degree: newEdu.degree.trim(),
+      field: newEdu.field.trim() || 'General',
+      school: newEdu.school.trim(),
+      year: newEdu.year.trim() || '2024',
+      gpa: newEdu.gpa.trim() || 'N/A',
+      logo: (newEdu.school.trim() || 'E')[0].toUpperCase(),
+      logoBg: 'linear-gradient(135deg,#c41230,#8b0c22)',
+    };
+    const updated = [...educations, eduObj];
+    setEducations(updated);
+    setShowEducationModal(false);
+    setNewEdu({ degree: '', field: '', school: '', year: '', gpa: '' });
+    showToast(`Education at ${eduObj.school} added!`);
+    await updateUserProfile({ education: updated });
   };
 
   const skillCategories = Array.from(new Set(skills.map(s => s.category)));
   const levelLabel = (l: number) => l >= 90 ? 'Expert' : l >= 75 ? 'Advanced' : l >= 60 ? 'Intermediate' : 'Beginner';
   const levelColor = (l: number) => l >= 90 ? '#00c853' : l >= 75 ? '#6c63ff' : l >= 60 ? '#f59e0b' : '#8890a4';
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+        <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
+        <PageSpinner label="Fetching user profile data from database..." />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
@@ -313,17 +538,198 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
               <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">Add New Skill</h3>
               <button onClick={() => setShowSkillModal(false)} className="bg-transparent border-none cursor-pointer text-[#8890a4] hover:text-[#1a1a2e]"><X size={18} /></button>
             </div>
-            <input
-              value={newSkill}
-              onChange={e => setNewSkill(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addSkill()}
-              placeholder="e.g. Motion Design, SQL..."
-              className="w-full px-4 py-3 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] mb-4"
-              autoFocus
-            />
+
+            <div className="flex flex-col gap-3.5 mb-4">
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Skill Name *</label>
+                <input
+                  value={newSkill.name}
+                  onChange={e => setNewSkill({ ...newSkill, name: e.target.value })}
+                  placeholder="e.g. React, Python, UI Design..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Category</label>
+                <select
+                  value={newSkill.category}
+                  onChange={e => setNewSkill({ ...newSkill, category: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] bg-white"
+                >
+                  <option value="Technical">Technical</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-[#4a5068] uppercase">Proficiency Level (%)</label>
+                  <span className="text-[12px] font-extrabold text-[#6c63ff]">{newSkill.level}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  step="5"
+                  value={newSkill.level}
+                  onChange={e => setNewSkill({ ...newSkill, level: Number(e.target.value) })}
+                  className="w-full accent-[#6c63ff] cursor-pointer"
+                />
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <button onClick={() => setShowSkillModal(false)} className="flex-1 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] font-bold text-[#8890a4] bg-transparent cursor-pointer hover:text-[#1a1a2e] transition-colors">Cancel</button>
               <button onClick={addSkill} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>Add Skill</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Education Modal */}
+      {showEducationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <GraduationCap size={18} className="text-[#6c63ff]" />
+                <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">Add Education</h3>
+              </div>
+              <button onClick={() => setShowEducationModal(false)} className="bg-transparent border-none cursor-pointer text-[#8890a4] hover:text-[#1a1a2e]"><X size={18} /></button>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Degree / Qualification *</label>
+                <input
+                  value={newEdu.degree}
+                  onChange={e => setNewEdu({ ...newEdu, degree: e.target.value })}
+                  placeholder="e.g. Bachelor of Technology / B.Sc"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">School / University *</label>
+                <input
+                  value={newEdu.school}
+                  onChange={e => setNewEdu({ ...newEdu, school: e.target.value })}
+                  placeholder="e.g. University of Mumbai"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Field of Study</label>
+                <input
+                  value={newEdu.field}
+                  onChange={e => setNewEdu({ ...newEdu, field: e.target.value })}
+                  placeholder="e.g. Computer Science & Engineering"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Passing Year</label>
+                  <input
+                    value={newEdu.year}
+                    onChange={e => setNewEdu({ ...newEdu, year: e.target.value })}
+                    placeholder="e.g. 2024"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">GPA / Score</label>
+                  <input
+                    value={newEdu.gpa}
+                    onChange={e => setNewEdu({ ...newEdu, gpa: e.target.value })}
+                    placeholder="e.g. 8.5 CGPA or 85%"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-[#f0f2f8]">
+                <button onClick={() => setShowEducationModal(false)} className="flex-1 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] font-bold text-[#8890a4] bg-transparent cursor-pointer hover:text-[#1a1a2e]">Cancel</button>
+                <button onClick={addEducation} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>Add Education</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Experience Modal */}
+      {showExperienceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Briefcase size={18} className="text-[#6c63ff]" />
+                <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">Add Work Experience</h3>
+              </div>
+              <button onClick={() => setShowExperienceModal(false)} className="bg-transparent border-none cursor-pointer text-[#8890a4] hover:text-[#1a1a2e]"><X size={18} /></button>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Job Title *</label>
+                <input
+                  value={newExp.role}
+                  onChange={e => setNewExp({ ...newExp, role: e.target.value })}
+                  placeholder="e.g. Senior Frontend Developer"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Company Name *</label>
+                <input
+                  value={newExp.company}
+                  onChange={e => setNewExp({ ...newExp, company: e.target.value })}
+                  placeholder="e.g. Google, Microsoft..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Period</label>
+                  <input
+                    value={newExp.period}
+                    onChange={e => setNewExp({ ...newExp, period: e.target.value })}
+                    placeholder="e.g. 2022 - Present"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Location</label>
+                  <input
+                    value={newExp.location}
+                    onChange={e => setNewExp({ ...newExp, location: e.target.value })}
+                    placeholder="e.g. Remote / NYC"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#4a5068] uppercase block mb-1">Description</label>
+                <textarea
+                  rows={3}
+                  value={newExp.description}
+                  onChange={e => setNewExp({ ...newExp, description: e.target.value })}
+                  placeholder="Key responsibilities and achievements..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-[#f0f2f8]">
+                <button onClick={() => setShowExperienceModal(false)} className="flex-1 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] font-bold text-[#8890a4] bg-transparent cursor-pointer hover:text-[#1a1a2e]">Cancel</button>
+                <button onClick={addExperience} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>Add Experience</button>
+              </div>
             </div>
           </div>
         </div>
@@ -585,7 +991,7 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
             {/* Tab Bar */}
             <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 overflow-hidden">
               <div className="flex border-b border-[#e4e8f0]">
-                {(['about','experience','education','skills'] as const).map(t => (
+                {(['about', 'experience', 'education', 'skills'] as const).map(t => (
                   <button
                     key={t}
                     onClick={() => setActiveTab(t)}
@@ -612,13 +1018,15 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                       </div>
                       {editingBio ? (
                         <div className="flex flex-col gap-2">
-                          <textarea value={bioTemp} onChange={e => setBioTemp(e.target.value)} rows={4} className="w-full px-4 py-3 rounded-xl border border-[#6c63ff] text-[13px] text-[#4a5068] leading-relaxed outline-none resize-none" />
+                          <textarea value={bioTemp} onChange={e => setBioTemp(e.target.value)} rows={4} className="w-full px-4 py-3 rounded-xl border border-[#6c63ff] text-[13px] text-[#4a5068] leading-relaxed outline-none resize-none" placeholder="Write your professional summary..." />
                           <button onClick={saveBio} className="self-end flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>
                             <Save size={12} /> Save
                           </button>
                         </div>
                       ) : (
-                        <p className="text-[13px] text-[#4a5068] leading-relaxed">{bio}</p>
+                        <p className="text-[13px] text-[#4a5068] leading-relaxed">
+                          {bio || <span className="text-[#8890a4] italic">No bio added yet. Click 'Edit' to write your profile summary.</span>}
+                        </p>
                       )}
                     </div>
 
@@ -635,7 +1043,7 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                           {(Object.keys(contactTemp) as (keyof typeof contactTemp)[]).map(key => (
                             <div key={key}>
                               <label className="text-[10px] font-bold text-[#b0b8cc] uppercase tracking-wider block mb-1">{key}</label>
-                              <input value={contactTemp[key]} onChange={e => setContactTemp(c => ({...c, [key]: e.target.value}))} className="w-full px-3 py-2 rounded-xl border border-[#e4e8f0] text-[12px] outline-none focus:border-[#6c63ff]" />
+                              <input value={contactTemp[key]} onChange={e => setContactTemp(c => ({ ...c, [key]: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-[#e4e8f0] text-[12px] outline-none focus:border-[#6c63ff]" />
                             </div>
                           ))}
                           <div className="col-span-full flex justify-end">
@@ -647,12 +1055,12 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {[
-                            { icon: <Mail size={13} className="text-[#6c63ff]" />, label: 'Email',    value: contact.email },
-                            { icon: <Phone size={13} className="text-[#6c63ff]" />, label: 'Phone',  value: contact.phone },
-                            { icon: <MapPin size={13} className="text-[#6c63ff]" />, label: 'Location', value: contact.location },
-                            { icon: <Globe size={13} className="text-[#6c63ff]" />, label: 'Website', value: contact.website },
-                            { icon: <Globe size={13} className="text-[#0a66c2]" />, label: 'LinkedIn', value: contact.linkedin },
-                            { icon: <Globe size={13} className="text-[#1a1a2e]" />, label: 'GitHub',  value: contact.github },
+                            { icon: <Mail size={13} className="text-[#6c63ff]" />, label: 'Email', value: contact.email || 'Not provided' },
+                            { icon: <Phone size={13} className="text-[#6c63ff]" />, label: 'Phone', value: contact.phone || 'Not provided' },
+                            { icon: <MapPin size={13} className="text-[#6c63ff]" />, label: 'Location', value: contact.location || 'Not provided' },
+                            { icon: <Globe size={13} className="text-[#6c63ff]" />, label: 'Website', value: contact.website || 'Not provided' },
+                            { icon: <Globe size={13} className="text-[#0a66c2]" />, label: 'LinkedIn', value: contact.linkedin || 'Not provided' },
+                            { icon: <Globe size={13} className="text-[#1a1a2e]" />, label: 'GitHub', value: contact.github || 'Not provided' },
                           ].map(({ icon, label, value }) => (
                             <div key={label} className="flex items-center gap-2.5 p-3 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0]">
                               <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shadow-sm flex-shrink-0">{icon}</div>
@@ -669,19 +1077,23 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                     {/* Certifications */}
                     <div>
                       <h3 className="text-[14px] font-extrabold text-[#1a1a2e] mb-3">Certifications</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {certifications.map(c => (
-                          <div key={c.id} className="flex items-center gap-3 p-3 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-colors">
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${c.color}20` }}>
-                              <Award size={16} style={{ color: c.color }} />
+                      {certifications.length === 0 ? (
+                        <p className="text-[12px] text-[#8890a4] italic p-3 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0]">No certifications added yet.</p>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {certifications.map(c => (
+                            <div key={c.id} className="flex items-center gap-3 p-3 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-colors">
+                              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${c.color}20` }}>
+                                <Award size={16} style={{ color: c.color }} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[12px] font-bold text-[#1a1a2e] truncate">{c.name}</p>
+                                <p className="text-[10px] text-[#8890a4]">{c.issuer} · {c.year}</p>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-[12px] font-bold text-[#1a1a2e] truncate">{c.name}</p>
-                              <p className="text-[10px] text-[#8890a4]">{c.issuer} · {c.year}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -691,49 +1103,57 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Work Experience</h3>
-                      <button onClick={() => showToast('Add experience form opened', 'info')} className="flex items-center gap-1.5 text-[12px] font-bold text-[#6c63ff] bg-[#6c63ff]/8 px-3 py-2 rounded-xl border-none cursor-pointer hover:bg-[#6c63ff]/15 transition-colors">
+                      <button onClick={() => setShowExperienceModal(true)} className="flex items-center gap-1.5 text-[12px] font-bold text-[#6c63ff] bg-[#6c63ff]/8 px-3 py-2 rounded-xl border-none cursor-pointer hover:bg-[#6c63ff]/15 transition-colors">
                         <Plus size={13} /> Add Experience
                       </button>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      {experiences.map((exp, idx) => (
-                        <div key={exp.id} className="relative pl-6">
-                          {idx < experiences.length - 1 && (
-                            <div className="absolute left-2.5 top-10 w-0.5 h-full bg-[#e4e8f0]" />
-                          )}
-                          <div className={`absolute left-0 top-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${exp.current ? 'border-[#6c63ff] bg-[#6c63ff]' : 'border-[#c4c9d4] bg-white'}`}>
-                            {exp.current && <div className="w-2 h-2 rounded-full bg-white" />}
-                          </div>
+                    {experiences.length === 0 ? (
+                      <div className="text-center py-8 bg-[#f8f9fc] rounded-2xl border border-dashed border-[#e4e8f0]">
+                        <Briefcase size={24} className="mx-auto text-[#b0b8cc] mb-2" />
+                        <p className="text-[13px] font-bold text-[#4a5068]">No Work Experience Added Yet</p>
+                        <p className="text-[11px] text-[#8890a4] mt-1 mb-3">Add your previous roles to showcase your career journey.</p>
+                        <button onClick={() => setShowExperienceModal(true)} className="px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>
+                          Add Experience
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {experiences.map((exp, idx) => (
+                          <div key={exp.id} className="relative pl-6">
+                            {idx < experiences.length - 1 && (
+                              <div className="absolute left-2.5 top-10 w-0.5 h-full bg-[#e4e8f0]" />
+                            )}
+                            <div className={`absolute left-0 top-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${exp.current ? 'border-[#6c63ff] bg-[#6c63ff]' : 'border-[#c4c9d4] bg-white'}`}>
+                              {exp.current && <div className="w-2 h-2 rounded-full bg-white" />}
+                            </div>
 
-                          <div className="bg-[#f8f9fc] rounded-2xl p-4 mb-4 border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all group">
-                            <div className="flex items-start justify-between gap-2 mb-3">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-black text-white flex-shrink-0" style={{ background: exp.logoBg }}>{exp.logo}</div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-[14px] font-extrabold text-[#1a1a2e]">{exp.role}</p>
-                                    {exp.current && <span className="text-[9px] font-bold bg-[#6c63ff]/10 text-[#6c63ff] px-2 py-0.5 rounded-full">Current</span>}
+                            <div className="bg-[#f8f9fc] rounded-2xl p-4 mb-4 border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all group">
+                              <div className="flex items-start justify-between gap-2 mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-black text-white flex-shrink-0" style={{ background: exp.logoBg }}>{exp.logo}</div>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-[14px] font-extrabold text-[#1a1a2e]">{exp.role}</p>
+                                      {exp.current && <span className="text-[9px] font-bold bg-[#6c63ff]/10 text-[#6c63ff] px-2 py-0.5 rounded-full">Current</span>}
+                                    </div>
+                                    <p className="text-[12px] text-[#8890a4]">{exp.company} · {exp.location}</p>
                                   </div>
-                                  <p className="text-[12px] text-[#8890a4]">{exp.company} · {exp.location}</p>
+                                </div>
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => removeExperience(exp.id)} className="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-[#e4e8f0] cursor-pointer hover:border-red-500 text-red-500">
+                                    <Trash2 size={11} />
+                                  </button>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => showToast('Edit experience...', 'info')} className="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all text-[#8890a4]">
-                                  <Edit3 size={12} />
-                                </button>
-                                <button onClick={() => removeExperience(exp.id)} className="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-[#e4e8f0] cursor-pointer hover:border-[#ff4d6d] hover:text-[#ff4d6d] transition-all text-[#8890a4]">
-                                  <Trash2 size={12} />
-                                </button>
+                              <div className="flex items-center gap-1.5 text-[11px] text-[#8890a4] mb-2">
+                                <Clock size={11} /> {exp.period}
                               </div>
+                              <p className="text-[12px] text-[#4a5068] leading-relaxed">{exp.description}</p>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-[#8890a4] mb-2">
-                              <Clock size={11} /> {exp.period}
-                            </div>
-                            <p className="text-[12px] text-[#4a5068] leading-relaxed">{exp.description}</p>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -742,35 +1162,41 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Education</h3>
-                      <button onClick={() => showToast('Add education opened', 'info')} className="flex items-center gap-1.5 text-[12px] font-bold text-[#6c63ff] bg-[#6c63ff]/8 px-3 py-2 rounded-xl border-none cursor-pointer hover:bg-[#6c63ff]/15 transition-colors">
+                      <button onClick={() => setShowEducationModal(true)} className="flex items-center gap-1.5 text-[12px] font-bold text-[#6c63ff] bg-[#6c63ff]/8 px-3 py-2 rounded-xl border-none cursor-pointer hover:bg-[#6c63ff]/15 transition-colors">
                         <Plus size={13} /> Add Education
                       </button>
                     </div>
-                    <div className="flex flex-col gap-4">
-                      {educations.map(edu => (
-                        <div key={edu.id} className="bg-[#f8f9fc] rounded-2xl p-5 border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all group">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-black text-white flex-shrink-0" style={{ background: edu.logoBg }}>{edu.logo}</div>
-                              <div>
-                                <p className="text-[14px] font-extrabold text-[#1a1a2e]">{edu.degree}</p>
-                                <p className="text-[12px] text-[#4a5068]">{edu.field}</p>
-                                <p className="text-[11px] text-[#8890a4]">{edu.school}</p>
+                    {educations.length === 0 ? (
+                      <div className="text-center py-8 bg-[#f8f9fc] rounded-2xl border border-dashed border-[#e4e8f0]">
+                        <GraduationCap size={24} className="mx-auto text-[#b0b8cc] mb-2" />
+                        <p className="text-[13px] font-bold text-[#4a5068]">No Education Details Added Yet</p>
+                        <p className="text-[11px] text-[#8890a4] mt-1 mb-3">Add your academic background and degrees.</p>
+                        <button onClick={() => setShowEducationModal(true)} className="px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>
+                          Add Education
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {educations.map(edu => (
+                          <div key={edu.id} className="bg-[#f8f9fc] rounded-2xl p-5 border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all group">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-black text-white flex-shrink-0" style={{ background: edu.logoBg }}>{edu.logo}</div>
+                                <div>
+                                  <p className="text-[14px] font-extrabold text-[#1a1a2e]">{edu.degree}</p>
+                                  <p className="text-[12px] text-[#4a5068]">{edu.field}</p>
+                                  <p className="text-[11px] text-[#8890a4]">{edu.school}</p>
+                                </div>
                               </div>
                             </div>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => showToast('Edit education...', 'info')} className="w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] text-[#8890a4]">
-                                <Edit3 size={11} />
-                              </button>
+                            <div className="flex gap-4 mt-2">
+                              <span className="text-[11px] text-[#8890a4] flex items-center gap-1"><GraduationCap size={11} /> Class of {edu.year}</span>
+                              <span className="text-[11px] text-[#8890a4] flex items-center gap-1"><Star size={11} /> GPA: {edu.gpa}</span>
                             </div>
                           </div>
-                          <div className="flex gap-4 mt-2">
-                            <span className="text-[11px] text-[#8890a4] flex items-center gap-1"><GraduationCap size={11} /> Class of {edu.year}</span>
-                            <span className="text-[11px] text-[#8890a4] flex items-center gap-1"><Star size={11} /> GPA: {edu.gpa}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -830,10 +1256,10 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                 <p className="text-[12px] text-[#b0b8cc] mb-4">Your profile is <span className="text-[#a78bfa] font-bold">above average</span> for Product Designer roles.</p>
                 <div className="flex flex-col gap-2">
                   {[
-                    { label: 'Experience',   score: 95, ok: true  },
-                    { label: 'Skills',        score: 88, ok: true  },
-                    { label: 'Portfolio',     score: 70, ok: false },
-                    { label: 'Keywords',      score: 82, ok: true  },
+                    { label: 'Experience', score: 95, ok: true },
+                    { label: 'Skills', score: 88, ok: true },
+                    { label: 'Portfolio', score: 70, ok: false },
+                    { label: 'Keywords', score: 82, ok: true },
                   ].map(({ label, score, ok }) => (
                     <div key={label} className="flex items-center gap-2">
                       <span className="text-[11px] text-[#8890a4] w-20">{label}</span>
@@ -866,7 +1292,7 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
                   {(Object.entries(prefsTemp)).map(([key, val]) => (
                     <div key={key}>
                       <label className="text-[10px] font-bold text-[#b0b8cc] uppercase tracking-wider block mb-1">{key.replace(/([A-Z])/g, ' $1')}</label>
-                      <input value={val} onChange={e => setPrefsTemp(p => ({...p, [key]: e.target.value}))} className="w-full px-3 py-2 rounded-xl border border-[#e4e8f0] text-[12px] outline-none focus:border-[#6c63ff]" />
+                      <input value={val} onChange={e => setPrefsTemp(p => ({ ...p, [key]: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-[#e4e8f0] text-[12px] outline-none focus:border-[#6c63ff]" />
                     </div>
                   ))}
                   <button onClick={savePrefs} className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>
@@ -900,9 +1326,9 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { value: '8+', label: 'Years Exp', color: '#6c63ff' },
-                  { value: '3',  label: 'Companies', color: '#f59e0b' },
-                  { value: '10', label: 'Skills',    color: '#00c853' },
-                  { value: '4',  label: 'Certs',     color: '#8b5cf6' },
+                  { value: '3', label: 'Companies', color: '#f59e0b' },
+                  { value: '10', label: 'Skills', color: '#00c853' },
+                  { value: '4', label: 'Certs', color: '#8b5cf6' },
                 ].map(({ value, label, color }) => (
                   <div key={label} className="flex flex-col items-center py-3 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0]">
                     <span className="text-[24px] font-black leading-none" style={{ color }}>{value}</span>
@@ -921,8 +1347,8 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
               <div className="flex flex-col gap-3">
                 {[
                   { label: 'Profile Visible to Recruiters', on: true },
-                  { label: 'Show Open to Work Badge',       on: true },
-                  { label: 'Email Notifications',           on: false },
+                  { label: 'Show Open to Work Badge', on: true },
+                  { label: 'Email Notifications', on: false },
                 ].map(({ label, on: initOn }, i) => (
                   <PrivacyToggleItem key={i} label={label} initOn={initOn} onToast={showToast} />
                 ))}

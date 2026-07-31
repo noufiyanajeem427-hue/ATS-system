@@ -46,6 +46,16 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    avatarUrl: {
+      type: String,
+      default: "",
+    },
+
+    coverUrl: {
+      type: String,
+      default: "",
+    },
+
     title: {
       type: String,
       default: "",

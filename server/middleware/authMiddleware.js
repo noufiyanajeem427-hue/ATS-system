@@ -13,7 +13,8 @@ const protect = (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const secret = process.env.JWT_SECRET || "nexhire_jwt_secret_2026";
+      const decoded = jwt.verify(token, secret);
 
       // Save user ID in request
       req.user = decoded.id;
