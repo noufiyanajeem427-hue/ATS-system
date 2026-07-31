@@ -73,6 +73,11 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick, onNavigate }) => {
           <Menu size={20} />
         </button>
 
+        {/* Mobile Brand Logo */}
+        <div className="lg:hidden flex items-center cursor-pointer" onClick={() => onNavigate?.('dashboard')}>
+          <img src="/nexthire-logo.svg" alt="NextHire Logo" className="h-7 w-auto object-contain" />
+        </div>
+
         {/* Search */}
         <div className="flex items-center gap-2.5 bg-[#f4f6fb] border border-[#e4e8f0] rounded-xl px-3.5 w-48 sm:w-72 md:w-80 h-[38px] focus-within:border-[#6c63ff] transition-colors">
           <svg className="text-[#b0b8cc] w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

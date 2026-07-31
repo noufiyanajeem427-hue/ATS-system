@@ -113,6 +113,16 @@ function App() {
     };
   }, [activePage]);
 
+  // Auto-hide Timeout Notice Notification after 3 seconds (3000ms)
+  useEffect(() => {
+    if (timeoutNotice) {
+      const noticeTimer = setTimeout(() => {
+        setTimeoutNotice(null);
+      }, 3000);
+      return () => clearTimeout(noticeTimer);
+    }
+  }, [timeoutNotice]);
+
   // Handle Page Navigation with Loading transition
   const handleNavigate = (page: Page, jobPayload?: any) => {
     // Prevent unauthenticated navigation to portal pages

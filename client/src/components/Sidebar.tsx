@@ -54,19 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, isOpen, onClo
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-[#6c63ff]/20 flex items-center justify-center flex-shrink-0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="8" height="8" rx="2" fill="#6c63ff"/>
-              <rect x="13" y="3" width="8" height="8" rx="2" fill="#6c63ff" opacity=".6"/>
-              <rect x="3" y="13" width="8" height="8" rx="2" fill="#6c63ff" opacity=".6"/>
-              <rect x="13" y="13" width="8" height="8" rx="2" fill="#6c63ff" opacity=".3"/>
-            </svg>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-white font-bold text-base tracking-wider">NexHire</span>
-            <span className="text-[9px] text-[#4a5068] leading-tight mt-0.5">AI-powered Applicant Tracking System</span>
-          </div>
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onNavigate('dashboard')}>
+          <img src="/nexthire-logo.svg" alt="NextHire" className="h-9 w-auto object-contain max-w-[150px]" />
         </div>
 
         {/* Close Button on Mobile */}

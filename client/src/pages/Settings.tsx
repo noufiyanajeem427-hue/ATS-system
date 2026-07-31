@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Topbar from '../components/Topbar';
+import { PageSpinner } from '../components/Loading';
+import { fetchUserProfile, updateUserProfile, changePasswordApi } from '../services/api';
 import {
   User, Bell, Shield, CreditCard, Sparkles,
   Save, Check, X, Smartphone, Laptop
@@ -16,14 +18,15 @@ type TabType = 'account' | 'job' | 'security' | 'notifications' | 'billing';
 const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
   const [activeTab, setActiveTab] = useState<TabType>('account');
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Form states
   const [accountForm, setAccountForm] = useState({
-    fullName: 'Alex Rivera',
-    email: 'alex.rivera@email.com',
-    phone: '+1 (415) 555-0192',
-    location: 'San Francisco, CA',
-    bio: 'Senior Product Designer with 8+ years experience in fintech and AI tools.',
+    fullName: '',
+    email: '',
+    phone: '',
+    location: '',
+    bio: '',
   });
 
   const [passwordForm, setPasswordForm] = useState({
@@ -37,7 +40,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
     autoTailorResume: true,
     recruiterDirectMsg: true,
     smartSalaryFilter: true,
-    minSalary: 180000,
+    minSalary: 120000,
   });
 
   const [notificationsSettings, setNotificationsSettings] = useState({
@@ -51,33 +54,142 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
 
   const [twoFactor, setTwoFactor] = useState(true);
 
+  useEffect(() => {
+    setLoading(true);
+    let defaultName = '';
+    let defaultEmail = '';
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      try {
+        const u = JSON.parse(stored);
+        if (u.name) defaultName = u.name;
+        if (u.email) defaultEmail = u.email;
+      } catch (e) {}
+    }
+
+    fetchUserProfile()
+      .then(userData => {
+        if (userData) {
+          setAccountForm({
+            fullName: userData.name || defaultName || '',
+            email: userData.email || defaultEmail || '',
+            phone: userData.phone || '',
+            location: userData.location || '',
+            bio: userData.bio || '',
+          });
+        } else {
+          setAccountForm(prev => ({
+            ...prev,
+            fullName: defaultName,
+            email: defaultEmail,
+          }));
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const showToast = (msg: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+    }, 3000);
   };
 
-  const handleSaveAccount = (e: React.FormEvent) => {
+  const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    showToast('Account details updated successfully!');
+    showToast('Saving account details...');
+    const res = await updateUserProfile({
+      name: accountForm.fullName,
+      email: accountForm.email,
+      phone: accountForm.phone,
+      location: accountForm.location,
+      bio: accountForm.bio,
+    });
+    if (res) {
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        try {
+          const u = JSON.parse(stored);
+          u.name = accountForm.fullName;
+          u.email = accountForm.email;
+          localStorage.setItem('user', JSON.stringify(u));
+        } catch (e) {}
+      }
+      showToast('Account details updated & saved to database!');
+    } else {
+      showToast('Account updated locally.');
+    }
   };
 
-  const handleSavePassword = (e: React.FormEvent) => {
+  const handleSavePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!passwordForm.currentPassword) {
       showToast('Please enter your current password.');
+      return;
+    }
+    if (!passwordForm.newPassword) {
+      showToast('Please enter a new password.');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      showToast('New password must be at least 6 characters long.');
       return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       showToast('New passwords do not match!');
       return;
     }
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    showToast('Password changed successfully!');
+
+    try {
+      showToast('Updating password in database...');
+      const res = await changePasswordApi({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      showToast(res.message || 'Password changed successfully in database!');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to change password.');
+    }
   };
 
-  const handleSaveAISettings = () => {
-    showToast('AI Match & Job Search preferences saved!');
+  const handleSaveAISettings = async () => {
+    showToast('Saving AI preferences...');
+    await updateUserProfile({
+      preferences: {
+        salary: `${aiSettings.minSalary}`,
+        availability: 'Immediate',
+        workMode: 'Remote',
+        type: 'Full-time',
+      }
+    });
+    showToast('AI Match & Job Search preferences saved to database!');
   };
+
+  const handleSaveAll = async () => {
+    showToast('Saving all settings...');
+    await updateUserProfile({
+      name: accountForm.fullName,
+      email: accountForm.email,
+      phone: accountForm.phone,
+      location: accountForm.location,
+      bio: accountForm.bio,
+    });
+    showToast('All settings saved to database!');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+        <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
+        <PageSpinner label="Loading your account settings from database..." />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
@@ -101,7 +213,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
             <p className="text-sm text-[#8890a4] mt-1">Manage your account preferences, AI matching thresholds, and security.</p>
           </div>
           <button
-            onClick={() => showToast('All settings saved to cloud.')}
+            onClick={handleSaveAll}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5"
             style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.35)' }}
           >

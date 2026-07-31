@@ -229,3 +229,21 @@ export const deleteInterviewApi = async (id: string | number) => {
   }
 };
 
+export const changePasswordApi = async (passwordData: { currentPassword: string; newPassword: string }) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(passwordData),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to change password');
+    }
+    return data;
+  } catch (err: any) {
+    console.error('changePasswordApi error:', err);
+    throw err;
+  }
+};
+

@@ -220,9 +220,13 @@ const Profile: React.FC<ProfileProps> = ({ onMenuClick, onNavigate }) => {
   const completeness = 87;
 
   // ── Handlers ─────────────────────────────────────────────────────
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const showToast = (msg: string, type: 'success' | 'info' = 'success') => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast(msg); setToastType(type);
-    setTimeout(() => setToast(null), 3000);
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+    }, 3000);
   };
 
   // Avatar upload

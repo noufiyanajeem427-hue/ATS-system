@@ -44,6 +44,31 @@ interface InterviewItem {
   score?: number;
 }
 
+const toLocalDateStr = (d: Date | string) => {
+  const dateObj = typeof d === 'string' ? new Date(d) : d;
+  if (isNaN(dateObj.getTime())) return '';
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getRelativeDate = (offsetDays: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return {
+    date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    day: d.toLocaleDateString('en-US', { weekday: 'long' }),
+  };
+};
+
+const dUpcoming1 = getRelativeDate(2);
+const dUpcoming2 = getRelativeDate(4);
+const dUpcoming3 = getRelativeDate(7);
+
+const dPast1 = getRelativeDate(-5);
+const dPast2 = getRelativeDate(-12);
+
 const upcomingInterviews: InterviewItem[] = [
   {
     id: 1,
@@ -54,8 +79,8 @@ const upcomingInterviews: InterviewItem[] = [
     type: 'Technical Round',
     typeColor: '#6c63ff',
     typeBg: '#6c63ff18',
-    date: 'Oct 24, 2023',
-    day: 'Wednesday',
+    date: dUpcoming1.date,
+    day: dUpcoming1.day,
     time: '10:00 AM – 11:30 AM',
     duration: '90 min',
     interviewer: 'Sarah Chen',
@@ -76,8 +101,8 @@ const upcomingInterviews: InterviewItem[] = [
     type: 'Design Portfolio Review',
     typeColor: '#f59e0b',
     typeBg: '#f59e0b18',
-    date: 'Oct 27, 2023',
-    day: 'Friday',
+    date: dUpcoming2.date,
+    day: dUpcoming2.day,
     time: '2:00 PM – 3:00 PM',
     duration: '60 min',
     interviewer: 'James Park',
@@ -98,8 +123,8 @@ const upcomingInterviews: InterviewItem[] = [
     type: 'Final Round',
     typeColor: '#00c853',
     typeBg: '#00c85318',
-    date: 'Nov 2, 2023',
-    day: 'Thursday',
+    date: dUpcoming3.date,
+    day: dUpcoming3.day,
     time: '11:00 AM – 12:30 PM',
     duration: '90 min',
     interviewer: 'Priya Sharma',
@@ -119,14 +144,14 @@ const pastInterviews: InterviewItem[] = [
     role: 'Product Design Lead',
     company: 'Airbnb',
     companyLogo: 'AB',
-    logoBg: 'linear-gradient(135deg,#ff5a5f,#c2185b)',
-    type: 'Screening Call',
-    typeColor: '#8890a4',
-    typeBg: '#e4e8f0',
-    date: 'Oct 15, 2023',
-    day: 'Sunday',
-    time: '3:00 PM – 3:30 PM',
-    duration: '30 min',
+    logoBg: 'linear-gradient(135deg,#ff5a5f,#d70466)',
+    type: 'Behavioral Round',
+    typeColor: '#6c63ff',
+    typeBg: '#6c63ff18',
+    date: dPast1.date,
+    day: dPast1.day,
+    time: '4:00 PM – 5:00 PM',
+    duration: '60 min',
     interviewer: 'Mike Torres',
     interviewerTitle: 'HR Manager',
     round: 'Round 1',
@@ -147,8 +172,8 @@ const pastInterviews: InterviewItem[] = [
     type: 'Technical Assessment',
     typeColor: '#8890a4',
     typeBg: '#e4e8f0',
-    date: 'Oct 10, 2023',
-    day: 'Tuesday',
+    date: dPast2.date,
+    day: dPast2.day,
     time: '1:00 PM – 2:30 PM',
     duration: '90 min',
     interviewer: 'Anna Kim',
@@ -176,17 +201,6 @@ const aiTips = [
   { icon: <Sparkles size={14} className="text-[#6c63ff]" />, tip: 'Mention your Design System impact at Meta — Netflix values systematic thinking.' },
   { icon: <TrendingUp size={14} className="text-[#00c853]" />, tip: 'Sarah Chen focuses on cross-functional collaboration. Highlight your PM partnerships.' },
   { icon: <Star size={14} className="text-[#f59e0b]" />, tip: 'Round 3 is typically the toughest. Expect deep dives on past decisions.' },
-];
-
-const calendarDays = [
-  { date: 20, day: 'Fri', hasInterview: false },
-  { date: 21, day: 'Sat', hasInterview: false },
-  { date: 22, day: 'Sun', hasInterview: false },
-  { date: 23, day: 'Mon', hasInterview: false },
-  { date: 24, day: 'Tue', hasInterview: true, company: 'Netflix' },
-  { date: 25, day: 'Wed', hasInterview: false },
-  { date: 26, day: 'Thu', hasInterview: false },
-  { date: 27, day: 'Fri', hasInterview: true, company: 'Nova' },
 ];
 
 const formatBackendInterview = (item: any): InterviewItem => {
@@ -325,7 +339,35 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
     return `${m}:${s}`;
   };
 
-  const today = 24;
+  // Selected Date Filter State
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+
+  // Dynamic Real Week State
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
+    const todayDate = new Date();
+    const dayOfWeek = todayDate.getDay();
+    const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(todayDate);
+    monday.setDate(todayDate.getDate() + distanceToMonday);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  });
+
+  const prevWeek = () => {
+    setCurrentWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - 7);
+      return d;
+    });
+  };
+
+  const nextWeek = () => {
+    setCurrentWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + 7);
+      return d;
+    });
+  };
 
   const loadInterviews = async () => {
     try {
@@ -408,8 +450,49 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
   const allUpcoming = [...liveUpcoming, ...upcomingInterviews];
   const allPast = [...livePast, ...pastInterviews];
 
-  const interviews = tab === 'upcoming' ? allUpcoming : allPast;
+  const baseInterviews = tab === 'upcoming' ? allUpcoming : allPast;
+  const interviews = selectedDateStr
+    ? baseInterviews.filter(iv => iv.date && toLocalDateStr(iv.date) === selectedDateStr)
+    : baseInterviews;
   const nextInterview = allUpcoming[0];
+
+  // Calculate 7 days for active week (Mon - Sun)
+  const todayStr = toLocalDateStr(new Date());
+
+  const weekDays = Array.from({ length: 7 }).map((_, idx) => {
+    const dayDate = new Date(currentWeekStart);
+    dayDate.setDate(currentWeekStart.getDate() + idx);
+    const dayName = dayDate.toLocaleDateString('en-US', { weekday: 'short' });
+    const dayNum = dayDate.getDate();
+    const fullDateStr = toLocalDateStr(dayDate);
+    const isToday = fullDateStr === todayStr;
+
+    // Find matching interview for this day
+    const matchingInterview = allUpcoming.find(iv => {
+      if (iv.date) {
+        return toLocalDateStr(iv.date) === fullDateStr;
+      }
+      return false;
+    });
+
+    return {
+      day: dayName,
+      dateNum: dayNum,
+      fullDateStr,
+      isToday,
+      hasInterview: !!matchingInterview,
+      company: matchingInterview?.company || '',
+    };
+  });
+
+  const formatMonthYear = () => {
+    const endOfWeek = new Date(currentWeekStart);
+    endOfWeek.setDate(currentWeekStart.getDate() + 6);
+    const startMonth = currentWeekStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const endMonth = endOfWeek.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (startMonth === endMonth) return startMonth;
+    return `${currentWeekStart.toLocaleDateString('en-US', { month: 'short' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
@@ -741,44 +824,56 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
           {/* ── Left Column ── */}
           <div className="flex flex-col gap-5">
 
-            {/* Mini Calendar Strip */}
+            {/* Dynamic Mini Calendar Strip */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-[15px] font-extrabold text-[#1a1a2e]">October 2023</h3>
-                  <p className="text-[11px] text-[#8890a4]">This week's schedule</p>
-                </div>
+                  <h3 className="text-[15px] font-extrabold text-[#1a1a2e]">{formatMonthYear()}</h3>
                 <div className="flex gap-1">
-                  <button onClick={() => showToast('Previous week')} className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]"><ChevronLeft size={14} /></button>
-                  <button onClick={() => showToast('Next week')}     className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]"><ChevronRight size={14} /></button>
+                  <button onClick={prevWeek} className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]" title="Previous Week"><ChevronLeft size={14} /></button>
+                  <button onClick={nextWeek} className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]" title="Next Week"><ChevronRight size={14} /></button>
                 </div>
               </div>
-              <div className="grid grid-cols-8 gap-2">
-                {calendarDays.map(d => (
-                  <div
-                    key={d.date}
-                    className={`flex flex-col items-center gap-1.5 py-3 rounded-xl cursor-pointer transition-all ${
-                      d.date === today
-                        ? 'text-white'
-                        : d.hasInterview
-                        ? 'bg-[#6c63ff]/8 hover:bg-[#6c63ff]/15'
-                        : 'hover:bg-[#f4f6fb]'
-                    }`}
-                    style={d.date === today ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' } : {}}
-                    onClick={() => d.hasInterview && showToast(`Interview: ${d.company}`)}
-                  >
-                    <span className={`text-[10px] font-bold ${d.date === today ? 'text-white/70' : 'text-[#b0b8cc]'}`}>{d.day}</span>
-                    <span className={`text-[16px] font-extrabold ${d.date === today ? 'text-white' : d.hasInterview ? 'text-[#6c63ff]' : 'text-[#1a1a2e]'}`}>{d.date}</span>
-                    {d.hasInterview && d.date !== today && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#6c63ff]" />
-                    )}
-                    {d.date === today && <span className="w-1.5 h-1.5 rounded-full bg-white/60" />}
-                  </div>
-                ))}
+              <div className="grid grid-cols-7 gap-2">
+                {weekDays.map(d => {
+                  const isSelected = selectedDateStr === d.fullDateStr;
+                  return (
+                    <div
+                      key={d.fullDateStr}
+                      className={`flex flex-col items-center gap-1.5 py-3 rounded-xl cursor-pointer transition-all ${
+                        isSelected
+                          ? 'ring-2 ring-[#6c63ff] bg-[#6c63ff]/15 shadow-md'
+                          : d.isToday
+                          ? 'text-white shadow-md'
+                          : d.hasInterview
+                          ? 'bg-[#6c63ff]/8 hover:bg-[#6c63ff]/15'
+                          : 'hover:bg-[#f4f6fb]'
+                      }`}
+                      style={d.isToday && !isSelected ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' } : {}}
+                      onClick={() => {
+                        if (selectedDateStr === d.fullDateStr) {
+                          setSelectedDateStr(null);
+                          showToast('Showing all interviews');
+                        } else {
+                          setSelectedDateStr(d.fullDateStr);
+                          const dateFormatted = new Date(d.fullDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                          showToast(`Filtering for ${dateFormatted}`);
+                        }
+                      }}
+                    >
+                      <span className={`text-[10px] font-bold ${d.isToday && !isSelected ? 'text-white/80' : isSelected ? 'text-[#6c63ff]' : 'text-[#b0b8cc]'}`}>{d.day}</span>
+                      <span className={`text-[16px] font-extrabold ${d.isToday && !isSelected ? 'text-white' : isSelected ? 'text-[#6c63ff]' : d.hasInterview ? 'text-[#6c63ff]' : 'text-[#1a1a2e]'}`}>{d.dateNum}</span>
+                      {d.hasInterview && !d.isToday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#6c63ff]" />
+                      )}
+                      {d.isToday && <span className="w-1.5 h-1.5 rounded-full bg-white/70" />}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Tab Bar */}
+            {/* Tab Bar & Date Filter Banner */}
             <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 overflow-hidden">
               <div className="flex border-b border-[#e4e8f0]">
                 {(['upcoming', 'past'] as TabType[]).map(t => (
@@ -795,9 +890,31 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                 ))}
               </div>
 
+              {/* Selected Date Filter Banner */}
+              {selectedDateStr && (
+                <div className="flex items-center justify-between px-5 py-3.5 bg-[#6c63ff]/8 border-b border-[#6c63ff]/20">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#6c63ff]">
+                    <Calendar size={14} />
+                    <span>Schedule for {new Date(selectedDateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} ({interviews.length} interview(s))</span>
+                  </div>
+                  <button onClick={() => setSelectedDateStr(null)} className="text-[11px] font-bold text-[#6c63ff] hover:underline bg-transparent border-none cursor-pointer flex items-center gap-1">
+                    Show All <X size={12} />
+                  </button>
+                </div>
+              )}
+
               {/* Interview Cards */}
               <div className="divide-y divide-[#f0f2f8]">
-                {interviews.map(iv => (
+                {interviews.length === 0 ? (
+                  <div className="p-8 text-center bg-[#f8f9fc]">
+                    <Calendar size={28} className="mx-auto text-[#b0b8cc] mb-2" />
+                    <p className="text-[13px] font-bold text-[#4a5068]">No Interviews Scheduled For This Day</p>
+                    <p className="text-[11px] text-[#8890a4] mt-1 mb-3">There are no interviews scheduled on this selected date.</p>
+                    <button onClick={() => setSelectedDateStr(null)} className="px-4 py-2 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}>
+                      Show All Interviews
+                    </button>
+                  </div>
+                ) : interviews.map(iv => (
                   <div key={iv.id} className="p-5">
                     {/* Card Header */}
                     <div className="flex items-start gap-4">
@@ -992,8 +1109,6 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                 </div>
                 <span className="text-[12px] font-bold text-[#6c63ff]">{prepPct}%</span>
               </div>
-
-              {/* Progress bar */}
               <div className="h-1.5 bg-[#f0f2f8] rounded-full mb-4 overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${prepPct}%`, background: 'linear-gradient(90deg,#6c63ff,#8b5cf6)' }} />
               </div>
@@ -1066,7 +1181,8 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default Interview;
