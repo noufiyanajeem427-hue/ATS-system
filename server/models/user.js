@@ -46,6 +46,16 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    resetPasswordToken: {
+      type: String,
+      default: "",
+    },
+
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+    },
+
     avatarUrl: {
       type: String,
       default: "",
