@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+<<<<<<< HEAD
 
     title: {
       type: String,
@@ -162,6 +163,17 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
+=======
+    resetPasswordToken: {
+  type: String,
+  default: "",
+},
+
+resetPasswordExpire: {
+  type: Date,
+  default: null,
+},
+>>>>>>> main
   },
   {
     timestamps: true,
