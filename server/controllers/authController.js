@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -196,10 +198,93 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
+// Forgot Password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset",
+      text: `Click this link to reset your password: ${resetLink}`,
+    });
+
+    res.status(200).json({
+      message: "Password reset email sent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Reset Password
+const resetPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = "";
+    user.resetPasswordExpire = null;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUser,
   loginUser,
+  forgotPassword,
+  resetPassword,
   getUserProfile,
   uploadResume,
   updateProfile,
