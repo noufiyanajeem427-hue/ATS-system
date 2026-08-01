@@ -5,7 +5,12 @@ const jobSchema = new mongoose.Schema(
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      required: true,
+      required: false,
+    },
+
+    company: {
+      type: String,
+      default: "Tech Company",
     },
 
     title: {
@@ -15,28 +20,37 @@ const jobSchema = new mongoose.Schema(
 
     slug: {
       type: String,
-      required: true,
-      unique: true,
+      required: false,
     },
 
     description: {
       type: String,
-      required: true,
+      default: "",
     },
 
     job_type: {
       type: String,
-      required: true,
+      default: "Full-time",
     },
 
     work_mode: {
       type: String,
-      required: true,
+      default: "Remote",
     },
 
     location: {
       type: String,
-      required: true,
+      default: "Remote",
+    },
+
+    match: {
+      type: Number,
+      default: 90,
+    },
+
+    salary: {
+      type: String,
+      default: "$120k - $180k",
     },
 
     experience_min: {
@@ -111,4 +125,4 @@ const jobSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Job", jobSchema);
+module.exports = mongoose.models.Job || mongoose.model("Job", jobSchema);
