@@ -58,10 +58,8 @@ function App() {
     return Boolean(token || user);
   };
 
-  // Require Login First: Default to login page if user is not authenticated
-  const [activePage, setActivePage] = useState<Page>(() => {
-    return isAuthenticated() ? 'dashboard' : 'login';
-  });
+  // Require Login First: Always default to login page when opening the portal
+  const [activePage, setActivePage] = useState<Page>('login');
 
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [pageLoading, setPageLoading] = useState(false);
