@@ -13,6 +13,7 @@ import axios from '../../../api/axiosConfig';
 const CandidateRanking = () => {
   const [loading, setLoading] = useState(true);
   const [candidates, setCandidates] = useState([]);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('score');
 
