@@ -12,7 +12,6 @@ const PrivateRoute = () => {
       </div>
     );
   }
-
   return isAuthenticated ? <Outlet /> : <Navigate to="/auth/login" />;
 };
 
