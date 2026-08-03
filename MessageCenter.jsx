@@ -18,6 +18,7 @@ const MessageCenter = () => {
   const [activeTab, setActiveTab] = useState('inbox');
   const [showCompose, setShowCompose] = useState(false);
   const [composeData, setComposeData] = useState({
+    
     recipient: '',
     recipientName: '',
     subject: '',
