@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Topbar from '../components/Topbar';
 import {
   Video, Calendar, Clock, MapPin, ExternalLink,
@@ -8,7 +8,6 @@ import {
   Bell, MoreHorizontal, Phone
 } from 'lucide-react';
 import { Page } from '../App';
-import { fetchInterviewsApi } from '../services/api';
 
 interface InterviewProps {
   onMenuClick?: () => void;
@@ -53,15 +52,15 @@ const upcomingInterviews: InterviewItem[] = [
     logoBg: 'linear-gradient(135deg,#e50914,#831010)',
     type: 'Technical Round',
     typeColor: '#6c63ff',
-    typeBg: '#6c63ff18',
+    typeBg: 'rgba(108,99,255,0.12)',
     date: 'Oct 24, 2023',
-    day: 'Wednesday',
-    time: '10:00 AM – 11:30 AM',
-    duration: '90 min',
+    day: 'Tomorrow',
+    time: '10:00 AM',
+    duration: '60 min',
     interviewer: 'Sarah Chen',
     interviewerTitle: 'Engineering Manager',
-    round: 'Round 3',
-    roundNum: 3,
+    round: 'Round 2',
+    roundNum: 2,
     totalRounds: 4,
     mode: 'video',
     link: 'https://meet.google.com/abc-defg-hij',
@@ -69,113 +68,91 @@ const upcomingInterviews: InterviewItem[] = [
   },
   {
     id: 2,
-    role: 'Lead UI Engineer',
-    company: 'Nova Capital',
-    companyLogo: 'NC',
-    logoBg: 'linear-gradient(135deg,#f093fb,#f5576c)',
-    type: 'Design Portfolio Review',
-    typeColor: '#f59e0b',
-    typeBg: '#f59e0b18',
+    role: 'Design Systems Architect',
+    company: 'Nova AI',
+    companyLogo: 'NA',
+    logoBg: 'linear-gradient(135deg,#8b5cf6,#6366f1)',
+    type: 'Portfolio Review',
+    typeColor: '#00c853',
+    typeBg: 'rgba(0,200,83,0.12)',
     date: 'Oct 27, 2023',
     day: 'Friday',
-    time: '2:00 PM – 3:00 PM',
-    duration: '60 min',
-    interviewer: 'James Park',
-    interviewerTitle: 'Creative Director',
-    round: 'Round 2',
-    roundNum: 2,
-    totalRounds: 3,
-    mode: 'video',
-    link: 'https://zoom.us/j/12345678',
-    status: 'scheduled',
-  },
-  {
-    id: 3,
-    role: 'UX Research Lead',
-    company: 'Verdant Labs',
-    companyLogo: 'VL',
-    logoBg: 'linear-gradient(135deg,#4facfe,#00f2fe)',
-    type: 'Final Round',
-    typeColor: '#00c853',
-    typeBg: '#00c85318',
-    date: 'Nov 2, 2023',
-    day: 'Thursday',
-    time: '11:00 AM – 12:30 PM',
-    duration: '90 min',
-    interviewer: 'Priya Sharma',
+    time: '2:30 PM',
+    duration: '45 min',
+    interviewer: 'Marcus Vance',
     interviewerTitle: 'Head of Product',
-    round: 'Round 4',
-    roundNum: 4,
+    round: 'Round 3',
+    roundNum: 3,
     totalRounds: 4,
-    mode: 'onsite',
-    location: 'Berlin, DE · Floor 5',
+    mode: 'video',
+    link: 'https://zoom.us/j/123456789',
     status: 'scheduled',
   },
 ];
 
 const pastInterviews: InterviewItem[] = [
   {
-    id: 4,
-    role: 'Product Design Lead',
-    company: 'Airbnb',
-    companyLogo: 'AB',
-    logoBg: 'linear-gradient(135deg,#ff5a5f,#c2185b)',
-    type: 'Screening Call',
-    typeColor: '#8890a4',
-    typeBg: '#e4e8f0',
-    date: 'Oct 15, 2023',
-    day: 'Sunday',
-    time: '3:00 PM – 3:30 PM',
-    duration: '30 min',
-    interviewer: 'Mike Torres',
-    interviewerTitle: 'HR Manager',
-    round: 'Round 1',
-    roundNum: 1,
-    totalRounds: 3,
-    mode: 'phone',
-    status: 'completed',
-    result: 'passed',
-    feedback: 'Great communication skills. Strong design background.',
-    score: 88,
-  },
-  {
-    id: 5,
-    role: 'Senior UX Designer',
-    company: 'Stripe',
-    companyLogo: 'ST',
-    logoBg: 'linear-gradient(135deg,#6772e5,#4b50d4)',
-    type: 'Technical Assessment',
-    typeColor: '#8890a4',
-    typeBg: '#e4e8f0',
-    date: 'Oct 10, 2023',
-    day: 'Tuesday',
-    time: '1:00 PM – 2:30 PM',
-    duration: '90 min',
-    interviewer: 'Anna Kim',
-    interviewerTitle: 'Principal Designer',
-    round: 'Round 2',
-    roundNum: 2,
-    totalRounds: 3,
+    id: 3,
+    role: 'Lead UI/UX Designer',
+    company: 'Verdant Labs',
+    companyLogo: 'VL',
+    logoBg: 'linear-gradient(135deg,#10b981,#047857)',
+    type: 'Final Executive Screen',
+    typeColor: '#00c853',
+    typeBg: 'rgba(0,200,83,0.12)',
+    date: 'Oct 18, 2023',
+    day: 'Wed',
+    time: '11:00 AM',
+    duration: '45 min',
+    interviewer: 'Elena Rostova',
+    interviewerTitle: 'VP of Product',
+    round: 'Round 4',
+    roundNum: 4,
+    totalRounds: 4,
     mode: 'video',
     status: 'completed',
     result: 'passed',
-    feedback: 'Exceptional portfolio. Excellent systems thinking.',
-    score: 94,
+    feedback: 'Outstanding system thinking and communication skills. Offer extended.',
+    score: 96,
+  },
+  {
+    id: 4,
+    role: 'Principal Product Designer',
+    company: 'Stripe',
+    companyLogo: 'ST',
+    logoBg: 'linear-gradient(135deg,#635bff,#0a2540)',
+    type: 'Screening Call',
+    typeColor: '#6c63ff',
+    typeBg: 'rgba(108,99,255,0.12)',
+    date: 'Oct 12, 2023',
+    day: 'Thu',
+    time: '3:00 PM',
+    duration: '30 min',
+    interviewer: 'David Miller',
+    interviewerTitle: 'Senior Recruiter',
+    round: 'Round 1',
+    roundNum: 1,
+    totalRounds: 4,
+    mode: 'phone',
+    status: 'completed',
+    result: 'passed',
+    feedback: 'Clear articulation of career achievements. Advanced to portfolio review.',
+    score: 92,
   },
 ];
 
 const prepChecklist = [
-  { id: 1, task: 'Research company culture & recent news', done: true },
-  { id: 2, task: 'Prepare STAR-format stories for behavioral questions', done: true },
-  { id: 3, task: 'Review Netflix Design System case studies', done: false },
-  { id: 4, task: 'Test audio/video setup for the call', done: false },
-  { id: 5, task: 'Prepare 3 thoughtful questions to ask', done: false },
+  { id: 1, task: 'Review job requirements & matching score analysis', done: true },
+  { id: 2, task: 'Prepare 3 STAR-method story examples of past projects', done: true },
+  { id: 3, task: 'Test webcam, microphone, and internet connection', done: true },
+  { id: 4, task: 'Research interviewer background & company news', done: false },
+  { id: 5, task: 'Prepare 3 thoughtful questions to ask the interviewer', done: false },
 ];
 
 const aiTips = [
-  { icon: <Sparkles size={14} className="text-[#6c63ff]" />, tip: 'Mention your Design System impact at Meta — Netflix values systematic thinking.' },
-  { icon: <TrendingUp size={14} className="text-[#00c853]" />, tip: 'Sarah Chen focuses on cross-functional collaboration. Highlight your PM partnerships.' },
-  { icon: <Star size={14} className="text-[#f59e0b]" />, tip: 'Round 3 is typically the toughest. Expect deep dives on past decisions.' },
+  { icon: <Sparkles size={14} className="text-[#6c63ff]" />, tip: "Focus on quantified impacts: mention how your design system reduced sprint dev time by 25%." },
+  { icon: <Zap size={14} className="text-[#00c853]" />, tip: "Use the STAR method: Situation, Task, Action, Result for behavioral questions." },
+  { icon: <TrendingUp size={14} className="text-[#f59e0b]" />, tip: "Netflix values high autonomy and candor: emphasize independent decision making." },
 ];
 
 const calendarDays = [
@@ -217,7 +194,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
   const interviews = tab === 'upcoming' ? upcomingInterviews : pastInterviews;
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast */}
@@ -234,11 +211,11 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
         {/* Page Header */}
         <div className="flex items-start justify-between mb-7 flex-wrap gap-3">
           <div>
-            <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] tracking-tight">Interviews</h1>
-            <p className="text-sm text-[#8890a4] mt-1">You have <span className="font-bold text-[#6c63ff]">{upcomingInterviews.length} upcoming</span> interviews this week.</p>
+            <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] dark:text-[#f8fafc] tracking-tight">Interviews</h1>
+            <p className="text-sm text-[#8890a4] dark:text-[#94a3b8] mt-1">You have <span className="font-bold text-[#6c63ff] dark:text-[#a78bfa]">{upcomingInterviews.length} upcoming</span> interviews this week.</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => showToast('Interview reminder set!')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-white border border-[#e4e8f0] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all cursor-pointer">
+            <button onClick={() => showToast('Interview reminder set!')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all cursor-pointer">
               <Bell size={14} /> Set Reminder
             </button>
             <button onClick={() => showToast('Opening calendar sync...')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 4px 14px rgba(108,99,255,0.35)' }}>
@@ -250,18 +227,18 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
         {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-7">
           {[
-            { label: 'Upcoming',  value: upcomingInterviews.length, icon: <Calendar size={16} className="text-[#6c63ff]" />, color: '#6c63ff', bg: '#6c63ff12' },
-            { label: 'Completed', value: pastInterviews.length,     icon: <CheckCircle2 size={16} className="text-[#00c853]" />, color: '#00c853', bg: '#00c85312' },
-            { label: 'Pass Rate', value: '100%',                    icon: <TrendingUp size={16} className="text-[#f59e0b]" />,   color: '#f59e0b', bg: '#f59e0b12' },
-            { label: 'Avg Score', value: '91%',                     icon: <Star size={16} className="text-[#8b5cf6]" />,          color: '#8b5cf6', bg: '#8b5cf612' },
+            { label: 'Upcoming',  value: upcomingInterviews.length, icon: <Calendar size={16} className="text-[#6c63ff]" />, color: '#6c63ff', bg: 'rgba(108,99,255,0.12)' },
+            { label: 'Completed', value: pastInterviews.length,     icon: <CheckCircle2 size={16} className="text-[#00c853]" />, color: '#00c853', bg: 'rgba(0,200,83,0.12)' },
+            { label: 'Pass Rate', value: '100%',                    icon: <TrendingUp size={16} className="text-[#f59e0b]" />,   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+            { label: 'Avg Score', value: '91%',                     icon: <Star size={16} className="text-[#8b5cf6]" />,          color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm border border-[#e4e8f0]/60 flex items-center gap-3 hover:shadow-md transition-all">
+            <div key={s.label} className="bg-white dark:bg-[#111827] rounded-2xl p-4 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] flex items-center gap-3 hover:shadow-md transition-all">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: s.bg }}>
                 {s.icon}
               </div>
               <div>
                 <div className="text-[22px] font-black leading-none" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-[11px] text-[#8890a4] font-medium mt-0.5">{s.label}</div>
+                <div className="text-[11px] text-[#8890a4] dark:text-[#94a3b8] font-medium mt-0.5">{s.label}</div>
               </div>
             </div>
           ))}
@@ -273,15 +250,15 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
           <div className="flex flex-col gap-5">
 
             {/* Mini Calendar Strip */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-[15px] font-extrabold text-[#1a1a2e]">October 2023</h3>
-                  <p className="text-[11px] text-[#8890a4]">This week's schedule</p>
+                  <h3 className="text-[15px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">October 2023</h3>
+                  <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">This week's schedule</p>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => showToast('Previous week')} className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]"><ChevronLeft size={14} /></button>
-                  <button onClick={() => showToast('Next week')}     className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068]"><ChevronRight size={14} /></button>
+                  <button onClick={() => showToast('Previous week')} className="w-7 h-7 rounded-lg bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068] dark:text-[#cbd5e1]"><ChevronLeft size={14} /></button>
+                  <button onClick={() => showToast('Next week')}     className="w-7 h-7 rounded-lg bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 text-[#4a5068] dark:text-[#cbd5e1]"><ChevronRight size={14} /></button>
                 </div>
               </div>
               <div className="grid grid-cols-8 gap-2">
@@ -292,14 +269,14 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                       d.date === today
                         ? 'text-white'
                         : d.hasInterview
-                        ? 'bg-[#6c63ff]/8 hover:bg-[#6c63ff]/15'
-                        : 'hover:bg-[#f4f6fb]'
+                        ? 'bg-[#6c63ff]/8 dark:bg-[#6c63ff]/20 hover:bg-[#6c63ff]/15'
+                        : 'hover:bg-[#f4f6fb] dark:hover:bg-[#161e2e]'
                     }`}
                     style={d.date === today ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' } : {}}
                     onClick={() => d.hasInterview && showToast(`Interview: ${d.company}`)}
                   >
-                    <span className={`text-[10px] font-bold ${d.date === today ? 'text-white/70' : 'text-[#b0b8cc]'}`}>{d.day}</span>
-                    <span className={`text-[16px] font-extrabold ${d.date === today ? 'text-white' : d.hasInterview ? 'text-[#6c63ff]' : 'text-[#1a1a2e]'}`}>{d.date}</span>
+                    <span className={`text-[10px] font-bold ${d.date === today ? 'text-white/70' : 'text-[#b0b8cc] dark:text-[#64748b]'}`}>{d.day}</span>
+                    <span className={`text-[16px] font-extrabold ${d.date === today ? 'text-white' : d.hasInterview ? 'text-[#6c63ff] dark:text-[#a78bfa]' : 'text-[#1a1a2e] dark:text-[#f8fafc]'}`}>{d.date}</span>
                     {d.hasInterview && d.date !== today && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#6c63ff]" />
                     )}
@@ -310,14 +287,14 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* Tab Bar */}
-            <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 overflow-hidden">
-              <div className="flex border-b border-[#e4e8f0]">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] overflow-hidden">
+              <div className="flex border-b border-[#e4e8f0] dark:border-[#1f2d42]">
                 {(['upcoming', 'past'] as TabType[]).map(t => (
                   <button
                     key={t}
                     onClick={() => setTab(t)}
                     className={`flex-1 py-3.5 text-[13px] font-bold capitalize transition-all border-none cursor-pointer ${
-                      tab === t ? 'text-[#6c63ff] bg-[#6c63ff]/5' : 'text-[#8890a4] bg-transparent hover:text-[#4a5068]'
+                      tab === t ? 'text-[#6c63ff] dark:text-[#a78bfa] bg-[#6c63ff]/5' : 'text-[#8890a4] dark:text-[#94a3b8] bg-transparent hover:text-[#4a5068] dark:hover:text-[#cbd5e1]'
                     }`}
                     style={{ borderBottom: tab === t ? '2px solid #6c63ff' : '2px solid transparent' }}
                   >
@@ -327,13 +304,13 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
               </div>
 
               {/* Interview Cards */}
-              <div className="divide-y divide-[#f0f2f8]">
+              <div className="divide-y divide-[#f0f2f8] dark:divide-[#1f2d42]">
                 {interviews.map(iv => (
                   <div key={iv.id} className="p-5">
                     {/* Card Header */}
                     <div className="flex items-start gap-4">
                       {/* Logo */}
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[13px] font-black text-white flex-shrink-0" style={{ background: iv.logoBg }}>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[13px] font-black text-white flex-shrink-0 shadow-sm" style={{ background: iv.logoBg }}>
                         {iv.companyLogo}
                       </div>
 
@@ -341,12 +318,12 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 flex-wrap">
                           <div>
-                            <h3 className="text-[15px] font-extrabold text-[#1a1a2e]">{iv.role}</h3>
+                            <h3 className="text-[15px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">{iv.role}</h3>
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                              <span className="flex items-center gap-1 text-[12px] text-[#8890a4]">
+                              <span className="flex items-center gap-1 text-[12px] text-[#8890a4] dark:text-[#94a3b8]">
                                 <Building2 size={11} /> {iv.company}
                               </span>
-                              <span className="text-[#e4e8f0]">•</span>
+                              <span className="text-[#e4e8f0] dark:text-[#1f2d42]">•</span>
                               <span
                                 className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                 style={{ color: iv.typeColor, background: iv.typeBg }}
@@ -358,7 +335,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
 
                           {/* Round badge */}
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-[#8890a4] bg-[#f4f6fb] px-2.5 py-1 rounded-full">
+                            <span className="text-[10px] font-bold text-[#8890a4] dark:text-[#94a3b8] bg-[#f4f6fb] dark:bg-[#161e2e] px-2.5 py-1 rounded-full">
                               {iv.round} of {iv.totalRounds}
                             </span>
                             {tab === 'past' && iv.result && (
@@ -371,15 +348,15 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
 
                         {/* Date/Time/Mode */}
                         <div className="flex flex-wrap gap-4 mt-3">
-                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068]">
-                            <Calendar size={13} className="text-[#8890a4]" />
+                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068] dark:text-[#cbd5e1]">
+                            <Calendar size={13} className="text-[#8890a4] dark:text-[#94a3b8]" />
                             {iv.day}, {iv.date}
                           </div>
-                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068]">
-                            <Clock size={13} className="text-[#8890a4]" />
+                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068] dark:text-[#cbd5e1]">
+                            <Clock size={13} className="text-[#8890a4] dark:text-[#94a3b8]" />
                             {iv.time} · {iv.duration}
                           </div>
-                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068]">
+                          <div className="flex items-center gap-1.5 text-[12px] text-[#4a5068] dark:text-[#cbd5e1]">
                             {modeIcon(iv.mode)}
                             {iv.mode === 'video' ? 'Video Call' : iv.mode === 'phone' ? 'Phone Call' : iv.location || 'On-site'}
                           </div>
@@ -390,17 +367,17 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#8b5cf6] flex items-center justify-center text-[9px] font-black text-white">
                             {iv.interviewer.charAt(0)}
                           </div>
-                          <span className="text-[11px] text-[#4a5068]">
-                            <span className="font-semibold">{iv.interviewer}</span> · {iv.interviewerTitle}
+                          <span className="text-[11px] text-[#4a5068] dark:text-[#cbd5e1]">
+                            <span className="font-semibold text-[#1a1a2e] dark:text-[#f8fafc]">{iv.interviewer}</span> · {iv.interviewerTitle}
                           </span>
                         </div>
 
                         {/* Past feedback */}
                         {tab === 'past' && iv.feedback && (
-                          <div className="mt-3 px-3 py-2.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] text-[11px] text-[#4a5068] italic">
+                          <div className="mt-3 px-3 py-2.5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] text-[11px] text-[#4a5068] dark:text-[#cbd5e1] italic">
                             "{iv.feedback}"
                             {iv.score && (
-                              <span className="not-italic font-bold text-[#6c63ff] ml-2">— Score: {iv.score}/100</span>
+                              <span className="not-italic font-bold text-[#6c63ff] dark:text-[#a78bfa] ml-2">— Score: {iv.score}/100</span>
                             )}
                           </div>
                         )}
@@ -419,7 +396,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                           {tab === 'upcoming' && (
                             <button
                               onClick={() => setExpandedId(expandedId === iv.id ? null : iv.id)}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border-none cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all"
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-[#f4f6fb] dark:bg-[#161e2e] border-none cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all"
                             >
                               <BookOpen size={12} /> Prep Guide
                             </button>
@@ -427,12 +404,12 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                           {tab === 'past' && (
                             <button
                               onClick={() => showToast('Opening interview debrief...')}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border-none cursor-pointer hover:text-[#6c63ff] transition-all"
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-[#f4f6fb] dark:bg-[#161e2e] border-none cursor-pointer hover:text-[#6c63ff] transition-all"
                             >
                               <BookOpen size={12} /> View Debrief
                             </button>
                           )}
-                          <button onClick={() => showToast('Rescheduling...')} className="w-8 h-8 rounded-xl bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 hover:text-[#6c63ff] transition-colors text-[#8890a4]">
+                          <button onClick={() => showToast('Rescheduling...')} className="w-8 h-8 rounded-xl bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 hover:text-[#6c63ff] transition-colors text-[#8890a4] dark:text-[#94a3b8]">
                             <MoreHorizontal size={15} />
                           </button>
                         </div>
@@ -451,7 +428,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                           }}
                         />
                       ))}
-                      <span className="text-[10px] text-[#b0b8cc] ml-1">{iv.roundNum}/{iv.totalRounds} rounds</span>
+                      <span className="text-[10px] text-[#b0b8cc] dark:text-[#64748b] ml-1">{iv.roundNum}/{iv.totalRounds} rounds</span>
                     </div>
                   </div>
                 ))}
@@ -464,7 +441,7 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
 
             {/* Next Interview Countdown */}
             <div
-              className="rounded-2xl p-5 relative overflow-hidden"
+              className="rounded-2xl p-5 relative overflow-hidden border border-[#1f2d42]"
               style={{ background: 'linear-gradient(145deg,#1a1a2e,#16213e)' }}
             >
               <div className="absolute top-0 right-0 w-28 h-28 rounded-full opacity-20 blur-2xl" style={{ background: '#6c63ff' }} />
@@ -505,19 +482,19 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* Prep Checklist */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-[#6c63ff]/10 flex items-center justify-center">
                     <CheckCircle2 size={14} className="text-[#6c63ff]" />
                   </div>
-                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Prep Checklist</h3>
+                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Prep Checklist</h3>
                 </div>
-                <span className="text-[12px] font-bold text-[#6c63ff]">{prepPct}%</span>
+                <span className="text-[12px] font-bold text-[#6c63ff] dark:text-[#a78bfa]">{prepPct}%</span>
               </div>
 
               {/* Progress bar */}
-              <div className="h-1.5 bg-[#f0f2f8] rounded-full mb-4 overflow-hidden">
+              <div className="h-1.5 bg-[#f0f2f8] dark:bg-[#26334d] rounded-full mb-4 overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${prepPct}%`, background: 'linear-gradient(90deg,#6c63ff,#8b5cf6)' }} />
               </div>
 
@@ -528,10 +505,10 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                     onClick={() => toggleCheck(item.id)}
                     className="flex items-start gap-3 text-left bg-transparent border-none cursor-pointer p-0 group"
                   >
-                    <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${item.done ? 'bg-[#00c853]' : 'border-2 border-[#d1d5db] group-hover:border-[#6c63ff]'}`}>
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${item.done ? 'bg-[#00c853]' : 'border-2 border-[#d1d5db] dark:border-[#374151] group-hover:border-[#6c63ff]'}`}>
                       {item.done && <Check size={11} strokeWidth={3} className="text-white" />}
                     </div>
-                    <span className={`text-[12px] leading-relaxed transition-colors ${item.done ? 'text-[#b0b8cc] line-through' : 'text-[#4a5068] group-hover:text-[#1a1a2e]'}`}>
+                    <span className={`text-[12px] leading-relaxed transition-colors ${item.done ? 'text-[#b0b8cc] dark:text-[#64748b] line-through' : 'text-[#4a5068] dark:text-[#cbd5e1] group-hover:text-[#1a1a2e] dark:group-hover:text-[#f8fafc]'}`}>
                       {item.task}
                     </span>
                   </button>
@@ -540,32 +517,32 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* AI Interview Tips */}
-            <div className="bg-gradient-to-br from-[#f0efff] to-[#e8f4ff] rounded-2xl p-5 border border-[#6c63ff]/15">
+            <div className="bg-gradient-to-br from-[#f0efff] to-[#e8f4ff] dark:from-[#111827] dark:to-[#1a2234] rounded-2xl p-5 border border-[#6c63ff]/15 dark:border-[#1f2d42]">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-[#6c63ff]/15 flex items-center justify-center">
                   <Sparkles size={13} className="text-[#6c63ff]" />
                 </div>
-                <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">AI Interview Tips</h3>
+                <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">AI Interview Tips</h3>
               </div>
               <div className="flex flex-col gap-3">
                 {aiTips.map((t, i) => (
-                  <div key={i} className="flex items-start gap-2.5 p-3 bg-white/70 rounded-xl border border-[#6c63ff]/10">
+                  <div key={i} className="flex items-start gap-2.5 p-3 bg-white/70 dark:bg-[#161e2e] rounded-xl border border-[#6c63ff]/10 dark:border-[#1f2d42]">
                     <div className="flex-shrink-0 mt-0.5">{t.icon}</div>
-                    <p className="text-[11px] text-[#4a5068] leading-relaxed">{t.tip}</p>
+                    <p className="text-[11px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed">{t.tip}</p>
                   </div>
                 ))}
               </div>
               <button
                 onClick={() => showToast('Generating personalized interview script...')}
-                className="w-full mt-4 py-2.5 rounded-xl text-[12px] font-bold text-[#6c63ff] bg-white border border-[#6c63ff]/30 cursor-pointer hover:bg-[#6c63ff] hover:text-white transition-all"
+                className="w-full mt-4 py-2.5 rounded-xl text-[12px] font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-white dark:bg-[#111827] border border-[#6c63ff]/30 cursor-pointer hover:bg-[#6c63ff] hover:text-white transition-all"
               >
                 Generate Full Prep Script →
               </button>
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
-              <h3 className="text-[13px] font-extrabold text-[#1a1a2e] mb-3">Quick Actions</h3>
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
+              <h3 className="text-[13px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc] mb-3">Quick Actions</h3>
               <div className="flex flex-col gap-2">
                 {[
                   { icon: <Mic size={13} className="text-[#6c63ff]" />, label: 'Practice with AI Mock Interview' },
@@ -576,11 +553,11 @@ const Interview: React.FC<InterviewProps> = ({ onMenuClick, onNavigate }) => {
                   <button
                     key={i}
                     onClick={() => showToast(`Opening: ${a.label}`)}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#f8f9fc] border border-[#e4e8f0] text-[12px] font-semibold text-[#4a5068] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all cursor-pointer text-left"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#f8f9fc] dark:bg-[#161e2e] border border-[#e4e8f0] dark:border-[#1f2d42] text-[12px] font-semibold text-[#4a5068] dark:text-[#cbd5e1] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all cursor-pointer text-left"
                   >
                     {a.icon}
                     {a.label}
-                    <ChevronRight size={12} className="ml-auto text-[#c4c9d4]" />
+                    <ChevronRight size={12} className="ml-auto text-[#c4c9d4] dark:text-[#64748b]" />
                   </button>
                 ))}
               </div>

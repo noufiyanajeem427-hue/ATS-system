@@ -48,131 +48,115 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
 
   const generatePDF = () => {
     setGeneratingPDF(true);
-    showToast('Generating PDF report...');
+    showToast('Generating AI Analysis PDF...');
 
     setTimeout(() => {
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const doc = new jsPDF('p', 'mm', 'a4');
       const pageW = doc.internal.pageSize.getWidth();
       const pageH = doc.internal.pageSize.getHeight();
-      const margin = 18;
+      const margin = 15;
       const contentW = pageW - margin * 2;
-      let y = 0;
+      let y = margin;
 
-      const hex2rgb = (hex: string) => {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return { r, g, b };
+      const setFill = (hex: string) => {
+        const { r, g, b } = hex2rgb(hex);
+        doc.setFillColor(r, g, b);
       };
       const setColor = (hex: string) => {
         const { r, g, b } = hex2rgb(hex);
         doc.setTextColor(r, g, b);
-      };
-      const setFill = (hex: string) => {
-        const { r, g, b } = hex2rgb(hex);
-        doc.setFillColor(r, g, b);
       };
       const setStroke = (hex: string) => {
         const { r, g, b } = hex2rgb(hex);
         doc.setDrawColor(r, g, b);
       };
 
-      // ── Header gradient bar ──
-      setFill('#6c63ff');
-      doc.rect(0, 0, pageW, 14, 'F');
-      setFill('#8b5cf6');
-      doc.rect(pageW * 0.5, 0, pageW * 0.5, 14, 'F');
+      const hex2rgb = (hex: string) => {
+        const h = hex.replace('#', '');
+        return {
+          r: parseInt(h.substring(0, 2), 16) || 0,
+          g: parseInt(h.substring(2, 4), 16) || 0,
+          b: parseInt(h.substring(4, 6), 16) || 0,
+        };
+      };
 
-      // ── Branding ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(255, 255, 255);
-      doc.text('TalentStream AI', margin, 9);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.text('AI-Powered Resume Analysis Report', pageW - margin, 9, { align: 'right' });
+      // ── Header Banner ──
+      setFill('#1a1a2e');
+      doc.rect(0, 0, pageW, 36, 'F');
 
-      y = 24;
-
-      // ── Title ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(22);
-      setColor('#1a1a2e');
-      doc.text('AI Resume Analysis Report', margin, y);
-      y += 8;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      setColor('#8890a4');
-      doc.text(`Optimized for: Senior Product Designer at Google  •  Generated: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`, margin, y);
-      y += 3;
-
-      // Divider
-      setStroke('#e4e8f0');
-      doc.setLineWidth(0.4);
-      doc.line(margin, y, pageW - margin, y);
-      y += 10;
-
-      // ── Score section ──
-      setFill('#f4f6fb');
-      doc.roundedRect(margin, y, contentW, 36, 3, 3, 'F');
-
-      // Score circle (fake via rect)
-      setFill('#6c63ff');
-      doc.circle(margin + 18, y + 18, 12, 'S');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(16);
-      setColor('#6c63ff');
-      doc.text(`${score}`, margin + 18, y + 21, { align: 'center' });
+      doc.setTextColor(255, 255, 255);
+      doc.text('TalentStream AI — Resume Analysis Report', margin, 16);
 
-      doc.setFontSize(20);
-      setColor('#1a1a2e');
-      doc.text('Elite Match Stability', margin + 36, y + 13);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      setColor('#4a5068');
-      doc.text('Your resume is highly optimized for the target job description.', margin + 36, y + 21);
-      doc.text("We've identified a few minor refinements to reach a 98% match.", margin + 36, y + 27);
+      doc.setTextColor(167, 139, 250);
+      doc.text(`Role Target: Senior Product Designer at Google   |   Generated: ${new Date().toLocaleDateString()}`, margin, 24);
 
-      // Green badges
-      const badges = ['Clean Formatting', 'Keyword Rich', 'Action Verbs'];
-      let bx = margin + 36;
-      badges.forEach(badge => {
-        setFill('#00c853');
-        doc.roundedRect(bx, y + 30, doc.getTextWidth(badge) + 8, 5, 1.5, 1.5, 'F');
-        doc.setFontSize(7);
-        doc.setTextColor(255, 255, 255);
-        doc.text(badge, bx + 4, y + 34);
-        bx += doc.getTextWidth(badge) + 14;
-      });
-      y += 44;
+      y = 44;
+
+      // ── Overall Score Section ──
+      const activeScore = fixesApplied ? 98 : 92;
+      const activeColor = activeScore >= 95 ? '#00c853' : '#6c63ff';
+
+      setFill('#f8f9fc');
+      setStroke('#e4e8f0');
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin, y, contentW, 28, 3, 3, 'FD');
+
+      // Circle score box
+      const { r: sr, g: sg, b: sb } = hex2rgb(activeColor);
+      doc.setFillColor(sr, sg, sb);
+      doc.circle(margin + 16, y + 14, 10, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${activeScore}%`, margin + 16, y + 17.5, { align: 'center' });
+
+      // Score Text
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      setColor('#1a1a2e');
+      doc.text(fixesApplied ? 'Perfect Optimization (98% Match)' : 'Elite Match Stability (92% Match)', margin + 32, y + 11);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      setColor('#4a5068');
+      const scoreSub = fixesApplied
+        ? 'All AI recommended fixes have been applied. Outstanding alignment with job requirements.'
+        : 'Your resume shows strong candidate alignment. Minor keyword enhancements recommended below.';
+      doc.text(doc.splitTextToSize(scoreSub, contentW - 38), margin + 32, y + 17);
+
+      y += 34;
 
       // ── Matching Skills ──
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       setColor('#1a1a2e');
-      doc.text('Matching Skills', margin, y);
-      setFill('#00c853');
-      doc.roundedRect(pageW - margin - 26, y - 5, 26, 6, 2, 2, 'F');
-      doc.setFontSize(7);
-      doc.setTextColor(255, 255, 255);
-      doc.text('6 FOUND', pageW - margin - 22, y - 0.5);
-      y += 5;
+      doc.text('Matching Skills Found (6)', margin, y);
+      y += 6;
 
-      const skills = ['Product Strategy', 'UI/UX Design', 'Figma', 'Prototyping', 'User Research', 'Design Systems'];
+      const skillsList = ['Product Strategy', 'UI/UX Design', 'Figma', 'Prototyping', 'User Research', 'Design Systems'];
       let sx = margin;
-      skills.forEach((skill, i) => {
-        const tw = doc.getTextWidth(skill) + 10;
-        if (sx + tw > pageW - margin) { sx = margin; y += 9; }
-        setFill('#f0f2f8');
-        doc.roundedRect(sx, y - 4, tw, 7, 2, 2, 'F');
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        setColor('#4a5068');
-        doc.text(skill, sx + 5, y + 1);
+      const pillH = 6;
+      skillsList.forEach(s => {
+        const tw = doc.getTextWidth(s) + 8;
+        if (sx + tw > pageW - margin) {
+          sx = margin;
+          y += pillH + 3;
+        }
+        setFill('#f0efff');
+        setStroke('#6c63ff');
+        doc.setLineWidth(0.2);
+        doc.roundedRect(sx, y, tw, pillH, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        setColor('#6c63ff');
+        doc.text(s, sx + 4, y + 4.2);
         sx += tw + 4;
       });
-      y += 14;
+      y += pillH + 8;
 
       // ── Missing Keywords ──
       doc.setFont('helvetica', 'bold');
@@ -302,19 +286,21 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
       doc.text('Analysis Summary', margin, y);
       y += 6;
 
-      const stats = [
-        { label: 'ATS Compatibility', value: '94%',   color: '#00c853' },
-        { label: 'Keyword Density',   value: '87%',   color: '#6c63ff' },
-        { label: 'Readability Score', value: 'A+',    color: '#6c63ff' },
-        { label: 'Formatting Quality',value: 'Clean', color: '#00c853' },
+      const statsCols = [
+        { label: 'ATS COMPATIBILITY', value: '94%',   color: '#00c853' },
+        { label: 'KEYWORD DENSITY',    value: '87%',   color: '#6c63ff' },
+        { label: 'READABILITY',        value: 'A+',    color: '#6c63ff' },
+        { label: 'FORMATTING',         value: 'Clean', color: '#00c853' },
       ];
-      const statColW = contentW / 4;
-      stats.forEach(({ label, value, color }, i) => {
-        const sx2 = margin + i * statColW;
-        setFill('#f4f6fb');
-        doc.roundedRect(sx2, y, statColW - 4, 18, 2, 2, 'F');
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
+      const statColW = (contentW - 9) / 4;
+      statsCols.forEach(({ label, value, color }, i) => {
+        const sx2 = margin + i * (statColW + 3);
+        setFill('#f8f9fc');
+        setStroke('#e4e8f0');
+        doc.setLineWidth(0.3);
+        doc.roundedRect(sx2, y, statColW, 18, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.5);
         setColor('#8890a4');
         doc.text(label, sx2 + (statColW - 4) / 2, y + 6, { align: 'center' });
         doc.setFont('helvetica', 'bold');
@@ -355,28 +341,28 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
     {
       tag: 'CRITICAL REVISION',
       tagColor: '#ff4d6d',
-      tagBg: '#ff4d6d18',
+      tagBg: 'rgba(255,77,109,0.12)',
       title: 'Strengthen "Data Visualization" keywords.',
       body: 'The Google role emphasizes analytical dashboards. Update your "Lead Designer" bullets to mention "data-driven visualization" or "Tableau/PowerBI integration".',
     },
     {
       tag: 'FORMATTING TIP',
       tagColor: '#f59e0b',
-      tagBg: '#f59e0b18',
+      tagBg: 'rgba(245,158,11,0.12)',
       title: 'Resume Length Optimization',
       body: 'Your resume is currently 1.5 pages. For Google, a concise 1-page resume is preferred for candidates with < 8 years experience.',
     },
     {
       tag: 'ACTION VERBS',
       tagColor: '#6c63ff',
-      tagBg: '#6c63ff18',
+      tagBg: 'rgba(108,99,255,0.12)',
       title: 'Diversify Starting Words',
       body: 'You use "Led" five times. Consider "Spearheaded", "Orchestrated", or "Architected" for variety.',
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast */}
@@ -394,12 +380,12 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
 
         {/* Page Header */}
         <div className="mb-7">
-          <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] tracking-tight">AI Resume Analyzer</h1>
-          <p className="text-sm text-[#4a5068] mt-1.5">
+          <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] dark:text-[#f8fafc] tracking-tight">AI Resume Analyzer</h1>
+          <p className="text-sm text-[#4a5068] dark:text-[#cbd5e1] mt-1.5">
             Optimize your resume for the{' '}
             <button
               onClick={() => onNavigate?.('jobdetails')}
-              className="text-[#6c63ff] font-semibold bg-transparent border-none cursor-pointer hover:underline p-0"
+              className="text-[#6c63ff] dark:text-[#a78bfa] font-semibold bg-transparent border-none cursor-pointer hover:underline p-0"
             >
               Senior Product Designer
             </button>
@@ -414,7 +400,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
           <div className="flex flex-col gap-5">
 
             {/* Score Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 overflow-hidden">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] overflow-hidden">
               {/* Purple gradient top band */}
               <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg,#6c63ff,#8b5cf6,#a78bfa)' }} />
               <div className="p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
@@ -423,7 +409,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                 <div className="flex flex-col items-center gap-2 flex-shrink-0">
                   <div className="relative w-28 h-28">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                      <path strokeWidth="3" stroke="#f0f2f8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <path strokeWidth="3" stroke="#f0f2f8" className="dark:stroke-[#1f2d42]" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                       <path
                         strokeWidth="3"
                         strokeDasharray={`${score}, 100`}
@@ -436,20 +422,20 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-[32px] font-black leading-none" style={{ color: scoreColor }}>{score}</span>
-                      <span className="text-[9px] font-bold text-[#b0b8cc] tracking-widest">SCORE</span>
+                      <span className="text-[9px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest">SCORE</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Score info */}
                 <div className="flex-1 text-center sm:text-left">
-                  <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] font-bold text-[#6c63ff] tracking-widest uppercase mb-2">
+                  <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] font-bold text-[#6c63ff] dark:text-[#a78bfa] tracking-widest uppercase mb-2">
                     <Sparkles size={12} /> NEXUS AI ANALYSIS
                   </div>
-                  <h2 className="text-[22px] sm:text-[26px] font-black text-[#1a1a2e] leading-tight mb-3">
+                  <h2 className="text-[22px] sm:text-[26px] font-black text-[#1a1a2e] dark:text-[#f8fafc] leading-tight mb-3">
                     {fixesApplied ? 'Perfect Optimization!' : 'Elite Match Stability'}
                   </h2>
-                  <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4 max-w-md">
+                  <p className="text-[13px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed mb-4 max-w-md">
                     {fixesApplied
                       ? 'All fixes applied. Your resume now scores 98% and is fully optimized for the Senior Product Designer role at Google.'
                       : 'Your resume is highly optimized for the target job description. We\'ve identified a few minor refinements to reach a 98% match.'}
@@ -472,11 +458,11 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             {/* Skills Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Matching Skills */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+              <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-[#00c853]" />
-                    <span className="text-[14px] font-extrabold text-[#1a1a2e]">Matching Skills</span>
+                    <span className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Matching Skills</span>
                   </div>
                   <span className="text-[10px] font-bold text-[#00a843] bg-[#00c853]/10 px-2.5 py-1 rounded-full border border-[#00c853]/20">
                     {matchingSkills.length} FOUND
@@ -484,7 +470,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {matchingSkills.map((skill) => (
-                    <span key={skill} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#f4f6fb] text-[#4a5068] border border-[#e4e8f0] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-colors cursor-default">
+                    <span key={skill} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[#f4f6fb] dark:bg-[#161e2e] text-[#4a5068] dark:text-[#cbd5e1] border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-colors cursor-default">
                       {skill}
                     </span>
                   ))}
@@ -492,11 +478,11 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
               </div>
 
               {/* Missing Keywords */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+              <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={16} className="text-[#f59e0b]" />
-                    <span className="text-[14px] font-extrabold text-[#1a1a2e]">Missing Keywords</span>
+                    <span className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Missing Keywords</span>
                   </div>
                   <span className="text-[10px] font-bold text-[#ff4d6d] bg-[#ff4d6d]/10 px-2.5 py-1 rounded-full border border-[#ff4d6d]/20">
                     {missingKeywords.length} CRITICAL
@@ -504,14 +490,14 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                 </div>
                 <div className="flex flex-col gap-2">
                   {missingKeywords.map((kw) => (
-                    <div key={kw} className="flex items-center gap-2.5 px-3 py-2 bg-[#ff4d6d]/5 border border-[#ff4d6d]/15 rounded-lg">
+                    <div key={kw} className="flex items-center gap-2.5 px-3 py-2 bg-[#ff4d6d]/5 dark:bg-[#ff4d6d]/10 border border-[#ff4d6d]/15 rounded-lg">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#ff4d6d] flex-shrink-0" />
-                      <span className="text-[12px] font-semibold text-[#1a1a2e]">{kw}</span>
+                      <span className="text-[12px] font-semibold text-[#1a1a2e] dark:text-[#f8fafc]">{kw}</span>
                     </div>
                   ))}
                   <button
                     onClick={() => showToast('Opening keyword suggestions...')}
-                    className="text-[11px] font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline mt-1 self-start p-0"
+                    className="text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline mt-1 self-start p-0"
                   >
                     + Add suggested keywords →
                   </button>
@@ -520,21 +506,21 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* Skill Gap Analysis */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex items-center gap-2 mb-5">
                 <TrendingUp size={16} className="text-[#6c63ff]" />
-                <h3 className="text-[15px] font-extrabold text-[#1a1a2e]">Skill Gap Analysis</h3>
+                <h3 className="text-[15px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Skill Gap Analysis</h3>
               </div>
               <div className="flex flex-col gap-4">
                 {skillGaps.map(({ label, level, pct, color }) => (
                   <div key={label}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[13px] font-bold text-[#1a1a2e]">{label}</span>
+                      <span className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{label}</span>
                       <span className="text-[11px] font-bold" style={{ color }}>
                         {level}
                       </span>
                     </div>
-                    <div className="h-2 bg-[#f0f2f8] rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#f0f2f8] dark:bg-[#26334d] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}99)` }}
@@ -548,21 +534,21 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             {/* Key Achievements + Grammar & Tone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Key Achievements */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+              <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
                 <div className="flex items-center gap-2 mb-4">
                   <Target size={15} className="text-[#6c63ff]" />
-                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Key Achievements</h3>
+                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Key Achievements</h3>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start gap-2.5">
                     <CheckCircle2 size={14} className="text-[#00c853] flex-shrink-0 mt-0.5" />
-                    <p className="text-[12px] text-[#4a5068] leading-relaxed">
+                    <p className="text-[12px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed">
                       Successfully quantified the impact of "Design System" implementation (+40% speed).
                     </p>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <div className="w-3.5 h-3.5 rounded-full border-2 border-[#f59e0b] flex-shrink-0 mt-0.5" />
-                    <p className="text-[12px] text-[#4a5068] leading-relaxed">
+                    <p className="text-[12px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed">
                       Consider adding metrics for your work at Meta to further strengthen the Experience section.
                     </p>
                   </div>
@@ -570,17 +556,17 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
               </div>
 
               {/* Grammar & Tone */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+              <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen size={15} className="text-[#6c63ff]" />
-                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Grammar &amp; Tone</h3>
+                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Grammar &amp; Tone</h3>
                 </div>
-                <div className="bg-[#f8f9fc] rounded-xl p-3.5 border border-[#e4e8f0]">
+                <div className="bg-[#f8f9fc] dark:bg-[#161e2e] rounded-xl p-3.5 border border-[#e4e8f0] dark:border-[#1f2d42]">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[9px] font-bold text-[#b0b8cc] tracking-widest uppercase">Tone Score</span>
-                    <span className="text-[11px] font-bold text-[#6c63ff]">Professional</span>
+                    <span className="text-[9px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest uppercase">Tone Score</span>
+                    <span className="text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa]">Professional</span>
                   </div>
-                  <p className="text-[12px] text-[#4a5068] leading-relaxed">
+                  <p className="text-[12px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed">
                     Your resume uses strong active voice. No significant spelling errors found.
                   </p>
                   <div className="flex gap-1.5 mt-3">
@@ -603,19 +589,19 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
           <div className="flex flex-col gap-4">
 
             {/* AI Recommendations */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-[#6c63ff]/10 flex items-center justify-center">
                   <Zap size={13} className="text-[#6c63ff]" />
                 </div>
-                <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">AI Recommendations</h3>
+                <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">AI Recommendations</h3>
               </div>
 
               <div className="flex flex-col gap-3">
                 {recommendations.map((rec, i) => (
                   <div
                     key={i}
-                    className="p-3.5 rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 hover:shadow-sm transition-all cursor-default"
+                    className="p-3.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff]/30 hover:shadow-sm transition-all cursor-default"
                   >
                     <span
                       className="inline-block text-[8px] font-black tracking-widest px-2 py-0.5 rounded mb-2"
@@ -623,8 +609,8 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                     >
                       {rec.tag}
                     </span>
-                    <p className="text-[12px] font-bold text-[#1a1a2e] mb-1">{rec.title}</p>
-                    <p className="text-[11px] text-[#8890a4] leading-relaxed">{rec.body}</p>
+                    <p className="text-[12px] font-bold text-[#1a1a2e] dark:text-[#f8fafc] mb-1">{rec.title}</p>
+                    <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8] leading-relaxed">{rec.body}</p>
                   </div>
                 ))}
               </div>
@@ -653,7 +639,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             <button
               onClick={generatePDF}
               disabled={generatingPDF}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold text-[#4a5068] bg-white border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {generatingPDF ? (
                 <>
@@ -666,21 +652,21 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             </button>
 
             {/* Re-upload for re-analysis */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="w-10 h-10 rounded-xl bg-[#f4f6fb] flex items-center justify-center">
-                  <FileText size={18} className="text-[#8890a4]" />
+                <div className="w-10 h-10 rounded-xl bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center">
+                  <FileText size={18} className="text-[#8890a4] dark:text-[#94a3b8]" />
                 </div>
                 <div>
                   {uploadedFile ? (
-                    <p className="text-[11px] text-[#6c63ff] font-semibold">"{uploadedFile}" loaded</p>
+                    <p className="text-[11px] text-[#6c63ff] dark:text-[#a78bfa] font-semibold">"{uploadedFile}" loaded</p>
                   ) : (
-                    <p className="text-[12px] text-[#8890a4]">Upload a new version to re-analyze</p>
+                    <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8]">Upload a new version to re-analyze</p>
                   )}
                 </div>
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="text-[12px] font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                  className="text-[12px] font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline"
                 >
                   Select File
                 </button>
@@ -689,8 +675,8 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* Quick stats */}
-            <div className="bg-gradient-to-br from-[#6c63ff]/8 to-[#8b5cf6]/8 rounded-2xl p-4 border border-[#6c63ff]/15">
-              <span className="block text-[9px] font-bold text-[#b0b8cc] tracking-widest uppercase mb-3">Analysis Summary</span>
+            <div className="bg-gradient-to-br from-[#6c63ff]/8 to-[#8b5cf6]/8 dark:from-[#111827] dark:to-[#1a2234] rounded-2xl p-4 border border-[#6c63ff]/15 dark:border-[#1f2d42]">
+              <span className="block text-[9px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest uppercase mb-3">Analysis Summary</span>
               <div className="flex flex-col gap-2">
                 {[
                   { label: 'ATS Compatibility',   value: '94%',   color: '#00c853' },
@@ -699,7 +685,7 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
                   { label: 'Formatting Quality',   value: 'Clean', color: '#00c853' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
-                    <span className="text-[11px] text-[#4a5068]">{label}</span>
+                    <span className="text-[11px] text-[#4a5068] dark:text-[#cbd5e1]">{label}</span>
                     <span className="text-[12px] font-bold" style={{ color }}>{value}</span>
                   </div>
                 ))}
@@ -710,14 +696,14 @@ const AIResume: React.FC<AIResumeProps> = ({ onMenuClick, onNavigate }) => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-[#e4e8f0] mt-4 px-8 py-4 flex items-center justify-between flex-wrap gap-3">
-        <span className="text-[11px] text-[#b0b8cc]">© 2024 TalentStream AI. All rights reserved.</span>
+      <footer className="border-t border-[#e4e8f0] dark:border-[#1f2d42] mt-4 px-8 py-4 flex items-center justify-between flex-wrap gap-3">
+        <span className="text-[11px] text-[#b0b8cc] dark:text-[#64748b]">© 2024 TalentStream AI. All rights reserved.</span>
         <div className="flex items-center gap-4">
           {['Privacy Policy', 'Terms of Service', 'Support'].map((link) => (
             <button
               key={link}
               onClick={() => showToast(`Opening ${link}...`)}
-              className="text-[11px] text-[#8890a4] hover:text-[#6c63ff] transition-colors bg-transparent border-none cursor-pointer"
+              className="text-[11px] text-[#8890a4] dark:text-[#94a3b8] hover:text-[#6c63ff] transition-colors bg-transparent border-none cursor-pointer"
             >
               {link}
             </button>

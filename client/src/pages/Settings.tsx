@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import Topbar from '../components/Topbar';
 import {
   User, Bell, Shield, CreditCard, Sparkles,
-  Save, Check, X, Smartphone, Laptop
+  Save, Check, X, Smartphone, Laptop, Moon, Sun, Palette
 } from 'lucide-react';
 import { Page } from '../App';
+import { useTheme } from '../context/ThemeContext';
 
 interface SettingsProps {
   onMenuClick?: () => void;
   onNavigate?: (p: Page, job?: any) => void;
 }
 
-type TabType = 'account' | 'job' | 'security' | 'notifications' | 'billing';
+type TabType = 'account' | 'job' | 'appearance' | 'security' | 'notifications' | 'billing';
 
 const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
+  const { darkMode, setDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('account');
   const [toast, setToast] = useState<string | null>(null);
 
@@ -80,7 +82,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast */}
@@ -97,8 +99,8 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
         {/* Page Header */}
         <div className="flex items-start justify-between mb-7 flex-wrap gap-3">
           <div>
-            <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] tracking-tight">Account Settings</h1>
-            <p className="text-sm text-[#8890a4] mt-1">Manage your account preferences, AI matching thresholds, and security.</p>
+            <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] dark:text-[#f8fafc] tracking-tight">Account Settings</h1>
+            <p className="text-sm text-[#8890a4] dark:text-[#94a3b8] mt-1">Manage your account preferences, AI matching thresholds, and security.</p>
           </div>
           <button
             onClick={() => showToast('All settings saved to cloud.')}
@@ -113,10 +115,11 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
 
           {/* Left Sub-nav */}
-          <div className="bg-white rounded-2xl p-2 shadow-sm border border-[#e4e8f0]/60 h-fit flex flex-row lg:flex-col overflow-x-auto">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl p-2 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] h-fit flex flex-row lg:flex-col overflow-x-auto">
             {[
               { id: 'account', label: 'Account Profile', icon: <User size={15} /> },
               { id: 'job', label: 'Job & AI Matching', icon: <Sparkles size={15} /> },
+              { id: 'appearance', label: 'Appearance & Theme', icon: <Palette size={15} /> },
               { id: 'security', label: 'Security & Privacy', icon: <Shield size={15} /> },
               { id: 'notifications', label: 'Notifications', icon: <Bell size={15} /> },
               { id: 'billing', label: 'Billing & Plan', icon: <CreditCard size={15} /> },
@@ -126,8 +129,8 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-bold transition-all border-none cursor-pointer text-left whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'text-[#6c63ff] bg-[#6c63ff]/8'
-                    : 'text-[#8890a4] bg-transparent hover:text-[#1a1a2e] hover:bg-[#f4f6fb]'
+                    ? 'text-[#6c63ff] dark:text-[#a78bfa] bg-[#6c63ff]/8 dark:bg-[#6c63ff]/20'
+                    : 'text-[#8890a4] dark:text-[#94a3b8] bg-transparent hover:text-[#1a1a2e] dark:hover:text-[#f8fafc] hover:bg-[#f4f6fb] dark:hover:bg-[#161e2e]'
                 }`}
               >
                 {tab.icon}
@@ -137,66 +140,66 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
           </div>
 
           {/* Right Main Content Panel */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#e4e8f0]/60">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl p-6 sm:p-8 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
 
             {/* ── 1. ACCOUNT PROFILE ── */}
             {activeTab === 'account' && (
               <form onSubmit={handleSaveAccount} className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Personal Information</h2>
-                  <p className="text-[12px] text-[#8890a4] mt-0.5">Update your basic profile details shown to recruiters.</p>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Personal Information</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Update your basic profile details shown to recruiters.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1.5">Full Name</label>
+                    <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1.5">Full Name</label>
                     <input
                       type="text"
                       value={accountForm.fullName}
                       onChange={e => setAccountForm({ ...accountForm, fullName: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] text-[#1a1a2e] outline-none focus:border-[#6c63ff]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] outline-none focus:border-[#6c63ff]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1.5">Email Address</label>
+                    <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1.5">Email Address</label>
                     <input
                       type="email"
                       value={accountForm.email}
                       onChange={e => setAccountForm({ ...accountForm, email: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] text-[#1a1a2e] outline-none focus:border-[#6c63ff]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] outline-none focus:border-[#6c63ff]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1.5">Phone Number</label>
+                    <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1.5">Phone Number</label>
                     <input
                       type="text"
                       value={accountForm.phone}
                       onChange={e => setAccountForm({ ...accountForm, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] text-[#1a1a2e] outline-none focus:border-[#6c63ff]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] outline-none focus:border-[#6c63ff]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1.5">Location</label>
+                    <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1.5">Location</label>
                     <input
                       type="text"
                       value={accountForm.location}
                       onChange={e => setAccountForm({ ...accountForm, location: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] text-[#1a1a2e] outline-none focus:border-[#6c63ff]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] outline-none focus:border-[#6c63ff]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1.5">Professional Summary</label>
+                  <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1.5">Professional Summary</label>
                   <textarea
                     rows={3}
                     value={accountForm.bio}
                     onChange={e => setAccountForm({ ...accountForm, bio: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] text-[13px] text-[#1a1a2e] outline-none focus:border-[#6c63ff] resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] outline-none focus:border-[#6c63ff] resize-none"
                   />
                 </div>
 
-                <div className="pt-3 border-t border-[#f0f2f8] flex justify-end">
+                <div className="pt-3 border-t border-[#f0f2f8] dark:border-[#1f2d42] flex justify-end">
                   <button
                     type="submit"
                     className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer"
@@ -212,15 +215,15 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
             {activeTab === 'job' && (
               <div className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">AI Matching & Job Preferences</h2>
-                  <p className="text-[12px] text-[#8890a4] mt-0.5">Customize how Nexus AI evaluates job opportunities for your profile.</p>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">AI Matching & Job Preferences</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Customize how Nexus AI evaluates job opportunities for your profile.</p>
                 </div>
 
                 {/* Slider */}
-                <div className="bg-[#f8f9fc] rounded-2xl p-5 border border-[#e4e8f0]">
+                <div className="bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl p-5 border border-[#e4e8f0] dark:border-[#1f2d42]">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] font-bold text-[#1a1a2e]">Minimum AI Match Score Threshold</span>
-                    <span className="text-[14px] font-black text-[#6c63ff] bg-[#6c63ff]/10 px-3 py-1 rounded-full">{aiSettings.matchThreshold}%</span>
+                    <span className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Minimum AI Match Score Threshold</span>
+                    <span className="text-[14px] font-black text-[#6c63ff] dark:text-[#a78bfa] bg-[#6c63ff]/10 px-3 py-1 rounded-full">{aiSettings.matchThreshold}%</span>
                   </div>
                   <input
                     type="range"
@@ -228,17 +231,17 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                     max="98"
                     value={aiSettings.matchThreshold}
                     onChange={e => setAiSettings({ ...aiSettings, matchThreshold: Number(e.target.value) })}
-                    className="w-full h-2 bg-[#e4e8f0] rounded-lg appearance-none cursor-pointer accent-[#6c63ff]"
+                    className="w-full h-2 bg-[#e4e8f0] dark:bg-[#26334d] rounded-lg appearance-none cursor-pointer accent-[#6c63ff]"
                   />
-                  <p className="text-[11px] text-[#8890a4] mt-2">Only jobs with a match score above {aiSettings.matchThreshold}% will trigger push alerts.</p>
+                  <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8] mt-2">Only jobs with a match score above {aiSettings.matchThreshold}% will trigger push alerts.</p>
                 </div>
 
                 {/* Salary filter */}
-                <div className="bg-[#f8f9fc] rounded-2xl p-5 border border-[#e4e8f0]">
+                <div className="bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl p-5 border border-[#e4e8f0] dark:border-[#1f2d42]">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <p className="text-[13px] font-bold text-[#1a1a2e]">Minimum Expected Salary</p>
-                      <p className="text-[11px] text-[#8890a4]">Filter out job recommendations below this threshold</p>
+                      <p className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Minimum Expected Salary</p>
+                      <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">Filter out job recommendations below this threshold</p>
                     </div>
                     <span className="text-[14px] font-extrabold text-[#00c853]">${(aiSettings.minSalary / 1000).toFixed(0)}k / year</span>
                   </div>
@@ -249,7 +252,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                     step="10000"
                     value={aiSettings.minSalary}
                     onChange={e => setAiSettings({ ...aiSettings, minSalary: Number(e.target.value) })}
-                    className="w-full h-2 bg-[#e4e8f0] rounded-lg appearance-none cursor-pointer accent-[#00c853]"
+                    className="w-full h-2 bg-[#e4e8f0] dark:bg-[#26334d] rounded-lg appearance-none cursor-pointer accent-[#00c853]"
                   />
                 </div>
 
@@ -260,10 +263,10 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                     { key: 'recruiterDirectMsg', title: 'Allow Direct Recruiter Inquiries', desc: 'Permit recruiters from 90%+ match roles to message you directly.' },
                     { key: 'smartSalaryFilter', title: 'Hide Salary Undisclosed Jobs', desc: 'Exclude listings that do not provide compensation details.' },
                   ].map(item => (
-                    <div key={item.key} className="flex items-center justify-between py-2 border-b border-[#f0f2f8]">
+                    <div key={item.key} className="flex items-center justify-between py-2 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
                       <div>
-                        <p className="text-[13px] font-bold text-[#1a1a2e]">{item.title}</p>
-                        <p className="text-[11px] text-[#8890a4]">{item.desc}</p>
+                        <p className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{item.title}</p>
+                        <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">{item.desc}</p>
                       </div>
                       <button
                         onClick={() => {
@@ -271,7 +274,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                           setAiSettings(prev => ({ ...prev, [k]: !prev[k] }));
                         }}
                         className={`w-10 h-5.5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${
-                          aiSettings[item.key as keyof typeof aiSettings] ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0]'
+                          aiSettings[item.key as keyof typeof aiSettings] ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0] dark:bg-[#26334d]'
                         }`}
                       >
                         <div
@@ -284,7 +287,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-[#f0f2f8] flex justify-end">
+                <div className="pt-3 border-t border-[#f0f2f8] dark:border-[#1f2d42] flex justify-end">
                   <button
                     onClick={handleSaveAISettings}
                     className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer"
@@ -296,48 +299,135 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
               </div>
             )}
 
-            {/* ── 3. SECURITY & PRIVACY ── */}
+            {/* ── 3. APPEARANCE & DARK MODE ── */}
+            {activeTab === 'appearance' && (
+              <div className="flex flex-col gap-8 max-w-3xl">
+                <div>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Appearance & Theme</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Customize your interface theme, contrast mode, and visual experience across all pages.</p>
+                </div>
+
+                {/* Theme Mode Selection Cards */}
+                <div>
+                  <h3 className="text-xs font-bold text-[#1a1a2e] dark:text-[#f8fafc] uppercase tracking-wider mb-3">Select Interface Theme</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Dark Theme Card */}
+                    <div
+                      onClick={() => {
+                        setDarkMode(true);
+                        showToast('Applied Dark Mode');
+                      }}
+                      className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                        darkMode
+                          ? 'border-[#6c63ff] bg-[#6c63ff]/10 shadow-lg'
+                          : 'border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8fafc] dark:bg-[#161e2e] hover:border-[#6c63ff]/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-[#0f0f1a] flex items-center justify-center text-[#6c63ff] shadow-sm">
+                            <Moon size={18} />
+                          </div>
+                          <div>
+                            <h4 className="text-[14px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Dark Mode</h4>
+                            <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">Sleek midnight palette</p>
+                          </div>
+                        </div>
+                        {darkMode && (
+                          <div className="w-5 h-5 rounded-full bg-[#6c63ff] flex items-center justify-center text-white">
+                            <Check size={12} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="h-16 rounded-xl bg-[#0b0f19] border border-white/10 p-2.5 flex flex-col gap-1.5 justify-center">
+                        <div className="h-2 w-20 bg-[#6c63ff] rounded-full" />
+                        <div className="h-2 w-32 bg-white/20 rounded-full" />
+                        <div className="h-2 w-16 bg-white/10 rounded-full" />
+                      </div>
+                    </div>
+
+                    {/* Light Theme Card */}
+                    <div
+                      onClick={() => {
+                        setDarkMode(false);
+                        showToast('Applied Light Mode');
+                      }}
+                      className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                        !darkMode
+                          ? 'border-[#6c63ff] bg-[#6c63ff]/10 shadow-lg'
+                          : 'border-[#e4e8f0] dark:border-[#1f2d42] bg-[#f8fafc] dark:bg-[#161e2e] hover:border-[#6c63ff]/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+                            <Sun size={18} />
+                          </div>
+                          <div>
+                            <h4 className="text-[14px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Light Mode</h4>
+                            <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">Clean studio workspace</p>
+                          </div>
+                        </div>
+                        {!darkMode && (
+                          <div className="w-5 h-5 rounded-full bg-[#6c63ff] flex items-center justify-center text-white">
+                            <Check size={12} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="h-16 rounded-xl bg-[#f4f6fb] border border-[#e4e8f0] p-2.5 flex flex-col gap-1.5 justify-center">
+                        <div className="h-2 w-20 bg-[#6c63ff] rounded-full" />
+                        <div className="h-2 w-32 bg-gray-300 rounded-full" />
+                        <div className="h-2 w-16 bg-gray-200 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* ── 4. SECURITY & PRIVACY ── */}
             {activeTab === 'security' && (
               <div className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Security & Password</h2>
-                  <p className="text-[12px] text-[#8890a4] mt-0.5">Manage your credentials, 2-factor authentication, and login sessions.</p>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Security & Password</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Manage your credentials, 2-factor authentication, and login sessions.</p>
                 </div>
 
                 {/* Password form */}
-                <form onSubmit={handleSavePassword} className="flex flex-col gap-4 bg-[#f8f9fc] rounded-2xl p-5 border border-[#e4e8f0]">
-                  <h3 className="text-[13px] font-bold text-[#1a1a2e]">Change Password</h3>
+                <form onSubmit={handleSavePassword} className="flex flex-col gap-4 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl p-5 border border-[#e4e8f0] dark:border-[#1f2d42]">
+                  <h3 className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Change Password</h3>
 
                   <div>
-                    <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1">Current Password</label>
+                    <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1">Current Password</label>
                     <input
                       type="password"
                       value={passwordForm.currentPassword}
                       onChange={e => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] bg-white"
+                      className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] text-[13px] outline-none focus:border-[#6c63ff] bg-white dark:bg-[#111827] text-[#1a1a2e] dark:text-[#f8fafc]"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1">New Password</label>
+                      <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1">New Password</label>
                       <input
                         type="password"
                         value={passwordForm.newPassword}
                         onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                         placeholder="Min 8 characters"
-                        className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] bg-white"
+                        className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] text-[13px] outline-none focus:border-[#6c63ff] bg-white dark:bg-[#111827] text-[#1a1a2e] dark:text-[#f8fafc]"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-[#4a5068] uppercase tracking-wider block mb-1">Confirm Password</label>
+                      <label className="text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1] uppercase tracking-wider block mb-1">Confirm Password</label>
                       <input
                         type="password"
                         value={passwordForm.confirmPassword}
                         onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                         placeholder="Confirm new password"
-                        className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] text-[13px] outline-none focus:border-[#6c63ff] bg-white"
+                        className="w-full px-4 py-2 rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] text-[13px] outline-none focus:border-[#6c63ff] bg-white dark:bg-[#111827] text-[#1a1a2e] dark:text-[#f8fafc]"
                       />
                     </div>
                   </div>
@@ -352,19 +442,19 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                 </form>
 
                 {/* 2FA */}
-                <div className="flex items-center justify-between p-5 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
+                <div className="flex items-center justify-between p-5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl border border-[#e4e8f0] dark:border-[#1f2d42]">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#00c853]/10 flex items-center justify-center text-[#00c853]">
                       <Shield size={20} />
                     </div>
                     <div>
-                      <p className="text-[13px] font-bold text-[#1a1a2e]">Two-Factor Authentication (2FA)</p>
-                      <p className="text-[11px] text-[#8890a4]">Secure your account with authenticator app (Google Authenticator / Authy).</p>
+                      <p className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Two-Factor Authentication (2FA)</p>
+                      <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">Secure your account with authenticator app (Google Authenticator / Authy).</p>
                     </div>
                   </div>
                   <button
                     onClick={() => { setTwoFactor(!twoFactor); showToast(`2FA ${!twoFactor ? 'Enabled' : 'Disabled'}`); }}
-                    className={`w-10 h-5.5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${twoFactor ? 'bg-[#00c853]' : 'bg-[#e4e8f0]'}`}
+                    className={`w-10 h-5.5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${twoFactor ? 'bg-[#00c853]' : 'bg-[#e4e8f0] dark:bg-[#26334d]'}`}
                   >
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-0.75 transition-all shadow-sm ${twoFactor ? 'left-5' : 'left-0.75'}`} />
                   </button>
@@ -372,21 +462,21 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
 
                 {/* Active Sessions */}
                 <div>
-                  <h3 className="text-[13px] font-bold text-[#1a1a2e] mb-3">Active Login Sessions</h3>
+                  <h3 className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc] mb-3">Active Login Sessions</h3>
                   <div className="flex flex-col gap-2">
                     {[
                       { device: 'Chrome on macOS', loc: 'San Francisco, CA', time: 'Active Now', current: true, icon: <Laptop size={15} /> },
                       { device: 'Nexus App on iPhone 15', loc: 'San Francisco, CA', time: '2 hours ago', current: false, icon: <Smartphone size={15} /> },
                     ].map((s, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0]">
+                      <div key={idx} className="flex items-center justify-between p-3.5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42]">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-[#6c63ff] shadow-sm">{s.icon}</div>
+                          <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#111827] flex items-center justify-center text-[#6c63ff] shadow-sm">{s.icon}</div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-bold text-[#1a1a2e]">{s.device}</span>
+                              <span className="text-[12px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{s.device}</span>
                               {s.current && <span className="text-[9px] font-bold bg-[#00c853]/10 text-[#00a843] px-2 py-0.5 rounded-full">Current</span>}
                             </div>
-                            <span className="text-[10px] text-[#8890a4]">{s.loc} · {s.time}</span>
+                            <span className="text-[10px] text-[#8890a4] dark:text-[#94a3b8]">{s.loc} · {s.time}</span>
                           </div>
                         </div>
                         {!s.current && (
@@ -401,12 +491,12 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
               </div>
             )}
 
-            {/* ── 4. NOTIFICATIONS ── */}
+            {/* ── 5. NOTIFICATIONS ── */}
             {activeTab === 'notifications' && (
               <div className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Notification Channels</h2>
-                  <p className="text-[12px] text-[#8890a4] mt-0.5">Control how and when Nexus sends you alerts.</p>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Notification Channels</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Control how and when Nexus sends you alerts.</p>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -418,10 +508,10 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                     { key: 'smsInterviews', title: 'SMS Interview Reminders', desc: 'Text alert 1 hour before an interview begins.' },
                     { key: 'emailMarketing', title: 'Career Insights & Newsletter', desc: 'Weekly roundup of hiring trends and salary benchmarks.' },
                   ].map(item => (
-                    <div key={item.key} className="flex items-center justify-between py-3 border-b border-[#f0f2f8]">
+                    <div key={item.key} className="flex items-center justify-between py-3 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
                       <div>
-                        <p className="text-[13px] font-bold text-[#1a1a2e]">{item.title}</p>
-                        <p className="text-[11px] text-[#8890a4]">{item.desc}</p>
+                        <p className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{item.title}</p>
+                        <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">{item.desc}</p>
                       </div>
                       <button
                         onClick={() => {
@@ -430,7 +520,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                           showToast('Notification preference updated.');
                         }}
                         className={`w-10 h-5.5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${
-                          notificationsSettings[item.key as keyof typeof notificationsSettings] ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0]'
+                          notificationsSettings[item.key as keyof typeof notificationsSettings] ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0] dark:bg-[#26334d]'
                         }`}
                       >
                         <div
@@ -445,17 +535,17 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
               </div>
             )}
 
-            {/* ── 5. BILLING & PLAN ── */}
+            {/* ── 6. BILLING & PLAN ── */}
             {activeTab === 'billing' && (
               <div className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Current Subscription</h2>
-                  <p className="text-[12px] text-[#8890a4] mt-0.5">Manage your plan, billing details, and invoice history.</p>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Current Subscription</h2>
+                  <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-0.5">Manage your plan, billing details, and invoice history.</p>
                 </div>
 
                 {/* Plan card */}
                 <div
-                  className="rounded-2xl p-6 text-white relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                  className="rounded-2xl p-6 text-white relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-[#1f2d42]"
                   style={{ background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)', boxShadow: '0 8px 24px rgba(108,99,255,0.25)' }}
                 >
                   <div>
@@ -471,8 +561,8 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
 
                 {/* Invoice History */}
                 <div>
-                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e] mb-3">Billing History</h3>
-                  <div className="divide-y divide-[#f0f2f8] bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0] overflow-hidden">
+                  <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc] mb-3">Billing History</h3>
+                  <div className="divide-y divide-[#f0f2f8] dark:divide-[#1f2d42] bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl border border-[#e4e8f0] dark:border-[#1f2d42] overflow-hidden">
                     {[
                       { date: 'Oct 15, 2023', amount: '$29.00', status: 'Paid', inv: 'INV-2023-010' },
                       { date: 'Sep 15, 2023', amount: '$29.00', status: 'Paid', inv: 'INV-2023-009' },
@@ -480,13 +570,13 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
                     ].map(inv => (
                       <div key={inv.inv} className="flex items-center justify-between p-4 text-[12px]">
                         <div>
-                          <p className="font-bold text-[#1a1a2e]">{inv.inv}</p>
-                          <p className="text-[10px] text-[#8890a4]">{inv.date}</p>
+                          <p className="font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{inv.inv}</p>
+                          <p className="text-[10px] text-[#8890a4] dark:text-[#94a3b8]">{inv.date}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="font-extrabold text-[#1a1a2e]">{inv.amount}</span>
+                          <span className="font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">{inv.amount}</span>
                           <span className="text-[10px] font-bold text-[#00a843] bg-[#00c853]/10 px-2 py-0.5 rounded-full">{inv.status}</span>
-                          <button onClick={() => showToast(`Downloading ${inv.inv}...`)} className="text-[11px] font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline">
+                          <button onClick={() => showToast(`Downloading ${inv.inv}...`)} className="text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline">
                             PDF
                           </button>
                         </div>

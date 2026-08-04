@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import AppLoader, { DashboardSkeleton, JobSearchSkeleton, PageSpinner } from './components/Loading';
+import { ThemeProvider } from './context/ThemeContext';
 
 export type Page =
   | 'dashboard'
@@ -46,7 +47,7 @@ const pageNames: Partial<Record<Page, string>> = {
   register: 'Create Account',
 };
 
-function App() {
+function AppContent() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [activePage, setActivePage] = useState<Page>('dashboard');
   const [selectedJob, setSelectedJob] = useState<any>(null);
@@ -216,7 +217,7 @@ function App() {
   const isAuthPage = activePage === 'login' || activePage === 'register';
 
   return (
-    <div className="flex min-h-screen bg-[#f4f6fb]">
+    <div className="flex min-h-screen bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] transition-colors duration-200">
       {!isAuthPage && (
         <Sidebar
           activePage={activePage}
@@ -230,4 +231,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}

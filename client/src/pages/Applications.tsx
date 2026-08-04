@@ -48,37 +48,74 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
     setTimeout(() => setToast(null), 3000);
   };
 
-  const filtered = appsList.filter(a => {
-    if (tab === 'active')    return ['IN REVIEW','INTERVIEWING','APPLIED'].includes(a.status);
-    if (tab === 'completed') return ['OFFER RECEIVED','WITHDRAWN'].includes(a.status);
-    return true;
-  });
-  const pageSize = 4;
-  const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
-
   const stats = [
-    { icon: <Send size={18} className="text-[#6c63ff]" />, label: 'APPLIED',     value: appStats.applied,     badge: '+12%',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Send size={48} className="text-[#6c63ff]" opacity={0.07} /> },
-    { icon: <Star size={18} className="text-[#f59e0b]" />, label: 'SHORTLISTED', value: appStats.shortlisted,  badge: '+5%',     badgeColor: '#00c853', bg: 'linear-gradient(135deg,#f59e0b22,#f59e0b08)', ghost: <Star size={48} className="text-[#f59e0b]" opacity={0.07} /> },
-    { icon: <Calendar size={18} className="text-[#6c63ff]" />, label: 'INTERVIEWS', value: appStats.interviews, badge: '• Today', badgeColor: '#ff4d6d', bg: 'linear-gradient(135deg,#6c63ff22,#6c63ff08)', ghost: <Calendar size={48} className="text-[#6c63ff]" opacity={0.07} />, highlight: true },
-    { icon: <Gift size={18} className="text-[#00c853]" />,  label: 'OFFERS',      value: appStats.offers,       badge: 'New!',    badgeColor: '#00c853', bg: 'linear-gradient(135deg,#00c85322,#00c85308)', ghost: <Gift size={48} className="text-[#00c853]" opacity={0.07} /> },
+    {
+      label: 'APPLICATIONS SENT',
+      value: appStats.applied,
+      badge: 'ACTIVE TRACKING',
+      badgeColor: '#6c63ff',
+      icon: <Send size={16} className="text-[#6c63ff]" />,
+      bg: 'rgba(108,99,255,0.1)',
+      ghost: <Send size={54} className="text-[#6c63ff]/6" />,
+      highlight: true,
+    },
+    {
+      label: 'INTERVIEWS SCHEDULED',
+      value: appStats.interviews,
+      badge: 'NEXT: OCT 24',
+      badgeColor: '#00c853',
+      icon: <Calendar size={16} className="text-[#00c853]" />,
+      bg: 'rgba(0,200,83,0.1)',
+      ghost: <Calendar size={54} className="text-[#00c853]/6" />,
+      highlight: false,
+    },
+    {
+      label: 'OFFERS RECEIVED',
+      value: appStats.offers,
+      badge: '1 ACCEPTED',
+      badgeColor: '#f59e0b',
+      icon: <Gift size={16} className="text-[#f59e0b]" />,
+      bg: 'rgba(245,158,11,0.1)',
+      ghost: <Gift size={54} className="text-[#f59e0b]/6" />,
+      highlight: false,
+    },
+    {
+      label: 'SAVED BOOKMARKS',
+      value: 8,
+      badge: '3 RECENT',
+      badgeColor: '#8b5cf6',
+      icon: <Star size={16} className="text-[#8b5cf6]" />,
+      bg: 'rgba(139,92,246,0.1)',
+      ghost: <Star size={54} className="text-[#8b5cf6]/6" />,
+      highlight: false,
+    },
   ];
 
+  const filtered = appsList.filter(a => {
+    if (tab === 'active') return a.status === 'APPLIED' || a.status === 'IN REVIEW' || a.status === 'INTERVIEWING';
+    if (tab === 'completed') return a.status === 'OFFER RECEIVED' || a.status === 'WITHDRAWN';
+    return true;
+  });
+
+  const pageSize = 5;
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   const getStatusStyle = (s: StatusType) => {
-    const map: Record<StatusType, { bg: string; color: string }> = {
-      'IN REVIEW':      { bg: '#e0f7fa', color: '#0891b2' },
-      'INTERVIEWING':   { bg: '#fef3c7', color: '#d97706' },
-      'OFFER RECEIVED': { bg: '#dcfce7', color: '#00a843' },
-      'WITHDRAWN':      { bg: '#f0f2f8', color: '#8890a4' },
-      'APPLIED':        { bg: '#ede9fe', color: '#6c63ff' },
+    const map: Record<string, { color: string; bg: string }> = {
+      'APPLIED':        { color: '#6c63ff', bg: 'rgba(108,99,255,0.12)' },
+      'IN REVIEW':      { color: '#6c63ff', bg: 'rgba(108,99,255,0.12)' },
+      'INTERVIEWING':   { color: '#00c853', bg: 'rgba(0,200,83,0.12)' },
+      'OFFER RECEIVED': { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+      'WITHDRAWN':      { color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
     };
-    return map[s];
+    return map[s] || { color: '#6c63ff', bg: 'rgba(108,99,255,0.12)' };
   };
 
   const getMatchColor = (m: number) => m >= 90 ? '#6c63ff' : m >= 80 ? '#4facfe' : '#f59e0b';
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast */}
@@ -96,8 +133,8 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
           {stats.map((s, i) => (
             <div
               key={i}
-              className={`relative bg-white rounded-2xl p-5 shadow-sm border overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 ${
-                s.highlight ? 'border-[#6c63ff]/30' : 'border-[#e4e8f0]/60'
+              className={`relative bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 ${
+                s.highlight ? 'border-[#6c63ff]/30' : 'border-[#e4e8f0]/60 dark:border-[#1f2d42]'
               }`}
             >
               {/* Ghost icon */}
@@ -114,17 +151,17 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
                   {s.badge}
                 </span>
               </div>
-              <div className="text-[11px] font-bold text-[#b0b8cc] tracking-widest uppercase mb-1">{s.label}</div>
-              <div className="text-[32px] font-black text-[#1a1a2e] leading-none">{s.value}</div>
+              <div className="text-[11px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest uppercase mb-1">{s.label}</div>
+              <div className="text-[32px] font-black text-[#1a1a2e] dark:text-[#f8fafc] leading-none">{s.value}</div>
             </div>
           ))}
         </div>
 
         {/* ── Applications Table Card ── */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 mb-6 overflow-hidden">
+        <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] mb-6 overflow-hidden">
 
           {/* Tab bar */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-0 border-b border-[#e4e8f0]">
+          <div className="flex items-center justify-between px-5 pt-4 pb-0 border-b border-[#e4e8f0] dark:border-[#1f2d42]">
             <div className="flex gap-1">
               {(['all','active','completed'] as TabType[]).map(t => (
                 <button
@@ -132,8 +169,8 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
                   onClick={() => { setTab(t); setPage(1); }}
                   className={`px-4 py-2 text-[13px] font-bold rounded-t-xl transition-all border-b-2 capitalize border-none cursor-pointer ${
                     tab === t
-                      ? 'text-[#6c63ff] border-b-[#6c63ff] bg-[#6c63ff]/5'
-                      : 'text-[#8890a4] border-b-transparent hover:text-[#4a5068] bg-transparent'
+                      ? 'text-[#6c63ff] dark:text-[#a78bfa] border-b-[#6c63ff] bg-[#6c63ff]/5'
+                      : 'text-[#8890a4] dark:text-[#94a3b8] border-b-transparent hover:text-[#4a5068] dark:hover:text-[#cbd5e1] bg-transparent'
                   }`}
                   style={{ borderBottom: tab === t ? '2px solid #6c63ff' : '2px solid transparent' }}
                 >
@@ -142,57 +179,57 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
               ))}
             </div>
             <div className="flex items-center gap-2 pb-2">
-              <span className="text-[12px] text-[#8890a4]">Sort by:</span>
+              <span className="text-[12px] text-[#8890a4] dark:text-[#94a3b8]">Sort by:</span>
               <select
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="text-[12px] font-bold text-[#4a5068] bg-transparent border-none outline-none cursor-pointer"
+                onChange={e => { setSortBy(e.target.value); showToast(`Sorted by ${e.target.value}`); }}
+                className="border border-[#e4e8f0] dark:border-[#1f2d42] rounded-lg px-2.5 py-1 text-[12px] font-semibold text-[#1a1a2e] dark:text-[#f8fafc] bg-[#f8f9fc] dark:bg-[#161e2e] outline-none cursor-pointer"
               >
                 <option>Newest</option>
                 <option>Oldest</option>
                 <option>Match %</option>
               </select>
-              <button className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 transition-colors">
-                <SlidersHorizontal size={13} className="text-[#8890a4]" />
+              <button className="w-7 h-7 rounded-lg bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center border-none cursor-pointer hover:bg-[#6c63ff]/10 transition-colors">
+                <SlidersHorizontal size={13} className="text-[#8890a4] dark:text-[#94a3b8]" />
               </button>
             </div>
           </div>
 
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-[#f8f9fc] border-b border-[#e4e8f0]">
+          <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-[#f8f9fc] dark:bg-[#161e2e] border-b border-[#e4e8f0] dark:border-[#1f2d42]">
             {['COMPANY & POSITION', 'APPLIED DATE', 'STATUS', 'AI MATCH', 'ACTION'].map(h => (
-              <div key={h} className="text-[10px] font-bold text-[#b0b8cc] tracking-widest">{h}</div>
+              <div key={h} className="text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest">{h}</div>
             ))}
           </div>
 
           {/* Rows */}
-          <div className="divide-y divide-[#f0f2f8]">
+          <div className="divide-y divide-[#f0f2f8] dark:divide-[#1f2d42]">
             {paginated.map((app) => {
               const st = getStatusStyle(app.status);
               const mc = getMatchColor(app.match);
               return (
                 <div
                   key={app.id}
-                  className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-4 items-center hover:bg-[#f8f9fc] transition-colors"
+                  className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-4 items-center hover:bg-[#f8f9fc] dark:hover:bg-[#161e2e] transition-colors"
                 >
                   {/* Company & Position */}
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black text-white flex-shrink-0"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black text-white flex-shrink-0 shadow-sm"
                       style={{ background: app.logoBg }}
                     >
                       {app.logo}
                     </div>
                     <div>
-                      <p className="text-[14px] font-extrabold text-[#1a1a2e]">{app.role}</p>
-                      <p className="text-[11px] text-[#8890a4]">{app.company} · {app.location}</p>
+                      <p className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">{app.role}</p>
+                      <p className="text-[11px] text-[#8890a4] dark:text-[#94a3b8]">{app.company} · {app.location}</p>
                     </div>
                   </div>
 
                   {/* Applied Date */}
                   <div className="sm:block">
-                    <p className="text-[13px] font-semibold text-[#4a5068]">{app.date}</p>
-                    <p className="text-[11px] text-[#b0b8cc]">{app.ago}</p>
+                    <p className="text-[13px] font-semibold text-[#4a5068] dark:text-[#cbd5e1]">{app.date}</p>
+                    <p className="text-[11px] text-[#b0b8cc] dark:text-[#64748b]">{app.ago}</p>
                   </div>
 
                   {/* Status */}
@@ -207,7 +244,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
 
                   {/* AI Match */}
                   <div className="flex items-center gap-2.5 min-w-[90px]">
-                    <div className="flex-1 h-1.5 bg-[#f0f2f8] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-[#f0f2f8] dark:bg-[#26334d] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${app.match}%`, background: `linear-gradient(90deg, ${mc}, ${mc}bb)` }}
@@ -230,15 +267,15 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between px-5 py-4 border-t border-[#e4e8f0]">
-            <span className="text-[12px] text-[#8890a4]">
+          <div className="flex items-center justify-between px-5 py-4 border-t border-[#e4e8f0] dark:border-[#1f2d42]">
+            <span className="text-[12px] text-[#8890a4] dark:text-[#94a3b8]">
               Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length} applications
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#f4f6fb] border-none cursor-pointer hover:bg-[#6c63ff]/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[#4a5068]"
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#f4f6fb] dark:bg-[#161e2e] border-none cursor-pointer hover:bg-[#6c63ff]/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[#4a5068] dark:text-[#cbd5e1]"
               >
                 <ChevronLeft size={13} />
               </button>
@@ -249,7 +286,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
                   className={`w-7 h-7 rounded-lg text-[12px] font-bold border-none cursor-pointer transition-all ${
                     page === n
                       ? 'text-white'
-                      : 'bg-[#f4f6fb] text-[#4a5068] hover:bg-[#6c63ff]/10 hover:text-[#6c63ff]'
+                      : 'bg-[#f4f6fb] dark:bg-[#161e2e] text-[#4a5068] dark:text-[#cbd5e1] hover:bg-[#6c63ff]/10 hover:text-[#6c63ff]'
                   }`}
                   style={page === n ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' } : {}}
                 >
@@ -259,7 +296,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#f4f6fb] border-none cursor-pointer hover:bg-[#6c63ff]/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[#4a5068]"
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#f4f6fb] dark:bg-[#161e2e] border-none cursor-pointer hover:bg-[#6c63ff]/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-[#4a5068] dark:text-[#cbd5e1]"
               >
                 <ChevronRight size={13} />
               </button>
@@ -271,7 +308,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
 
           {/* AI Application Insight */}
-          <div className="relative bg-gradient-to-br from-[#f0efff] to-[#e8f4ff] rounded-2xl p-6 border border-[#6c63ff]/15 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-[#f0efff] to-[#e8f4ff] dark:from-[#111827] dark:to-[#1a2234] rounded-2xl p-6 border border-[#6c63ff]/15 dark:border-[#1f2d42] overflow-hidden">
             {/* Decorative sparkles */}
             <div className="absolute top-4 right-8 opacity-20">
               <Sparkles size={60} className="text-[#6c63ff]" />
@@ -284,18 +321,18 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
               <div className="w-8 h-8 rounded-xl bg-[#6c63ff]/15 flex items-center justify-center">
                 <TrendingUp size={16} className="text-[#6c63ff]" />
               </div>
-              <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">AI Application Insight</h3>
+              <h3 className="text-[16px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">AI Application Insight</h3>
             </div>
 
-            <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4 max-w-lg relative z-10">
+            <p className="text-[13px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed mb-4 max-w-lg relative z-10">
               Based on your recent 5 interviews, your "Technical Communication" score has improved by{' '}
-              <span className="font-bold text-[#6c63ff]">14%</span>. Companies in the Fintech sector are
+              <span className="font-bold text-[#6c63ff] dark:text-[#a78bfa]">14%</span>. Companies in the Fintech sector are
               currently highly engaged with your profile.
             </p>
 
             <div className="flex flex-wrap gap-3 relative z-10">
               {['Fintech Preference', 'Product Strategy Expert', 'Fast-growing Startups'].map((tag, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-[11px] font-bold text-[#4a5068]">
+                <div key={i} className="flex items-center gap-1.5 text-[11px] font-bold text-[#4a5068] dark:text-[#cbd5e1]">
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ background: ['#6c63ff','#f59e0b','#00c853'][i] }}
@@ -308,7 +345,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
 
           {/* Nexus AI Plus upgrade card */}
           <div
-            className="rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden"
+            className="rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden border border-[#1f2d42]"
             style={{ background: 'linear-gradient(145deg,#1a1a2e,#16213e)' }}
           >
             {/* Glow */}

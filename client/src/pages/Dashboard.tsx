@@ -26,9 +26,9 @@ const recommended = [
 ];
 
 const badgeClass: Record<string, string> = {
-  blue:  'bg-[#6c63ff]/10 text-[#6c63ff]',
-  green: 'bg-[#00c853]/10 text-[#00a843]',
-  gray:  'bg-[#f0f2f8] text-[#8890a4]',
+  blue:  'bg-[#6c63ff]/10 text-[#6c63ff] dark:bg-[#6c63ff]/20 dark:text-[#a78bfa]',
+  green: 'bg-[#00c853]/10 text-[#00a843] dark:bg-[#00c853]/20 dark:text-[#00e676]',
+  gray:  'bg-[#f0f2f8] text-[#8890a4] dark:bg-[#1a2234] dark:text-[#94a3b8]',
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
@@ -94,7 +94,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden relative">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden relative transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast Notification */}
@@ -110,21 +110,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
       {/* ── DETAILED ANALYTICS REPORT MODAL ── */}
       {showAnalyticsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
-            <div className="flex items-start justify-between mb-6 pb-4 border-b border-[#f0f2f8]">
+            <div className="flex items-start justify-between mb-6 pb-4 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
               <div>
-                <div className="flex items-center gap-2 text-[11px] font-bold text-[#6c63ff] tracking-widest uppercase mb-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa] tracking-widest uppercase mb-1">
                   <BarChart2 size={14} /> DETAILED ANALYTICS REPORT
                 </div>
-                <h2 className="text-[22px] sm:text-[26px] font-black text-[#1a1a2e]">Candidate Performance Insights</h2>
-                <p className="text-[13px] text-[#8890a4]">Real-time engagement, recruiter searches, and ATS match analytics.</p>
+                <h2 className="text-[22px] sm:text-[26px] font-black text-[#1a1a2e] dark:text-[#f8fafc]">Candidate Performance Insights</h2>
+                <p className="text-[13px] text-[#8890a4] dark:text-[#94a3b8]">Real-time engagement, recruiter searches, and ATS match analytics.</p>
               </div>
               <button
                 onClick={() => setShowAnalyticsModal(false)}
-                className="w-9 h-9 rounded-xl bg-[#f4f6fb] flex items-center justify-center text-[#8890a4] hover:text-[#1a1a2e] hover:bg-[#e4e8f0] transition-colors border-none cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-[#f4f6fb] dark:bg-[#1a2234] flex items-center justify-center text-[#8890a4] dark:text-[#94a3b8] hover:text-[#1a1a2e] dark:hover:text-[#f8fafc] transition-colors border-none cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -138,12 +138,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                 { label: 'AI Match Index', val: '98%', change: 'Top 2%', color: '#8b5cf6', icon: <Target size={14} /> },
                 { label: 'Response Rate', val: '58.3%', change: 'Passed 5/8', color: '#f59e0b', icon: <Award size={14} /> },
               ].map(m => (
-                <div key={m.label} className="p-4 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
-                  <div className="flex items-center justify-between text-[#8890a4] mb-2">
+                <div key={m.label} className="p-4 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl border border-[#e4e8f0] dark:border-[#1f2d42]">
+                  <div className="flex items-center justify-between text-[#8890a4] dark:text-[#94a3b8] mb-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider">{m.label}</span>
                     <span style={{ color: m.color }}>{m.icon}</span>
                   </div>
-                  <p className="text-[22px] font-black text-[#1a1a2e] leading-none mb-1">{m.val}</p>
+                  <p className="text-[22px] font-black text-[#1a1a2e] dark:text-[#f8fafc] leading-none mb-1">{m.val}</p>
                   <span className="text-[10px] font-bold text-[#00c853] bg-[#00c853]/10 px-2 py-0.5 rounded-full">{m.change}</span>
                 </div>
               ))}
@@ -153,8 +153,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
               
               {/* Weekly Traffic Bar Chart */}
-              <div className="p-5 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
-                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] mb-3 flex items-center gap-2">
+              <div className="p-5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl border border-[#e4e8f0] dark:border-[#1f2d42]">
+                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc] mb-3 flex items-center gap-2">
                   <TrendingUp size={14} className="text-[#6c63ff]" /> Weekly Profile Views Trend
                 </h4>
                 <div className="flex items-end justify-between h-32 pt-4 px-2">
@@ -174,15 +174,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                           style={{ height: d.h }}
                         />
                       </div>
-                      <span className="text-[10px] text-[#8890a4] font-semibold">{d.day}</span>
+                      <span className="text-[10px] text-[#8890a4] dark:text-[#94a3b8] font-semibold">{d.day}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Skill Match Breakdown */}
-              <div className="p-5 bg-[#f8f9fc] rounded-2xl border border-[#e4e8f0]">
-                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] mb-3 flex items-center gap-2">
+              <div className="p-5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-2xl border border-[#e4e8f0] dark:border-[#1f2d42]">
+                <h4 className="text-[13px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc] mb-3 flex items-center gap-2">
                   <ShieldCheck size={14} className="text-[#00c853]" /> ATS Skill Match Accuracy
                 </h4>
                 <div className="flex flex-col gap-2.5">
@@ -194,10 +194,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                   ].map(s => (
                     <div key={s.skill}>
                       <div className="flex justify-between text-[11px] font-bold mb-1">
-                        <span className="text-[#1a1a2e]">{s.skill}</span>
+                        <span className="text-[#1a1a2e] dark:text-[#f8fafc]">{s.skill}</span>
                         <span style={{ color: s.color }}>{s.pct}%</span>
                       </div>
-                      <div className="h-1.5 bg-[#e4e8f0] rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-[#e4e8f0] dark:bg-[#26334d] rounded-full overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.color }} />
                       </div>
                     </div>
@@ -208,10 +208,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
             </div>
 
             {/* Footer Action Buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#f0f2f8] flex-wrap gap-3">
+            <div className="flex items-center justify-between pt-4 border-t border-[#f0f2f8] dark:border-[#1f2d42] flex-wrap gap-3">
               <button
                 onClick={downloadAnalyticsPDF}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-[#f4f6fb] border border-[#e4e8f0] hover:border-[#6c63ff] hover:text-[#6c63ff] cursor-pointer transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-[#f4f6fb] dark:bg-[#1a2234] border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff] hover:text-[#6c63ff] cursor-pointer transition-all"
               >
                 <Download size={14} className="text-[#6c63ff]" /> Export PDF Report
               </button>
@@ -219,7 +219,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowAnalyticsModal(false)}
-                  className="px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#8890a4] bg-transparent border border-[#e4e8f0] hover:text-[#1a1a2e] cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-[12px] font-bold text-[#8890a4] dark:text-[#94a3b8] bg-transparent border border-[#e4e8f0] dark:border-[#1f2d42] hover:text-[#1a1a2e] dark:hover:text-[#f8fafc] cursor-pointer"
                 >
                   Close
                 </button>
@@ -243,8 +243,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
         {/* Welcome */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-[32px] font-extrabold text-[#1a1a2e] tracking-tight mb-1">Welcome back, Alex.</h1>
-          <p className="text-xs sm:text-sm text-[#8890a4]">Here's how your career search is progressing today.</p>
+          <h1 className="text-2xl sm:text-[32px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc] tracking-tight mb-1">Welcome back, Alex.</h1>
+          <p className="text-xs sm:text-sm text-[#8890a4] dark:text-[#94a3b8]">Here's how your career search is progressing today.</p>
         </div>
 
         {/* Top Row */}
@@ -295,34 +295,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
             {/* Right */}
             <div className="flex flex-col gap-3">
-              <div className="bg-white/95 rounded-2xl p-4 backdrop-blur-xl">
-                <span className="block text-[10px] font-bold text-[#8890a4] tracking-widest mb-3">TOP AI MATCH</span>
+              <div className="bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] rounded-2xl p-4 shadow-md">
+                <span className="block text-[10px] font-bold text-[#8890a4] dark:text-[#94a3b8] tracking-widest mb-3">TOP AI MATCH</span>
                 <div className="flex gap-2.5 items-start mb-3">
                   <div className="w-9 h-9 rounded-xl bg-[#4285f4] flex items-center justify-center text-white text-base font-bold flex-shrink-0">G</div>
                   <div>
-                    <span className="block text-sm font-bold text-[#1a1a2e]">Senior AI Product Designer</span>
-                    <span className="block text-xs text-[#8890a4]">Google · Mountain View, CA</span>
+                    <span className="block text-sm font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Senior AI Product Designer</span>
+                    <span className="block text-xs text-[#8890a4] dark:text-[#94a3b8]">Google · Mountain View, CA</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-[#f0f2f8]">
+                <div className="flex items-center justify-between pt-2 border-t border-[#f0f2f8] dark:border-[#1f2d42]">
                   <span className="text-xs font-bold text-[#00c853]">96% Match Rate</span>
                   <button
                     onClick={() => onNavigate?.('jobdetails', { title: 'Senior AI Product Designer', company: 'Google', location: 'Mountain View, CA', match: 96, salary: '$190k - $250k', type: 'Full-time' })}
-                    className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                    className="text-xs font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline"
                   >
                     View Job →
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white/10 rounded-2xl p-4 border border-white/10 text-white flex items-center justify-between">
+              <div className="bg-white/10 dark:bg-[#161e2e]/90 rounded-2xl p-4 border border-white/10 dark:border-[#1f2d42] text-white flex items-center justify-between">
                 <div>
                   <span className="block text-[11px] text-[#a78bfa] font-bold">NEXT INTERVIEW</span>
                   <span className="block text-sm font-bold mt-0.5">Netflix · Tomorrow 10:00 AM</span>
                 </div>
                 <button
                   onClick={() => onNavigate?.('interview')}
-                  className="bg-white/15 text-white border border-white/20 text-xs px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/25 font-semibold"
+                  className="bg-white/15 dark:bg-[#6c63ff]/20 text-white border border-white/20 dark:border-[#6c63ff]/30 text-xs px-3 py-1.5 rounded-lg cursor-pointer hover:bg-white/25 font-semibold"
                 >
                   Prepare
                 </button>
@@ -332,8 +332,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
           {/* Right Column Quick Actions */}
           <div className="flex flex-col gap-3">
-            <div className="bg-white rounded-2xl p-5 border border-[#e4e8f0] shadow-sm flex-1">
-              <span className="block text-[11px] font-bold text-[#8890a4] tracking-widest uppercase mb-4">Quick Navigation</span>
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-[#e4e8f0] dark:border-[#1f2d42] shadow-sm flex-1">
+              <span className="block text-[11px] font-bold text-[#8890a4] dark:text-[#94a3b8] tracking-widest uppercase mb-4">Quick Navigation</span>
               <div className="flex flex-col gap-2.5">
                 {[
                   { label: 'Job Search & Matches', page: 'jobsearch', color: '#6c63ff', count: '12 new' },
@@ -344,9 +344,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
                   <button
                     key={item.page}
                     onClick={() => onNavigate?.(item.page as Page)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-[#f8f9fc] hover:bg-[#6c63ff]/8 border border-[#e4e8f0] hover:border-[#6c63ff]/30 text-left transition-all cursor-pointer group"
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-[#f8f9fc] dark:bg-[#161e2e] hover:bg-[#6c63ff]/8 dark:hover:bg-[#6c63ff]/15 border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff]/30 text-left transition-all cursor-pointer group"
                   >
-                    <span className="text-[13px] font-bold text-[#1a1a2e] group-hover:text-[#6c63ff] transition-colors">{item.label}</span>
+                    <span className="text-[13px] font-bold text-[#1a1a2e] dark:text-[#f8fafc] group-hover:text-[#6c63ff] dark:group-hover:text-[#a78bfa] transition-colors">{item.label}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: item.color }}>{item.count}</span>
                   </button>
                 ))}
@@ -366,11 +366,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
             <div
               key={s.label}
               onClick={() => onNavigate?.(s.page as Page)}
-              className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e4e8f0] shadow-sm hover:shadow-md hover:border-[#6c63ff]/40 cursor-pointer transition-all"
+              className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-[#e4e8f0] dark:border-[#1f2d42] shadow-sm hover:shadow-md hover:border-[#6c63ff]/40 cursor-pointer transition-all"
             >
-              <span className="block text-[11px] font-bold text-[#8890a4] mb-1">{s.label}</span>
-              <span className="block text-3xl font-black text-[#1a1a2e] mb-1">{s.value}</span>
-              <span className="block text-[11px] text-[#6c63ff] font-semibold">{s.sub} →</span>
+              <span className="block text-[11px] font-bold text-[#8890a4] dark:text-[#94a3b8] mb-1">{s.label}</span>
+              <span className="block text-3xl font-black text-[#1a1a2e] dark:text-[#f8fafc] mb-1">{s.value}</span>
+              <span className="block text-[11px] text-[#6c63ff] dark:text-[#a78bfa] font-semibold">{s.sub} →</span>
             </div>
           ))}
         </div>
@@ -379,12 +379,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
           
           {/* Left: Active Pipeline */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] shadow-sm">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] dark:border-[#1f2d42] shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-extrabold text-[#1a1a2e]">Active Application Pipeline</h3>
+              <h3 className="text-base font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Active Application Pipeline</h3>
               <button
                 onClick={() => onNavigate?.('applications')}
-                className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                className="text-xs font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline"
               >
                 View All ({appStats.applied}) →
               </button>
@@ -392,27 +392,27 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
             <div className="flex flex-col gap-3">
               {pipelineJobs.map((j, i) => (
-                <div key={i} className="flex items-center justify-between p-3.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all">
+                <div key={i} className="flex items-center justify-between p-3.5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff]/30 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-bold text-[13px] shadow-sm border border-[#e4e8f0] text-[#1a1a2e]">
+                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#111827] flex items-center justify-center font-bold text-[13px] shadow-sm border border-[#e4e8f0] dark:border-[#1f2d42] text-[#1a1a2e] dark:text-[#f8fafc]">
                       {j.company[0]}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-extrabold text-[#1a1a2e]">{j.role}</span>
+                        <span className="text-sm font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">{j.role}</span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeClass[j.badgeColor]}`}>
                           {j.badge}
                         </span>
                       </div>
-                      <span className="text-xs text-[#8890a4]">{j.company} · {j.location}</span>
+                      <span className="text-xs text-[#8890a4] dark:text-[#94a3b8]">{j.company} · {j.location}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="hidden sm:inline text-xs text-[#8890a4]">{j.status}</span>
+                    <span className="hidden sm:inline text-xs text-[#8890a4] dark:text-[#94a3b8]">{j.status}</span>
                     <button
                       onClick={() => onNavigate?.('applications')}
-                      className="p-1.5 text-[#8890a4] hover:text-[#6c63ff] bg-transparent border-none cursor-pointer"
+                      className="p-1.5 text-[#8890a4] dark:text-[#94a3b8] hover:text-[#6c63ff] dark:hover:text-[#a78bfa] bg-transparent border-none cursor-pointer"
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -423,13 +423,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
           </div>
 
           {/* Right: Top Recommended */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] shadow-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 sm:p-6 border border-[#e4e8f0] dark:border-[#1f2d42] shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-extrabold text-[#1a1a2e]">Top Recommended Roles</h3>
+                <h3 className="text-base font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Top Recommended Roles</h3>
                 <button
                   onClick={() => onNavigate?.('jobsearch')}
-                  className="text-xs font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                  className="text-xs font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline"
                 >
                   Explore →
                 </button>
@@ -437,29 +437,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onMenuClick, onNavigate }) => {
 
               <div className="flex flex-col gap-3">
                 {recommended.map((r, i) => (
-                  <div key={i} className="p-3.5 bg-[#f8f9fc] rounded-xl border border-[#e4e8f0] hover:border-[#6c63ff]/30 transition-all">
+                  <div key={i} className="p-3.5 bg-[#f8f9fc] dark:bg-[#161e2e] rounded-xl border border-[#e4e8f0] dark:border-[#1f2d42] hover:border-[#6c63ff]/30 transition-all">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center" style={{ background: r.bg }}>
                           {r.initials}
                         </div>
                         <div>
-                          <span className="block text-xs font-bold text-[#1a1a2e]">{r.title}</span>
-                          <span className="block text-[10px] text-[#8890a4]">{r.company} · {r.location}</span>
+                          <span className="block text-xs font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{r.title}</span>
+                          <span className="block text-[10px] text-[#8890a4] dark:text-[#94a3b8]">{r.company} · {r.location}</span>
                         </div>
                       </div>
                       <span className="text-xs font-extrabold" style={{ color: r.matchColor }}>{r.match}% Match</span>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-[#e4e8f0]">
+                    <div className="flex items-center justify-between pt-2 border-t border-[#e4e8f0] dark:border-[#1f2d42]">
                       <div className="flex gap-1.5">
                         {r.tags.map((t, idx) => (
-                          <span key={idx} className="text-[9px] font-bold text-[#4a5068] bg-white px-2 py-0.5 rounded border border-[#e4e8f0]">{t}</span>
+                          <span key={idx} className="text-[9px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-white dark:bg-[#111827] px-2 py-0.5 rounded border border-[#e4e8f0] dark:border-[#1f2d42]">{t}</span>
                         ))}
                       </div>
                       <button
                         onClick={() => onNavigate?.('jobdetails', { title: r.title, company: r.company, location: r.location, match: r.match, salary: '$180k - $240k', type: 'Full-time' })}
-                        className="text-[11px] font-bold text-[#6c63ff] bg-transparent border-none cursor-pointer hover:underline"
+                        className="text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:underline"
                       >
                         Apply →
                       </button>

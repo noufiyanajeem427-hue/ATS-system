@@ -111,58 +111,58 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
     : filteredJobs;
 
   const FilterSidebar = () => (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
+    <div className="bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-5">
-        <span className="text-[16px] font-bold text-[#1a1a2e]">Filters</span>
+        <span className="text-[16px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">Filters</span>
         <button
           onClick={resetFilters}
-          className="text-[12px] font-medium text-[#6c63ff] bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+          className="text-[12px] font-medium text-[#6c63ff] dark:text-[#a78bfa] bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
         >
           Clear All
         </button>
       </div>
 
       {/* Location */}
-      <div className="mb-5 pb-5 border-b border-[#f0f2f8]">
-        <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-3">LOCATION</span>
+      <div className="mb-5 pb-5 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
+        <span className="block text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest mb-3">LOCATION</span>
         {[{ id: 'remote', label: 'Remote Only' }, { id: 'sf', label: 'San Francisco, CA' }, { id: 'ny', label: 'New York, NY' }].map(({ id, label }) => (
           <label key={id} className="flex items-center gap-2.5 cursor-pointer mb-2.5 select-none">
-            <div onClick={() => setLoc(id)} className={`w-[17px] h-[17px] rounded-[5px] border-2 flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${loc === id ? 'bg-[#6c63ff] border-[#6c63ff]' : 'border-[#d0d5e8]'}`}>
+            <div onClick={() => setLoc(id)} className={`w-[17px] h-[17px] rounded-[5px] border-2 flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${loc === id ? 'bg-[#6c63ff] border-[#6c63ff]' : 'border-[#d0d5e8] dark:border-[#26334d]'}`}>
               {loc === id && <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>}
             </div>
-            <span className="text-[13px] text-[#4a5068]">{label}</span>
+            <span className="text-[13px] text-[#4a5068] dark:text-[#cbd5e1]">{label}</span>
           </label>
         ))}
       </div>
 
       {/* AI Match */}
-      <div className="mb-5 pb-5 border-b border-[#f0f2f8]">
+      <div className="mb-5 pb-5 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-[#b0b8cc] tracking-widest">AI MATCH %</span>
-          <span className="text-[12px] font-semibold text-[#6c63ff] bg-[#6c63ff]/10 px-2 py-0.5 rounded-full">{aim}% +</span>
+          <span className="text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest">AI MATCH %</span>
+          <span className="text-[12px] font-semibold text-[#6c63ff] dark:text-[#a78bfa] bg-[#6c63ff]/10 dark:bg-[#6c63ff]/20 px-2 py-0.5 rounded-full">{aim}% +</span>
         </div>
         <input type="range" min={0} max={100} value={aim} onChange={e => setAim(+e.target.value)}
           className="w-full h-1 rounded cursor-pointer accent-[#6c63ff]"/>
       </div>
 
       {/* Salary */}
-      <div className="mb-5 pb-5 border-b border-[#f0f2f8]">
-        <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-3">SALARY RANGE</span>
+      <div className="mb-5 pb-5 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
+        <span className="block text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest mb-3">SALARY RANGE</span>
         <div className="relative">
-          <select className="w-full py-2.5 pl-3 pr-8 border border-[#e4e8f0] rounded-[9px] text-[13px] text-[#1a1a2e] bg-[#f8f9fc] outline-none appearance-none cursor-pointer font-sans">
+          <select className="w-full py-2.5 pl-3 pr-8 border border-[#e4e8f0] dark:border-[#1f2d42] rounded-[9px] text-[13px] text-[#1a1a2e] dark:text-[#f8fafc] bg-[#f8f9fc] dark:bg-[#161e2e] outline-none appearance-none cursor-pointer font-sans">
             <option>$100k - $150k</option><option>$150k - $200k</option><option>$200k+</option>
           </select>
-          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8890a4] pointer-events-none"/>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8890a4] dark:text-[#94a3b8] pointer-events-none"/>
         </div>
       </div>
 
       {/* Experience */}
-      <div className="mb-5 pb-5 border-b border-[#f0f2f8]">
-        <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-3">EXPERIENCE</span>
+      <div className="mb-5 pb-5 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
+        <span className="block text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest mb-3">EXPERIENCE</span>
         <div className="flex flex-wrap gap-2">
           {['Senior', 'Lead', 'Staff'].map((e) => (
             <button key={e} onClick={() => toggleExp(e)}
-              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border-[1.5px] cursor-pointer transition-all font-sans ${exp.includes(e) ? 'bg-[#6c63ff]/12 border-[#6c63ff] text-[#6c63ff] font-semibold' : 'bg-[#f0f2f8] border-[#e4e8f0] text-[#6a7090] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}>
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border-[1.5px] cursor-pointer transition-all font-sans ${exp.includes(e) ? 'bg-[#6c63ff]/12 dark:bg-[#6c63ff]/25 border-[#6c63ff] text-[#6c63ff] dark:text-[#a78bfa] font-semibold' : 'bg-[#f0f2f8] dark:bg-[#161e2e] border-[#e4e8f0] dark:border-[#1f2d42] text-[#6a7090] dark:text-[#cbd5e1] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}>
               {e}
             </button>
           ))}
@@ -170,14 +170,14 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
       </div>
 
       {/* Job Type */}
-      <div className="mb-5 pb-5 border-b border-[#f0f2f8]">
-        <span className="block text-[10px] font-bold text-[#b0b8cc] tracking-widest mb-3">JOB TYPE</span>
+      <div className="mb-5 pb-5 border-b border-[#f0f2f8] dark:border-[#1f2d42]">
+        <span className="block text-[10px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-widest mb-3">JOB TYPE</span>
         {[{ id: 'fulltime', label: 'Full-time' }, { id: 'contract', label: 'Contract' }].map(({ id, label }) => (
           <label key={id} className="flex items-center gap-2.5 cursor-pointer mb-2.5 select-none">
-            <div onClick={() => setJt(id)} className={`w-[17px] h-[17px] rounded-full border-2 flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${jt === id ? 'border-[#6c63ff]' : 'border-[#d0d5e8]'}`}>
+            <div onClick={() => setJt(id)} className={`w-[17px] h-[17px] rounded-full border-2 flex items-center justify-center transition-all cursor-pointer flex-shrink-0 ${jt === id ? 'border-[#6c63ff]' : 'border-[#d0d5e8] dark:border-[#26334d]'}`}>
               {jt === id && <span className="w-[7px] h-[7px] rounded-full bg-[#6c63ff] block"/>}
             </div>
-            <span className="text-[13px] text-[#4a5068]">{label}</span>
+            <span className="text-[13px] text-[#4a5068] dark:text-[#cbd5e1]">{label}</span>
           </label>
         ))}
       </div>
@@ -198,7 +198,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden relative font-sans">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden relative font-sans transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast Notification */}
@@ -214,25 +214,25 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
 
       {/* Hero Search */}
       <div className="px-4 sm:px-7 pt-4 sm:pt-6 pb-0 w-full box-border">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white border-2 border-dashed border-[#c5ccde] rounded-2xl p-3 md:px-4 md:py-3 gap-3 md:gap-0 w-full focus-within:border-solid focus-within:border-[#6c63ff] transition-all">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white dark:bg-[#111827] border-2 border-dashed border-[#c5ccde] dark:border-[#26334d] rounded-2xl p-3 md:px-4 md:py-3 gap-3 md:gap-0 w-full focus-within:border-solid focus-within:border-[#6c63ff] transition-all">
           <div className="flex items-center gap-2.5 flex-1 px-1 sm:px-3">
-            <Search size={18} className="text-[#b0b8cc] flex-shrink-0"/>
+            <Search size={18} className="text-[#b0b8cc] dark:text-[#64748b] flex-shrink-0"/>
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              className="border-none outline-none text-[14px] text-[#1a1a2e] w-full bg-transparent placeholder:text-[#b0b8cc] font-sans"
+              className="border-none outline-none text-[14px] text-[#1a1a2e] dark:text-[#f8fafc] w-full bg-transparent placeholder:text-[#b0b8cc] dark:placeholder:text-[#64748b] font-sans"
               placeholder="Job title, keywords, or company"
             />
           </div>
-          <div className="hidden md:block w-px h-8 bg-[#e4e8f0] flex-shrink-0"/>
+          <div className="hidden md:block w-px h-8 bg-[#e4e8f0] dark:bg-[#1f2d42] flex-shrink-0"/>
           <div className="flex items-center gap-2.5 flex-1 px-1 sm:px-3">
             <MapPin size={18} className="text-[#6c63ff] flex-shrink-0"/>
             <input
               value={locationQuery}
               onChange={e => setLocationQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              className="border-none outline-none text-[14px] text-[#1a1a2e] w-full bg-transparent placeholder:text-[#b0b8cc] font-sans"
+              className="border-none outline-none text-[14px] text-[#1a1a2e] dark:text-[#f8fafc] w-full bg-transparent placeholder:text-[#b0b8cc] dark:placeholder:text-[#64748b] font-sans"
               placeholder="City, state, or remote"
             />
           </div>
@@ -251,7 +251,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
       <div className="px-4 sm:px-7 pt-4 lg:hidden">
         <button
           onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#e4e8f0] text-xs font-semibold text-[#1a1a2e] active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] text-xs font-semibold text-[#1a1a2e] dark:text-[#f8fafc] active:scale-95"
         >
           <SlidersHorizontal size={16} /> Filter Results
         </button>
@@ -259,11 +259,11 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
 
       {/* Mobile Filter Modal */}
       {mobileFilterOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 lg:hidden flex justify-end">
-          <div className="w-80 bg-[#f4f6fb] h-full p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 z-50 lg:hidden flex justify-end">
+          <div className="w-80 bg-[#f4f6fb] dark:bg-[#0b0f19] h-full p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <span className="font-bold text-lg">Filters</span>
-              <button onClick={() => setMobileFilterOpen(false)} className="text-sm font-semibold text-[#6c63ff]">Done</button>
+              <span className="font-bold text-lg text-[#1a1a2e] dark:text-[#f8fafc]">Filters</span>
+              <button onClick={() => setMobileFilterOpen(false)} className="text-sm font-semibold text-[#6c63ff] dark:text-[#a78bfa]">Done</button>
             </div>
             <FilterSidebar />
           </div>
@@ -280,17 +280,17 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
         {/* Job Listings */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 px-1">
-            <span className="text-[15px] text-[#4a5068]"><strong className="text-[#1a1a2e]">{filteredJobs.length}</strong> Jobs matches for your profile</span>
+            <span className="text-[15px] text-[#4a5068] dark:text-[#cbd5e1]"><strong className="text-[#1a1a2e] dark:text-[#f8fafc]">{filteredJobs.length}</strong> Jobs matches for your profile</span>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[#b0b8cc] tracking-wider">SORT BY:</span>
+              <span className="text-[11px] font-bold text-[#b0b8cc] dark:text-[#64748b] tracking-wider">SORT BY:</span>
               <div className="flex items-center gap-1">
                 <select
                   onChange={e => showToast(`Sorted jobs by ${e.target.value}`)}
-                  className="border-none outline-none text-[13px] font-semibold text-[#6c63ff] bg-transparent cursor-pointer font-sans appearance-none pr-4"
+                  className="border-none outline-none text-[13px] font-semibold text-[#6c63ff] dark:text-[#a78bfa] bg-transparent cursor-pointer font-sans appearance-none pr-4"
                 >
                   <option>Highest Match</option><option>Latest</option><option>Salary</option>
                 </select>
-                <ChevronDown size={13} className="text-[#6c63ff] -ml-3 pointer-events-none"/>
+                <ChevronDown size={13} className="text-[#6c63ff] dark:text-[#a78bfa] -ml-3 pointer-events-none"/>
               </div>
             </div>
           </div>
@@ -298,8 +298,8 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
           {/* Cards */}
           <div className="flex flex-col gap-3">
             {displayedJobs.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 text-center text-[#8890a4]">
-                <p className="font-bold text-base mb-1">No jobs match your AI filter threshold</p>
+              <div className="bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] rounded-2xl p-8 text-center text-[#8890a4] dark:text-[#94a3b8]">
+                <p className="font-bold text-base mb-1 text-[#1a1a2e] dark:text-[#f8fafc]">No jobs match your AI filter threshold</p>
                 <p className="text-xs mb-4">Try lowering the AI Match slider to see more opportunities.</p>
                 <button onClick={resetFilters} className="px-4 py-2 bg-[#6c63ff] text-white rounded-xl text-xs font-semibold">Reset Filters</button>
               </div>
@@ -307,7 +307,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
               displayedJobs.map((job: Job) => {
                 const mc = matchColor(job.match);
                 return (
-                  <div key={job.id} className={`bg-white rounded-2xl p-4 sm:p-5 shadow-sm border-[1.5px] transition-all hover:-translate-y-0.5 hover:shadow-md relative overflow-hidden ${job.id === 1 ? 'border-[#dddaff]' : 'border-transparent hover:border-[#e0ddff]'}`}>
+                  <div key={job.id} className={`bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 shadow-sm border-[1.5px] border-[#e4e8f0] dark:border-[#1f2d42] transition-all hover:-translate-y-0.5 hover:shadow-md relative overflow-hidden ${job.id === 1 ? 'border-[#dddaff] dark:border-[#3b3486]' : 'hover:border-[#e0ddff] dark:hover:border-[#3b3486]'}`}>
                     {job.id === 1 && <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l" style={{ background: 'linear-gradient(180deg,#6c63ff,#a78bfa)' }}/>}
 
                     <div className="flex items-start gap-3.5">
@@ -316,19 +316,19 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3
-                          onClick={() => onNavigate?.('jobdetails', job)}
-                          className="text-sm sm:text-[16px] font-bold text-[#1a1a2e] mb-1.5 truncate cursor-pointer hover:text-[#6c63ff] transition-colors"
+                          onClick={() => handleJobNavigate(job)}
+                          className="text-sm sm:text-[16px] font-bold text-[#1a1a2e] dark:text-[#f8fafc] mb-1.5 truncate cursor-pointer hover:text-[#6c63ff] dark:hover:text-[#a78bfa] transition-colors"
                         >
                           {job.title}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 mb-2.5">
-                          <span className="flex items-center gap-1 text-[12px] text-[#8890a4]"><Building2 size={12}/>{job.company}</span>
-                          <span className="flex items-center gap-1 text-[12px] text-[#8890a4]"><MapPin size={12}/>{job.location}</span>
+                          <span className="flex items-center gap-1 text-[12px] text-[#8890a4] dark:text-[#94a3b8]"><Building2 size={12}/>{job.company}</span>
+                          <span className="flex items-center gap-1 text-[12px] text-[#8890a4] dark:text-[#94a3b8]"><MapPin size={12}/>{job.location}</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full" style={{ color: mc, background: `${mc}18` }}>✦ {job.match}% Match</span>
-                          <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0f2f8] text-[#4a5068]">{job.salary}</span>
-                          <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0f2f8] text-[#4a5068]">{job.type}</span>
+                          <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0f2f8] dark:bg-[#161e2e] text-[#4a5068] dark:text-[#cbd5e1]">{job.salary}</span>
+                          <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[#f0f2f8] dark:bg-[#161e2e] text-[#4a5068] dark:text-[#cbd5e1]">{job.type}</span>
                         </div>
                       </div>
                       <button onClick={() => toggleSave(job.id)} className="bg-transparent border-none cursor-pointer p-1 rounded-lg hover:scale-125 transition-transform flex-shrink-0">
@@ -336,73 +336,63 @@ const JobSearch: React.FC<JobSearchProps> = ({ onMenuClick, onNavigate }) => {
                       </button>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3.5 border-t border-[#f0f2f8]">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3.5 border-t border-[#f0f2f8] dark:border-[#1f2d42]">
                       <div className="flex items-center gap-2">
                         {job.id === 1 && (
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <div className="flex">
                               {[{ l: 'C', c: '#6c63ff' }, { l: 'B', c: '#f093fb' }, { l: 'A', c: '#4facfe' }].map((a, i) => (
-                                <div key={i} className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style={{ background: a.c, marginLeft: i ? '-8px' : 0, zIndex: 3 - i }}>{a.l}</div>
+                                <div key={i} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#111827] flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0" style={{ background: a.c, marginLeft: i ? '-8px' : 0, zIndex: 3 - i }}>{a.l}</div>
                               ))}
                             </div>
-                            <span className="text-[11px] text-[#8890a4] font-medium ml-1">+1.4k applied</span>
+                            <span className="text-[11px] text-[#8890a4] dark:text-[#94a3b8] font-medium ml-1">+1.4k applied</span>
                           </div>
                         )}
                         {job.tag && (
-                          <span className={`text-[12px] font-medium px-2.5 py-1 rounded-full ${job.tagType === 'urgent' ? 'bg-[#ff4d6d]/10 text-[#ff4d6d]' : 'text-[#8890a4]'}`}>{job.tag}</span>
+                          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${job.tagType === 'urgent' ? 'bg-[#ff4d6d]/10 text-[#ff4d6d]' : 'bg-[#6c63ff]/10 text-[#6c63ff] dark:text-[#a78bfa]'}`}>
+                            {job.tag}
+                          </span>
                         )}
                       </div>
-                      <div className="flex gap-2.5 w-full sm:w-auto">
-                        <button
-                          onClick={() => handleJobNavigate(job)}
-                          disabled={loadingJobId === job.id}
-                          className="flex-1 sm:flex-none px-5 py-2 border-[1.5px] border-[#e4e8f0] rounded-[9px] bg-white text-[13px] font-semibold text-[#4a5068] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all font-sans active:scale-95 flex items-center justify-center gap-1.5"
-                        >
-                          {loadingJobId === job.id ? <ButtonSpinner size={14} color="#6c63ff" /> : 'Details'}
-                        </button>
-                        <button
-                          onClick={() => onNavigate?.('applications')}
-                          className="flex-1 sm:flex-none px-5 py-2 border-none rounded-[9px] text-[13px] font-semibold text-white cursor-pointer transition-all hover:-translate-y-px font-sans active:scale-95"
-                          style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)', boxShadow: '0 3px 10px rgba(108,99,255,0.3)' }}
-                        >
-                          Apply Now
-                        </button>
-                      </div>
+
+                      <button
+                        onClick={() => handleJobNavigate(job)}
+                        disabled={loadingJobId === job.id}
+                        className="px-5 py-2 rounded-xl text-[13px] font-bold text-white border-none cursor-pointer transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-1.5 self-end sm:self-auto"
+                        style={{ background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' }}
+                      >
+                        {loadingJobId === job.id ? <ButtonSpinner size={14} color="#ffffff" /> : 'View Details →'}
+                      </button>
                     </div>
                   </div>
                 );
               })
             )}
-          </div>
 
-          {/* Dynamic Pagination (Only shown when jobs count > 10) */}
-          {filteredJobs.length > 10 && (
-            <div className="flex items-center justify-center gap-1.5 mt-6">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-40"
-              >
-                <ChevronLeft size={14}/>
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-9 h-9 rounded-[9px] border-[1.5px] text-[13px] font-medium cursor-pointer transition-all font-sans active:scale-95 ${page === p ? 'bg-[#6c63ff] border-[#6c63ff] text-white font-bold' : 'bg-white border-[#e4e8f0] text-[#4a5068] hover:border-[#6c63ff] hover:text-[#6c63ff]'}`}
-                >
-                  {p}
-                </button>
-              ))}
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-9 h-9 rounded-[9px] border-[1.5px] border-[#e4e8f0] bg-white flex items-center justify-center cursor-pointer text-[#8890a4] hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 disabled:opacity-40"
-              >
-                <ChevronRight size={14}/>
-              </button>
-            </div>
-          )}
+            {/* Pagination */}
+            {filteredJobs.length > 0 && (
+              <div className="flex items-center justify-between mt-4 px-1">
+                <span className="text-xs text-[#8890a4] dark:text-[#94a3b8]">Showing page {page} of {totalPages}</span>
+                <div className="flex gap-2">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage(p => p - 1)}
+                    className="w-8 h-8 rounded-lg bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] flex items-center justify-center text-[#4a5068] dark:text-[#cbd5e1] disabled:opacity-40 cursor-pointer"
+                  >
+                    <ChevronLeft size={16}/>
+                  </button>
+                  <button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(p => p + 1)}
+                    className="w-8 h-8 rounded-lg bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] flex items-center justify-center text-[#4a5068] dark:text-[#cbd5e1] disabled:opacity-40 cursor-pointer"
+                  >
+                    <ChevronRight size={16}/>
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
     </div>

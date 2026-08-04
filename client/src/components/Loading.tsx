@@ -104,7 +104,7 @@ const AppLoader: React.FC = () => (
 
 /** Skeleton pulse block */
 const Sk: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`animate-pulse bg-gradient-to-r from-[#eef0f8] via-[#f8f9fc] to-[#eef0f8] bg-[length:400%_100%] rounded-xl ${className}`}
+  <div className={`animate-pulse bg-gradient-to-r from-[#eef0f8] via-[#f8f9fc] to-[#eef0f8] dark:from-[#1a2234] dark:via-[#26334d] dark:to-[#1a2234] bg-[length:400%_100%] rounded-xl ${className}`}
     style={{ backgroundSize: '400% 100%', animation: 'shimmer 1.5s ease-in-out infinite, pulse 2s ease-in-out infinite' }}/>
 );
 

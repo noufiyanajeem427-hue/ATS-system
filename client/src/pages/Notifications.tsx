@@ -42,7 +42,7 @@ const initialNotifications: NotificationItem[] = [
     read: false,
     actionText: 'View Interview Details',
     targetPage: 'interview',
-    iconBg: '#6c63ff',
+    iconBg: '#6c63ff15',
   },
   {
     id: 2,
@@ -59,63 +59,27 @@ const initialNotifications: NotificationItem[] = [
   },
   {
     id: 3,
-    title: 'New Recruiter Message',
-    message: 'James Park (Creative Director at Nova Capital) sent you a message regarding Lead UI Engineer position.',
-    time: '3h ago',
-    date: 'Today',
+    title: 'Direct Recruiter Message',
+    message: 'Marcus Vance from Stripe sent you a direct recruiter inquiry regarding Design Systems Architect.',
+    time: 'Yesterday',
+    date: 'Yesterday',
     category: 'messages',
-    read: false,
-    actionText: 'Reply to James',
+    read: true,
+    actionText: 'Open Chat',
     targetPage: 'messages',
     iconBg: '#f59e0b15',
   },
   {
     id: 4,
-    title: 'Offer Letter Received!',
-    message: 'Verdant Labs updated your application status to "OFFER RECEIVED" for UX Research Lead role.',
-    time: '5h ago',
-    date: 'Today',
-    category: 'jobs',
-    read: true,
-    actionText: 'View Applications',
-    targetPage: 'applications',
-    iconBg: '#00c85315',
-  },
-  {
-    id: 5,
-    title: 'AI Resume Score Boosted',
-    message: 'Your AI Resume score increased to 92% after adding key cloud infrastructure skills.',
-    time: 'Yesterday',
-    date: 'Oct 23',
+    title: 'AI Resume Score Updated',
+    message: 'Your resume compatibility index increased from 84% to 92% after adding key UI design keywords.',
+    time: '2 days ago',
+    date: 'Oct 20',
     category: 'system',
     read: true,
-    actionText: 'View AI Report',
+    actionText: 'View AI Resume',
     targetPage: 'airesume',
     iconBg: '#8b5cf615',
-  },
-  {
-    id: 6,
-    title: 'Application Status Updated',
-    message: 'Stellarize Tech changed your application status for Senior Product Designer to "IN REVIEW".',
-    time: '2 days ago',
-    date: 'Oct 22',
-    category: 'jobs',
-    read: true,
-    actionText: 'Track Application',
-    targetPage: 'applications',
-    iconBg: '#06b6d415',
-  },
-  {
-    id: 7,
-    title: 'Security Alert: New Sign-in',
-    message: 'New sign-in detected from Chrome on macOS in San Francisco, CA. If this was not you, update your password.',
-    time: '3 days ago',
-    date: 'Oct 21',
-    category: 'system',
-    read: true,
-    actionText: 'Account Settings',
-    targetPage: 'settings',
-    iconBg: '#ff4d6d15',
   },
 ];
 
@@ -129,13 +93,15 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
       if (Array.isArray(data) && data.length > 0) {
         const mapped: NotificationItem[] = data.map((n: any, idx: number) => ({
           id: n._id || idx + 1,
-          title: n.title || 'Notification',
-          message: n.message || n.description || 'You have a new update',
-          time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
-          date: 'Today',
-          category: (n.category || 'system') as any,
-          read: Boolean(n.read),
-          iconBg: '#6c63ff15',
+          title: n.title || 'Notification Update',
+          message: n.message || 'You have a new update in your account.',
+          time: n.time || 'Recently',
+          date: n.date || 'Today',
+          category: n.category || 'system',
+          read: !!n.read,
+          actionText: n.actionText || 'View Details',
+          targetPage: n.targetPage || 'dashboard',
+          iconBg: n.iconBg || '#6c63ff15',
         }));
         setNotifications(mapped);
       }
@@ -145,6 +111,25 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    showToast('All notifications marked as read.');
+  };
+
+  const markSingleRead = (id: number | string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const deleteNotification = (id: number | string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    showToast('Notification removed.');
+  };
+
+  const clearAll = () => {
+    setNotifications([]);
+    showToast('Cleared all notifications.');
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -158,25 +143,6 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
     return true;
   });
 
-  const markAllRead = () => {
-    setNotifications(ns => ns.map(n => ({ ...n, read: true })));
-    showToast('All notifications marked as read');
-  };
-
-  const toggleRead = (id: number | string) => {
-    setNotifications(ns => ns.map(n => n.id === id ? { ...n, read: !n.read } : n));
-  };
-
-  const deleteNotification = (id: number | string) => {
-    setNotifications(ns => ns.filter(n => n.id !== id));
-    showToast('Notification removed');
-  };
-
-  const clearAll = () => {
-    setNotifications([]);
-    showToast('Cleared all notifications');
-  };
-
   const categoryIcon = (cat: NotificationItem['category']) => {
     if (cat === 'interview') return <Calendar size={16} className="text-[#6c63ff]" />;
     if (cat === 'jobs') return <Briefcase size={16} className="text-[#00c853]" />;
@@ -185,7 +151,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full lg:w-[calc(100vw-220px)] lg:ml-[220px] bg-[#f4f6fb] dark:bg-[#0b0f19] text-[#1a1a2e] dark:text-[#f8fafc] overflow-x-hidden transition-colors duration-200">
       <Topbar onMenuClick={onMenuClick} onNavigate={onNavigate} />
 
       {/* Toast Notification */}
@@ -203,21 +169,21 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
         <div className="flex items-start justify-between mb-7 flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] tracking-tight">Notifications</h1>
+              <h1 className="text-[26px] sm:text-[32px] font-black text-[#1a1a2e] dark:text-[#f8fafc] tracking-tight">Notifications</h1>
               {unreadCount > 0 && (
                 <span className="bg-[#6c63ff] text-white text-[12px] font-black px-2.5 py-0.5 rounded-full">
                   {unreadCount} New
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#8890a4] mt-1">Stay updated with your job applications, interviews, and AI matches.</p>
+            <p className="text-sm text-[#8890a4] dark:text-[#94a3b8] mt-1">Stay updated with your job applications, interviews, and AI matches.</p>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] bg-white border border-[#e4e8f0] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-bold text-[#4a5068] dark:text-[#cbd5e1] bg-white dark:bg-[#111827] border border-[#e4e8f0] dark:border-[#1f2d42] cursor-pointer hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all"
               >
                 <CheckCheck size={14} /> Mark All Read
               </button>
@@ -239,7 +205,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
           <div className="flex flex-col gap-5">
 
             {/* Filter Tabs */}
-            <div className="bg-white rounded-2xl p-2 shadow-sm border border-[#e4e8f0]/60 flex items-center gap-1 overflow-x-auto">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-2 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] flex items-center gap-1 overflow-x-auto">
               {[
                 { id: 'all', label: 'All' },
                 { id: 'unread', label: `Unread (${unreadCount})` },
@@ -254,7 +220,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
                   className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
                     filter === t.id
                       ? 'text-white'
-                      : 'text-[#8890a4] bg-transparent hover:text-[#1a1a2e] hover:bg-[#f4f6fb]'
+                      : 'text-[#8890a4] dark:text-[#94a3b8] bg-transparent hover:text-[#1a1a2e] dark:hover:text-[#f8fafc] hover:bg-[#f4f6fb] dark:hover:bg-[#161e2e]'
                   }`}
                   style={filter === t.id ? { background: 'linear-gradient(135deg,#6c63ff,#8b5cf6)' } : {}}
                 >
@@ -264,13 +230,13 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
             </div>
 
             {/* Notifications List */}
-            <div className="bg-white rounded-2xl shadow-sm border border-[#e4e8f0]/60 overflow-hidden">
-              <div className="divide-y divide-[#f0f2f8]">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42] overflow-hidden">
+              <div className="divide-y divide-[#f0f2f8] dark:divide-[#1f2d42]">
                 {filtered.map(item => (
                   <div
                     key={item.id}
                     className={`p-5 flex items-start gap-4 transition-all relative group ${
-                      !item.read ? 'bg-[#6c63ff]/4 border-l-4 border-[#6c63ff]' : 'hover:bg-[#f8f9fc]'
+                      !item.read ? 'bg-[#6c63ff]/4 border-l-4 border-[#6c63ff]' : 'hover:bg-[#f8f9fc] dark:hover:bg-[#161e2e]'
                     }`}
                   >
                     {/* Category Icon */}
@@ -285,46 +251,47 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <h3 className={`text-[14px] font-extrabold ${!item.read ? 'text-[#1a1a2e]' : 'text-[#4a5068]'}`}>
+                          <h3 className={`text-[14px] font-extrabold ${!item.read ? 'text-[#1a1a2e] dark:text-[#f8fafc]' : 'text-[#4a5068] dark:text-[#cbd5e1]'}`}>
                             {item.title}
                           </h3>
                           {!item.read && (
                             <span className="w-2 h-2 rounded-full bg-[#6c63ff] flex-shrink-0" />
                           )}
                         </div>
-                        <span className="text-[11px] text-[#b0b8cc] flex-shrink-0">{item.time}</span>
+                        <span className="text-[11px] text-[#b0b8cc] dark:text-[#64748b] flex-shrink-0">{item.time}</span>
                       </div>
 
-                      <p className="text-[12.5px] text-[#4a5068] leading-relaxed mt-1 mb-3">
+                      <p className="text-[12.5px] text-[#4a5068] dark:text-[#cbd5e1] leading-relaxed mt-1 mb-3">
                         {item.message}
                       </p>
 
-                      {/* Bottom action button */}
-                      <div className="flex items-center justify-between flex-wrap gap-2">
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-3">
                         {item.actionText && (
                           <button
                             onClick={() => {
-                              toggleRead(item.id);
+                              markSingleRead(item.id);
                               if (item.targetPage) onNavigate?.(item.targetPage, item.jobPayload);
                             }}
-                            className="flex items-center gap-1 text-[12px] font-bold text-[#6c63ff] bg-[#6c63ff]/8 px-3 py-1.5 rounded-lg border-none cursor-pointer hover:bg-[#6c63ff]/15 transition-colors"
+                            className="flex items-center gap-1 text-[11px] font-bold text-[#6c63ff] dark:text-[#a78bfa] hover:underline bg-transparent border-none cursor-pointer"
                           >
                             {item.actionText} <ChevronRight size={13} />
                           </button>
                         )}
-
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
-                          <button
-                            onClick={() => toggleRead(item.id)}
-                            className="p-1.5 rounded-lg text-[#8890a4] hover:text-[#6c63ff] hover:bg-white transition-colors bg-transparent border-none cursor-pointer"
-                            title={item.read ? 'Mark as unread' : 'Mark as read'}
-                          >
-                            <Check size={14} />
-                          </button>
+                        <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {!item.read && (
+                            <button
+                              onClick={() => markSingleRead(item.id)}
+                              className="p-1 rounded text-[#8890a4] hover:text-[#6c63ff] bg-transparent border-none cursor-pointer"
+                              title="Mark as Read"
+                            >
+                              <Check size={14} />
+                            </button>
+                          )}
                           <button
                             onClick={() => deleteNotification(item.id)}
-                            className="p-1.5 rounded-lg text-[#8890a4] hover:text-[#ff4d6d] hover:bg-white transition-colors bg-transparent border-none cursor-pointer"
-                            title="Delete notification"
+                            className="p-1 rounded text-[#8890a4] hover:text-[#ff4d6d] bg-transparent border-none cursor-pointer"
+                            title="Delete Notification"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -336,17 +303,17 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
 
                 {filtered.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <div className="w-14 h-14 rounded-2xl bg-[#f4f6fb] flex items-center justify-center mb-3 text-[#b0b8cc]">
+                    <div className="w-14 h-14 rounded-2xl bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center mb-3 text-[#b0b8cc]">
                       <Bell size={26} />
                     </div>
-                    <h3 className="text-[15px] font-bold text-[#1a1a2e]">No Notifications</h3>
-                    <p className="text-[12px] text-[#8890a4] mt-1 max-w-xs">You're all caught up! There are no notifications under this filter.</p>
+                    <h3 className="text-[15px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">No Notifications</h3>
+                    <p className="text-[12px] text-[#8890a4] dark:text-[#94a3b8] mt-1 max-w-xs">You're all caught up! There are no notifications under this filter.</p>
                   </div>
                 )}
               </div>
 
               {filtered.length > 0 && (
-                <div className="px-5 py-3.5 bg-[#f8f9fc] border-t border-[#f0f2f8] flex items-center justify-between text-[12px] text-[#8890a4]">
+                <div className="px-5 py-3.5 bg-[#f8f9fc] dark:bg-[#161e2e] border-t border-[#f0f2f8] dark:border-[#1f2d42] flex items-center justify-between text-[12px] text-[#8890a4] dark:text-[#94a3b8]">
                   <span>Showing {filtered.length} notification{filtered.length > 1 ? 's' : ''}</span>
                   <button onClick={clearAll} className="text-[#ff4d6d] font-bold bg-transparent border-none cursor-pointer hover:underline">
                     Clear All
@@ -360,10 +327,10 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
           <div className="flex flex-col gap-5">
 
             {/* Delivery Channels */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 shadow-sm border border-[#e4e8f0]/60 dark:border-[#1f2d42]">
               <div className="flex items-center gap-2 mb-4">
                 <Volume2 size={16} className="text-[#6c63ff]" />
-                <h3 className="text-[14px] font-extrabold text-[#1a1a2e]">Delivery Channels</h3>
+                <h3 className="text-[14px] font-extrabold text-[#1a1a2e] dark:text-[#f8fafc]">Delivery Channels</h3>
               </div>
 
               <div className="flex flex-col gap-3">
@@ -378,7 +345,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
             </div>
 
             {/* Priority Alerts Card */}
-            <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-5 text-white relative overflow-hidden border border-[#1f2d42]">
               <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-20 blur-2xl" style={{ background: '#6c63ff' }} />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-[#a78bfa] tracking-widest mb-3">
@@ -411,17 +378,17 @@ const ChannelToggleItem: React.FC<{
 }> = ({ ch, onToast }) => {
   const [active, setActive] = useState(ch.init);
   return (
-    <div className="flex items-center justify-between py-2 border-b border-[#f0f2f8] last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-[#f0f2f8] dark:border-[#1f2d42] last:border-0">
       <div className="flex items-start gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-[#f4f6fb] flex items-center justify-center mt-0.5">{ch.icon}</div>
+        <div className="w-7 h-7 rounded-lg bg-[#f4f6fb] dark:bg-[#161e2e] flex items-center justify-center mt-0.5">{ch.icon}</div>
         <div>
-          <p className="text-[12px] font-bold text-[#1a1a2e]">{ch.label}</p>
-          <p className="text-[10px] text-[#8890a4]">{ch.sub}</p>
+          <p className="text-[12px] font-bold text-[#1a1a2e] dark:text-[#f8fafc]">{ch.label}</p>
+          <p className="text-[10px] text-[#8890a4] dark:text-[#94a3b8]">{ch.sub}</p>
         </div>
       </div>
       <button
         onClick={() => { setActive(!active); onToast(`${ch.label}: ${!active ? 'Enabled' : 'Disabled'}`); }}
-        className={`w-9 h-5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${active ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0]'}`}
+        className={`w-9 h-5 rounded-full transition-all cursor-pointer border-none relative flex-shrink-0 ${active ? 'bg-[#6c63ff]' : 'bg-[#e4e8f0] dark:bg-[#26334d]'}`}
       >
         <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.75 transition-all shadow-sm ${active ? 'left-4.5' : 'left-0.75'}`} />
       </button>
