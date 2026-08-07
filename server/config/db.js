@@ -4,23 +4,15 @@ const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const connectDB = async () => {
-  mongoose.set("bufferCommands", false);
-  if (!process.env.MONGO_URI) {
-    console.log("Server operating with backend data store.");
-    return;
-  }
+  const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ats-system";
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 5000,
     });
     console.log("MongoDB Connected Host:", conn.connection.host);
   } catch (error) {
     console.log("MongoDB Connection Error:", error.message);
-    console.log("MongoDB Connection Note: Running server with fallback data store if DB unavailable.");
-    // Reset connection state on failure so readyState is 0 (Disconnected)
-    try {
-      await mongoose.disconnect();
-    } catch (e) {}
+    console.log("MongoDB Connection Note: Running server with fallback store until MongoDB database connection is active.");
   }
 };
 

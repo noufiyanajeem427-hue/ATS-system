@@ -1,21 +1,43 @@
 const SavedJob = require("../models/SavedJob");
+const mongoose = require("mongoose");
+
+const isMongoConnected = () => {
+  return mongoose.connection && mongoose.connection.readyState === 1;
+};
+
+const inMemorySavedJobs = [];
 
 // Save a job
 const saveJob = async (req, res) => {
   try {
     const { job } = req.body;
 
-    const savedJob = await SavedJob.create({
+    if (isMongoConnected()) {
+      const savedJob = await SavedJob.create({
+        user: req.user,
+        job,
+      });
+
+      return res.status(201).json({
+        message: "Job saved successfully",
+        savedJob,
+      });
+    }
+
+    const mockSavedJob = {
+      _id: "saved_" + Date.now(),
       user: req.user,
       job,
-    });
+      createdAt: new Date(),
+    };
+    inMemorySavedJobs.push(mockSavedJob);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Job saved successfully",
-      savedJob,
+      savedJob: mockSavedJob,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -24,12 +46,15 @@ const saveJob = async (req, res) => {
 // Get all saved jobs
 const getSavedJobs = async (req, res) => {
   try {
-    const savedJobs = await SavedJob.find({ user: req.user })
-      .populate("job");
+    if (isMongoConnected()) {
+      const savedJobs = await SavedJob.find({ user: req.user }).populate("job");
+      return res.status(200).json(savedJobs);
+    }
 
-    res.status(200).json(savedJobs);
+    const userSavedJobs = inMemorySavedJobs.filter(s => s.user === req.user);
+    return res.status(200).json(userSavedJobs);
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -38,21 +63,32 @@ const getSavedJobs = async (req, res) => {
 // Delete a saved job
 const deleteSavedJob = async (req, res) => {
   try {
-    const savedJob = await SavedJob.findById(req.params.id);
+    if (isMongoConnected()) {
+      const savedJob = await SavedJob.findById(req.params.id);
 
-    if (!savedJob) {
-      return res.status(404).json({
-        message: "Saved job not found",
+      if (!savedJob) {
+        return res.status(404).json({
+          message: "Saved job not found",
+        });
+      }
+
+      await SavedJob.findByIdAndDelete(req.params.id);
+
+      return res.status(200).json({
+        message: "Saved job deleted successfully",
       });
     }
 
-    await SavedJob.findByIdAndDelete(req.params.id);
+    const idx = inMemorySavedJobs.findIndex(s => s._id === req.params.id);
+    if (idx !== -1) {
+      inMemorySavedJobs.splice(idx, 1);
+    }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Saved job deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
