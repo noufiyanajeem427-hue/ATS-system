@@ -2,4 +2,5 @@
 
 export function useCompany() {
   return useMemo(() => ({ ready: true }), []);
+  
 }
