@@ -4,6 +4,7 @@ const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const connectDB = async () => {
+  mongoose.set("bufferCommands", false);
   if (!process.env.MONGO_URI) {
     console.log("Server operating with backend data store.");
     return;

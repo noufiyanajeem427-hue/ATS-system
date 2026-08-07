@@ -8,6 +8,7 @@ const {
   uploadResume,
   updateProfile,
   getAllUsers,
+  changePassword,
 } = require("../controllers/authController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -20,6 +21,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.put("/change-password", protect, changePassword);
 
 // Users
 router.get("/users", getAllUsers);

@@ -50,7 +50,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
       const response = await fetch('http://localhost:5005/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: fullName, email, password }),
+        body: JSON.stringify({ name: fullName, email, password, title: targetRole }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -62,12 +62,28 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
           localStorage.setItem('user', JSON.stringify(data.user));
         }
       }
-      showToast('Account registered & stored in backend! Welcome to NexHire.');
+      showToast('Account registered successfully! Welcome to NexHire.');
       setTimeout(() => {
         if (onRegisterSuccess) onRegisterSuccess();
         if (onNavigate) onNavigate('dashboard');
       }, 600);
     } catch (err: any) {
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        const mockUser = {
+          id: `user_${Date.now()}`,
+          name: fullName || 'New User',
+          email: email,
+          role: 'candidate',
+        };
+        localStorage.setItem('token', `offline_token_${Date.now()}`);
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        showToast('Account registered (Offline session mode).');
+        setTimeout(() => {
+          if (onRegisterSuccess) onRegisterSuccess();
+          if (onNavigate) onNavigate('dashboard');
+        }, 600);
+        return;
+      }
       showToast(err.message || 'Registration failed.');
     } finally {
       setLoading(false);
@@ -76,7 +92,16 @@ const Register: React.FC<RegisterProps> = ({ onNavigate, onRegisterSuccess }) =>
 
   const handleSocialRegister = (provider: string) => {
     showToast(`Registering with ${provider}...`);
+    const mockUser = {
+      id: `user_${provider.toLowerCase()}_123`,
+      name: fullName || 'Alex Rivera',
+      email: email || 'alex.rivera@email.com',
+      role: 'candidate',
+    };
+    localStorage.setItem('token', `social_token_${provider.toLowerCase()}_${Date.now()}`);
+    localStorage.setItem('user', JSON.stringify(mockUser));
     setTimeout(() => {
+      if (onRegisterSuccess) onRegisterSuccess();
       if (onNavigate) onNavigate('dashboard');
     }, 1000);
   };
