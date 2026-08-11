@@ -118,7 +118,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
           </div>
           <div>
             <h1 className="text-[20px] font-black tracking-tight text-white leading-none">NexHire</h1>
-            <p className="text-[10px] text-[#a78bfa] tracking-widest font-bold uppercase mt-1">AI Career Intelligence</p>
+            <p className="text-[10px] text-[#a78bfa] tracking-widest font-bold uppercase mt-1">AI Career Intelligences</p>
           </div>
         </div>
 
