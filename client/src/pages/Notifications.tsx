@@ -349,7 +349,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onMenuClick, onNavigate }
                 <div className="px-5 py-3.5 bg-[#f8f9fc] border-t border-[#f0f2f8] flex items-center justify-between text-[12px] text-[#8890a4]">
                   <span>Showing {filtered.length} notification{filtered.length > 1 ? 's' : ''}</span>
                   <button onClick={clearAll} className="text-[#ff4d6d] font-bold bg-transparent border-none cursor-pointer hover:underline">
-                    Clear All
+                    Clear All NOtifications
                   </button>
                 </div>
               )}
