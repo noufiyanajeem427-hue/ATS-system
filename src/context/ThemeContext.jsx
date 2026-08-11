@@ -14,6 +14,8 @@ export const ThemeProvider = ({ children }) => {
     const saved = localStorage.getItem('theme');
     return saved ? saved === 'dark' : false;
   });
+
+  
   useEffect(() => {
     if (isDark) {
       document.documentElement.setAttribute('data-theme', 'dark');
