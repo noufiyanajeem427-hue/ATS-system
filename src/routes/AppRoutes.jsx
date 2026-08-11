@@ -13,7 +13,6 @@ import InterviewList from '../pages/hr/Interviews/InterviewList';
 import InterviewSchedule from '../pages/hr/Interviews/InterviewSchedule';
 import MessageCenter from '../pages/hr/Messages/MessageCenter';
 import HiringAnalytics from '../pages/hr/AnalyticsDashboard/HiringAnalytics';
-
 const AppRoutes = () => {
   return (
     <Routes>
@@ -35,5 +34,4 @@ const AppRoutes = () => {
     </Routes>
   );
 };
-
 export default AppRoutes;
