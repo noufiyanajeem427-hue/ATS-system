@@ -255,7 +255,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
             {activeTab === 'account' && (
               <form onSubmit={handleSaveAccount} className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Personal Information</h2>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">Personal Informations</h2>
                   <p className="text-[12px] text-[#8890a4] mt-0.5">Update your basic profile details shown to recruiters.</p>
                 </div>
 
@@ -324,7 +324,7 @@ const Settings: React.FC<SettingsProps> = ({ onMenuClick, onNavigate }) => {
             {activeTab === 'job' && (
               <div className="flex flex-col gap-6 max-w-2xl">
                 <div>
-                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">AI Matching & Job Preferences</h2>
+                  <h2 className="text-[18px] font-extrabold text-[#1a1a2e]">AI Matching Resume & Job Preferences</h2>
                   <p className="text-[12px] text-[#8890a4] mt-0.5">Customize how Nexus AI evaluates job opportunities for your profile.</p>
                 </div>
 
