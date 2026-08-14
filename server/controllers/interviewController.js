@@ -1,62 +1,20 @@
-import Interview from "../models/Interview.js";
+const Interview = require("../models/Interview");
 
-// ==============================
-// Get All Interviews
-// ==============================
-
-export const getAllInterviews = async (req, res) => {
+// Schedule Interview
+const scheduleInterview = async (req, res) => {
   try {
-    const interviews = await Interview.find()
-      .populate("candidate", "fullName email")
-      .populate("recruiter", "fullName email")
-      .sort({ date: 1 });
+    const { application, interviewDate, interviewTime, meetingLink } = req.body;
 
-    res.status(200).json(interviews);
-  } catch (error) {
-    res.status(500).json({
-      message: "Error fetching interviews",
-      error: error.message,
+    const interview = await Interview.create({
+      application,
+      recruiter: req.user,
+      interviewDate,
+      interviewTime,
+      meetingLink,
     });
-  }
-};
-
-// ==============================
-// Get Single Interview
-// ==============================
-
-export const getInterviewById = async (req, res) => {
-  try {
-    const interview = await Interview.findById(req.params.id)
-      .populate("candidate", "fullName email")
-      .populate("recruiter", "fullName email");
-
-    if (!interview) {
-      return res.status(404).json({
-        message: "Interview not found",
-      });
-    }
-
-    res.status(200).json(interview);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-// ==============================
-// Create Interview
-// ==============================
-
-export const createInterview = async (req, res) => {
-  try {
-    const interview = await Interview.create(req.body);
-    const populatedInterview = await Interview.findById(interview._id)
-        .populate("candidate", "fullName email")
-        .populate("recruiter", "fullName email");
 
     res.status(201).json({
-      message: "Interview Scheduled Successfully",
+      message: "Interview scheduled successfully",
       interview,
     });
   } catch (error) {
@@ -66,27 +24,14 @@ export const createInterview = async (req, res) => {
   }
 };
 
-// ==============================
-// Update Interview
-// ==============================
-
-export const updateInterview = async (req, res) => {
+// Get All Interviews
+const getAllInterviews = async (req, res) => {
   try {
-    const interview = await Interview.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    )
-    .populate("candidate", "fullName email")
-    .populate("recruiter", "fullName email");
+    const interviews = await Interview.find()
+      .populate("application")
+      .populate("recruiter", "name email");
 
-    if (!interview) {
-      return res.status(404).json({
-        message: "Interview not found",
-      });
-    }
-
-    res.status(200).json(interview);
+    res.status(200).json(interviews);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -94,11 +39,41 @@ export const updateInterview = async (req, res) => {
   }
 };
 
-// ==============================
-// Delete Interview
-// ==============================
+// Update Interview Status
+const updateInterviewStatus = async (req, res) => {
+  try {
+    const interview = await Interview.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          status: req.body.status,
+        },
+      },
+      {
+        new: true,
+        runValidators: false,
+      }
+    );
 
-export const deleteInterview = async (req, res) => {
+    if (!interview) {
+      return res.status(404).json({
+        message: "Interview not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Interview status updated successfully",
+      interview,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Delete Interview
+const deleteInterview = async (req, res) => {
   try {
     const interview = await Interview.findByIdAndDelete(req.params.id);
 
@@ -109,7 +84,7 @@ export const deleteInterview = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Interview Deleted Successfully",
+      message: "Interview deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -118,58 +93,9 @@ export const deleteInterview = async (req, res) => {
   }
 };
 
-// ==============================
-// Update Interview Status
-// ==============================
-
-export const updateInterviewStatus = async (req, res) => {
-  try {
-    const interview = await Interview.findById(req.params.id);
-
-    if (!interview) {
-      return res.status(404).json({
-        message: "Interview not found",
-      });
-    }
-
-    interview.status = req.body.status;
-
-    await interview.save();
-
-    res.status(200).json(interview);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-// ==============================
-// Add Feedback
-// ==============================
-
-export const addFeedback = async (req, res) => {
-  try {
-    const interview = await Interview.findById(req.params.id);
-
-    if (!interview) {
-      return res.status(404).json({
-        message: "Interview not found",
-      });
-    }
-
-    interview.feedback = req.body.feedback;
-    interview.rating = req.body.rating;
-
-    await interview.save();
-
-    res.status(200).json({
-      message: "Feedback Saved",
-      interview,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
+module.exports = {
+  scheduleInterview,
+  getAllInterviews,
+  updateInterviewStatus,
+  deleteInterview,
 };

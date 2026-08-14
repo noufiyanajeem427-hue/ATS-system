@@ -1,36 +1,25 @@
-import express from "express";
-
-import {
+const express = require("express");
+const {
+  scheduleInterview,
   getAllInterviews,
-  getInterviewById,
-  createInterview,
-  updateInterview,
-  deleteInterview,
   updateInterviewStatus,
-  addFeedback,
-} from "../controllers/interviewController.js";
+  deleteInterview,
+} = require("../controllers/interviewController");
+
+const { protect, requireRole } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Get all interviews
-router.get("/", getAllInterviews);
+// Schedule Interview (HR only)
+router.post("/", protect, requireRole("hr"), scheduleInterview);
 
-// Get interview by ID
-router.get("/:id", getInterviewById);
+// Get All Interviews
+router.get("/", protect, getAllInterviews);
 
-// Schedule interview
-router.post("/", createInterview);
+// Update Interview Status (HR only)
+router.put("/:id", protect, requireRole("hr"), updateInterviewStatus);
 
-// Update interview
-router.put("/:id", updateInterview);
+// Delete Interview (HR only)
+router.delete("/:id", protect, requireRole("hr"), deleteInterview);
 
-// Delete interview
-router.delete("/:id", deleteInterview);
-
-// Update interview status
-router.patch("/:id/status", updateInterviewStatus);
-
-// Add interview feedback
-router.patch("/:id/feedback", addFeedback);
-
-export default router;
+module.exports = router;

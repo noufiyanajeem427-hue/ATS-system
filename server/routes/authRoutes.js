@@ -1,16 +1,21 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   registerUser,
   loginUser,
-  forgotPassword,
-  resetPassword,
-} from "../controllers/authController.js";
-
+  getUserProfile,
+  uploadResume,
+  updateProfile,
+  adminLogin,
+} = require("../controllers/authController");
+const {protect} = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.get("/profile", protect, getUserProfile);
+router.post("/upload-resume", protect, upload.single("resume"), uploadResume);
+router.put("/profile", protect, updateProfile);
+router.post("/admin-login", adminLogin);
 
-export default router;
+module.exports = router;

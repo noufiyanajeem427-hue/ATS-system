@@ -1,15 +1,31 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+
+mongoose.set("bufferCommands", false);
 
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+  if (!process.env.MONGO_URI) {
+    console.log("Server operating with backend data store.");
+    return;
+  }
 
-    console.log("Host:", conn.connection.host);
-    console.log("Database:", conn.connection.name);
+  try {
+    const conn = await mongoose.connect(
+      process.env.MONGO_URI,
+      {
+        serverSelectionTimeoutMS: 10000,
+      }
+    );
+
+    console.log(
+      "MongoDB Connected Host:",
+      conn.connection.host
+    );
   } catch (error) {
-    console.error(error);
+    console.error("MongoDB Connection Error:");
+    console.error(error.message);
+
     process.exit(1);
   }
 };
 
-export default connectDB;
+module.exports = connectDB;
