@@ -89,9 +89,6 @@ def upload_resume():
 @app.route("/match-resume", methods=["POST"])
 def match_resume():
 
-    print("FILES:", request.files)
-    print("FORM:", request.form)
-
     if "resume" not in request.files:
         return jsonify({"error": "Resume missing"}), 400
 
@@ -102,14 +99,107 @@ def match_resume():
 
     file = request.files["resume"]
 
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+    filepath = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        file.filename
+    )
+
     file.save(filepath)
+
+    # -----------------------------
+    # Extract Resume Text
+    # -----------------------------
 
     resume_text = extract_text(filepath)
 
-    result = calculate_match(resume_text, job_description)
+    # -----------------------------
+    # AI Modules
+    # -----------------------------
 
-    return jsonify(result)
+    candidate = extract_info(resume_text)
+
+    skills = extract_skills(resume_text)
+
+    experience = extract_experience(resume_text)
+
+    projects = extract_projects(resume_text)
+
+    certifications = extract_certifications(resume_text)
+
+    summary = generate_summary(
+        candidate,
+        skills,
+        projects,
+        certifications,
+        experience,
+    )
+
+    strengths = analyze_strengths(
+        skills,
+        projects,
+        certifications,
+    )
+
+    weaknesses = analyze_weaknesses(skills)
+
+    suggestions = generate_suggestions(
+        weaknesses
+    )
+
+    questions = generate_questions(
+        skills
+    )
+
+    # -----------------------------
+    # Match Score
+    # -----------------------------
+
+    match_result = calculate_match(
+        resume_text,
+        job_description,
+    )
+
+    # -----------------------------
+    # Final Response
+    # -----------------------------
+
+    return jsonify({
+
+        "candidate": candidate,
+
+        "skills": skills,
+
+        "experience": experience,
+
+        "projects": projects,
+
+        "certifications": certifications,
+
+        "summary": summary,
+
+        "strengths": strengths,
+
+        "weaknesses": weaknesses,
+
+        "suggestions": suggestions,
+
+        "interview_questions": questions,
+
+        "match_score": match_result.get("match_score", 0),
+
+        "matched_skills": match_result.get(
+            "matched_skills",
+            []
+        ),
+
+        "missing_skills": match_result.get(
+            "missing_skills",
+            []
+        )
+
+    })
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    # NOTE: nexHire's Node/Express API already runs on port 5001 (see server/.env.example),
+    # so this AI microservice runs on a separate port to avoid a clash.
+    app.run(debug=True, port=5002)
