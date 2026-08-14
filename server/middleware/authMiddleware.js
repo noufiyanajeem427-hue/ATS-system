@@ -8,6 +8,7 @@ const protect = (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
+    
     try {
       // Get token from header
       token = req.headers.authorization.split(" ")[1];
@@ -15,6 +16,7 @@ const protect = (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      
       // Save user ID in request
       req.user = decoded.id;
 
@@ -25,6 +27,7 @@ const protect = (req, res, next) => {
       });
     }
   }
+  
 
   if (!token) {
     return res.status(401).json({
