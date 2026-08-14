@@ -1,0 +1,287 @@
+/* ===========================
+   ANALYTICS PAGE
+=========================== */
+
+.analytics-page{
+    padding:35px;
+}
+
+.analytics-header{
+    margin-bottom:35px;
+}
+
+.analytics-header h1{
+    font-size:36px;
+    color:#1E293B;
+    margin-bottom:8px;
+}
+
+.analytics-header p{
+    color:#64748B;
+    font-size:16px;
+}
+
+/* ===========================
+   TOP CARDS
+=========================== */
+
+.analytics-cards{
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+    margin-bottom:35px;
+
+}
+
+.analytics-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+
+    transition:.35s;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.analytics-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:6px;
+    height:100%;
+
+    background:linear-gradient(
+        180deg,
+        #7C3AED,
+        #A855F7
+    );
+
+}
+
+.analytics-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 40px rgba(124,58,237,.18);
+
+}
+
+.analytics-card svg{
+
+    font-size:30px;
+
+    color:#7C3AED;
+
+    margin-bottom:18px;
+
+}
+
+.analytics-card h2{
+
+    font-size:32px;
+
+    color:#1E293B;
+
+    margin-bottom:8px;
+
+}
+
+.analytics-card p{
+
+    color:#64748B;
+
+}
+
+/* ===========================
+   GRID
+=========================== */
+
+.analytics-grid{
+
+    display:grid;
+
+    grid-template-columns:2fr 1fr;
+
+    gap:25px;
+
+    margin-bottom:25px;
+
+}
+
+.analytics-box{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+
+}
+
+.analytics-box h3{
+
+    color:#1E293B;
+
+    margin-bottom:20px;
+
+}
+
+/* ===========================
+   FAKE BAR CHART
+=========================== */
+
+.fake-chart{
+
+    height:260px;
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:18px;
+
+    padding-top:20px;
+
+}
+
+.fake-chart div{
+
+    flex:1;
+
+    background:linear-gradient(
+        180deg,
+        #A855F7,
+        #7C3AED
+    );
+
+    border-radius:14px 14px 0 0;
+
+    transition:.3s;
+
+}
+
+.fake-chart div:hover{
+
+    opacity:.8;
+
+}
+
+/* ===========================
+   LISTS
+=========================== */
+
+.analytics-box ul{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:0;
+
+}
+
+.analytics-box li{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:16px 0;
+
+    border-bottom:1px solid #EEF2F7;
+
+    color:#334155;
+
+}
+
+.analytics-box li:last-child{
+
+    border:none;
+
+}
+
+.analytics-box li span{
+
+    color:#7C3AED;
+
+    font-weight:600;
+
+}
+
+.analytics-box li svg{
+
+    color:#22C55E;
+
+    margin-right:10px;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:1200px){
+
+.analytics-cards{
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+@media(max-width:900px){
+
+.analytics-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+}
+
+@media(max-width:700px){
+
+.analytics-cards{
+
+    grid-template-columns:1fr;
+
+}
+
+.analytics-page{
+
+    padding:20px;
+
+}
+
+.analytics-header h1{
+
+    font-size:30px;
+
+}
+
+.fake-chart{
+
+    height:180px;
+
+}
+
+}

@@ -1,0 +1,42 @@
+@import "./ProfileSettings.css";
+
+.notification-list{
+
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+
+}
+
+.notification-item{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:16px 20px;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:14px;
+
+    background:#F8FAFC;
+
+}
+
+.notification-item span{
+
+    color:#334155;
+
+    font-weight:600;
+
+}
+
+.notification-item input{
+
+    width:20px;
+    height:20px;
+
+    cursor:pointer;
+
+}

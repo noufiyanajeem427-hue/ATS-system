@@ -1,0 +1,101 @@
+.download-card{
+
+    background:#fff;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    margin-bottom:30px;
+
+    box-shadow:0 8px 25px rgba(15,23,42,.08);
+
+}
+
+.download-card h2{
+
+    color:#1E293B;
+
+    margin-bottom:8px;
+
+}
+
+.download-card p{
+
+    color:#64748B;
+
+    margin-bottom:25px;
+
+}
+
+.download-buttons{
+
+    display:flex;
+
+    gap:18px;
+
+    flex-wrap:wrap;
+
+}
+
+.download-buttons button{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:14px 22px;
+
+    border-radius:14px;
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.download-buttons button:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.pdf-btn{
+
+    background:linear-gradient(
+        135deg,
+        #DC2626,
+        #EF4444
+    );
+
+}
+
+.excel-btn{
+
+    background:linear-gradient(
+        135deg,
+        #15803D,
+        #22C55E
+    );
+
+}
+
+.csv-btn{
+
+    background:linear-gradient(
+        135deg,
+        #2563EB,
+        #3B82F6
+    );
+
+}

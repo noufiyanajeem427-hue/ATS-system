@@ -1,0 +1,117 @@
+.monthly-summary{
+
+    background:#fff;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    margin-bottom:30px;
+
+    box-shadow:0 8px 25px rgba(15,23,42,.08);
+
+}
+
+.monthly-summary h2{
+
+    color:#1E293B;
+
+    margin-bottom:25px;
+
+}
+
+.summary-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:20px;
+
+}
+
+.summary-card{
+
+    text-align:center;
+
+    background:#F8FAFC;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    transition:.3s;
+
+}
+
+.summary-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.summary-icon{
+
+    width:60px;
+
+    height:60px;
+
+    margin:auto;
+
+    margin-bottom:15px;
+
+    border-radius:16px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:white;
+
+    font-size:22px;
+
+    background:linear-gradient(
+        135deg,
+        #7C3AED,
+        #A855F7
+    );
+
+}
+
+.summary-card h3{
+
+    color:#1E293B;
+
+    font-size:28px;
+
+    margin-bottom:8px;
+
+}
+
+.summary-card p{
+
+    color:#64748B;
+
+}
+
+@media(max-width:900px){
+
+    .summary-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+}
+
+@media(max-width:600px){
+
+    .summary-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}

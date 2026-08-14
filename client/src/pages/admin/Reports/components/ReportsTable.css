@@ -1,0 +1,103 @@
+.reports-table-card{
+
+    background:#fff;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    box-shadow:0 8px 25px rgba(15,23,42,.08);
+
+    overflow-x:auto;
+
+}
+
+.reports-table-card h2{
+
+    color:#1E293B;
+
+    margin-bottom:25px;
+
+}
+
+.reports-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.reports-table th{
+
+    text-align:left;
+
+    padding:18px;
+
+    background:#F8FAFC;
+
+    color:#475569;
+
+}
+
+.reports-table td{
+
+    padding:18px;
+
+    border-top:1px solid #EEF2F7;
+
+}
+
+.reports-table tr:hover{
+
+    background:#FAFAFF;
+
+}
+
+.report-status{
+
+    padding:8px 14px;
+
+    border-radius:20px;
+
+    background:#DCFCE7;
+
+    color:#15803D;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.download-btn{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    color:white;
+
+    background:linear-gradient(
+        135deg,
+        #7C3AED,
+        #A855F7
+    );
+
+    transition:.3s;
+
+}
+
+.download-btn:hover{
+
+    transform:scale(1.08);
+
+    box-shadow:0 10px 20px rgba(124,58,237,.30);
+
+}
