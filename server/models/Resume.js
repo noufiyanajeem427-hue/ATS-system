@@ -13,6 +13,8 @@ const resumeSchema = new mongoose.Schema(
       required: true,
     },
 
+
+    
     fileUrl: {
       type: String,
       required: true,
