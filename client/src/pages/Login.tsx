@@ -133,7 +133,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
           </h2>
 
           <p className="text-[14px] text-[#cbd5e1] leading-relaxed mb-8">
-            Analyze your resume against 5,000+ top-tier job requirements, get instant ATS optimization scores, and land 3x more interviews.
+            Analyze your resume against 4,000+ top-tier job requirements, get instant ATS optimization scores, and land 3x more interviews.
           </p>
 
           {/* Key Feature Badges */}
@@ -156,7 +156,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
         {/* Bottom Candidate Quote */}
         <div className="relative z-10 bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
           <p className="text-[12.5px] text-slate-300 italic leading-relaxed">
-            "Nexus ATS helped me rewrite my resume for Meta. Within 2 weeks, I received 4 interview calls!"
+            "Nexus ATS helped me rewrite my resume for Meta. Within 1 weeks, I received 4 interview calls!"
           </p>
           <div className="flex items-center gap-3 mt-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6c63ff] to-[#a855f7] flex items-center justify-center text-[11px] font-bold">AR</div>
@@ -194,7 +194,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLoginSuccess }) => {
         {/* Form Container */}
         <div className="max-w-md w-full mx-auto my-auto py-4">
           <div className="mb-8">
-            <h2 className="text-[28px] font-black text-white tracking-tight">Welcome back</h2>
+            <h2 className="text-[28px] font-black text-white tracking-tight">Welcome back ATS</h2>
             <p className="text-[13px] text-slate-400 mt-1">Enter your credentials to access your candidate dashboard.</p>
           </div>
 
