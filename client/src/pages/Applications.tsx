@@ -299,12 +299,12 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
               <div className="w-8 h-8 rounded-xl bg-[#6c63ff]/15 flex items-center justify-center">
                 <TrendingUp size={16} className="text-[#6c63ff]" />
               </div>
-              <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">AI Application Insight</h3>
+              <h3 className="text-[16px] font-extrabold text-[#1a1a2e]">AI Application Insights</h3>
             </div>
 
             <p className="text-[13px] text-[#4a5068] leading-relaxed mb-4 max-w-lg relative z-10">
               Based on your recent 5 interviews, your "Technical Communication" score has improved by{' '}
-              <span className="font-bold text-[#6c63ff]">14%</span>. Companies in the Fintech sector are
+              <span className="font-bold text-[#6c63ff]">15%</span>. Companies in the Fintech sector are
               currently highly engaged with your profile.
             </p>
 
@@ -334,7 +334,7 @@ const Applications: React.FC<ApplicationsProps> = ({ onMenuClick, onNavigate }) 
                 <Zap size={18} className="text-white" />
               </div>
               <div>
-                <p className="text-[15px] font-extrabold text-white">Nexus AI Plus</p>
+                <p className="text-[15px] font-extrabold text-white">Next AI Plus</p>
                 <p className="text-[11px] text-[#b0b8cc]">Unlock premium insights</p>
               </div>
             </div>
