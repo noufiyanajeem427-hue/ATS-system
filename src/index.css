@@ -23,7 +23,11 @@
   --stats-bg: #ffffff;
   --chart-bg: #ffffff;
   --activity-bg: #ffffff;
-}
+)
+
+
+
+
 
 [data-theme="dark"] {
   /* Dark Mode Colors */
