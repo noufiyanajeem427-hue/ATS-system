@@ -9,6 +9,10 @@ root.render(
   <React.StrictMode>
     <App />
     <Toaster
+
+
+
+
       position="top-right"
       toastOptions={{
         duration: 4000,
